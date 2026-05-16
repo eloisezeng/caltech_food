@@ -22,6 +22,9 @@ service cloud.firestore {
         && (!('rating'   in request.resource.data) || (request.resource.data.rating   is int     && request.resource.data.rating >= 1 && request.resource.data.rating <= 5))
         && (!('imageUrl' in request.resource.data) || (request.resource.data.imageUrl is string  && request.resource.data.imageUrl.size() <= 500))
         && (!('week'     in request.resource.data) || (request.resource.data.week     is string  && request.resource.data.week.size()     <= 16))
+        // Clients may only set moderationStatus = "pending"; the moderate.mjs
+        // Action (admin SDK) bypasses these rules to write "ok" / "blocked".
+        && (!('moderationStatus' in request.resource.data) || request.resource.data.moderationStatus == "pending")
         && request.resource.data.createdAt == request.time;
 
       allow update: if
@@ -32,7 +35,9 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt
         && (!('text'     in request.resource.data) || (request.resource.data.text     is string  && request.resource.data.text.size()     <= 2000))
         && (!('rating'   in request.resource.data) || (request.resource.data.rating   is int     && request.resource.data.rating >= 1 && request.resource.data.rating <= 5))
-        && (!('imageUrl' in request.resource.data) || (request.resource.data.imageUrl is string  && request.resource.data.imageUrl.size() <= 500));
+        && (!('imageUrl' in request.resource.data) || (request.resource.data.imageUrl is string  && request.resource.data.imageUrl.size() <= 500))
+        // Edits reset moderation to "pending" so the Action re-checks.
+        && (!('moderationStatus' in request.resource.data) || request.resource.data.moderationStatus == "pending");
 
       allow delete: if
         request.auth != null

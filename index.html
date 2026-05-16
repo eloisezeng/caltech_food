@@ -150,20 +150,6 @@
     gap: 8px;
     flex-wrap: wrap;
   }
-  .menu-card .avg-rating {
-    font-size: 13px;
-    color: var(--source);
-    background: var(--source-bg);
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-weight: 600;
-  }
-  .menu-card .avg-rating.empty {
-    color: var(--muted);
-    background: transparent;
-    border: 1px dashed var(--border);
-    font-weight: 400;
-  }
   .menu-card .today-comments {
     background: var(--surface);
     color: var(--accent);
@@ -400,26 +386,54 @@
     font-style: italic;
   }
   .error { color: var(--allergen); }
-  /* Feature request + summary header links */
-  .header-actions {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 12px;
-    font-size: 13px;
+  /* Page footer: ratings + feedback buttons live here, not the header. */
+  .page-footer {
+    max-width: 1200px;
+    margin: 32px auto 24px;
+    padding: 24px 16px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
   }
-  .header-actions button {
-    background: none;
-    border: none;
+  @media (max-width: 768px) {
+    .page-footer { grid-template-columns: 1fr; }
+  }
+  .footer-block h3 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .footer-ratings { display: flex; flex-direction: column; gap: 8px; }
+  .rating-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--source-bg);
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .rating-item .rating-label { color: var(--source); }
+  .rating-item .rating-value {
+    font-weight: 700;
+    color: var(--source);
+  }
+  .footer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .footer-actions button {
+    background: var(--surface);
     color: var(--accent);
-    cursor: pointer;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 6px 12px;
     font-size: 13px;
     font-weight: 500;
-    padding: 0;
-    text-decoration: underline;
+    cursor: pointer;
   }
-  .header-actions button:hover { color: var(--accent-hover); }
+  .footer-actions button:hover { background: var(--accent); color: white; }
   /* Modal for feature request + summary */
   .modal-backdrop {
     position: fixed;
@@ -505,7 +519,6 @@
     <button data-view="house"  class="active">House</button>
     <button data-view="browne">Browne</button>
   </div>
-  <div class="header-actions" id="header-actions"></div>
 </header>
 
 <div class="modal-backdrop" id="feature-modal">
@@ -565,7 +578,6 @@
     <div class="card-head">
       <h2>House Dinner Menu</h2>
       <div class="head-meta">
-        <span class="avg-rating empty" id="house-avg" hidden></span>
         <button type="button" class="today-comments" id="house-today" hidden>💬 Today's comments</button>
       </div>
     </div>
@@ -579,7 +591,6 @@
     <div class="card-head">
       <h2>Browne Menu</h2>
       <div class="head-meta">
-        <span class="avg-rating empty" id="browne-avg" hidden></span>
         <button type="button" class="today-comments" id="browne-today" hidden>💬 Today's comments</button>
       </div>
     </div>
@@ -589,6 +600,26 @@
     <div id="browne-menu"><div class="loading">Loading…</div></div>
   </div>
 </main>
+
+<footer class="page-footer">
+  <div class="footer-block">
+    <h3>Average ratings</h3>
+    <div class="footer-ratings">
+      <div class="rating-item">
+        <span class="rating-label">🏠 House Dinner</span>
+        <span class="rating-value" id="house-avg">—</span>
+      </div>
+      <div class="rating-item">
+        <span class="rating-label">🥪 Browne Menu</span>
+        <span class="rating-value" id="browne-avg">—</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer-block">
+    <h3>Feedback &amp; site</h3>
+    <div class="footer-actions" id="footer-actions"></div>
+  </div>
+</footer>
 
 <script>
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -710,6 +741,19 @@ function setUsername(name) {
   return clean;
 }
 
+// Words that trigger an immediate client-side rejection on post. Layer 1 of
+// two — the Gemini moderation Action handles smarter / context-aware blocks
+// (and also catches deliberate bypasses by reviewing posts after they land).
+const BANNED_WORDS_RE = /\b(fuck|shit|bitch|cunt|dick|cock|pussy|asshole|faggot|nigger|retard|whore|slut)\b/i;
+
+function checkClientWordlist(...fields) {
+  for (const f of fields) {
+    if (f && BANNED_WORDS_RE.test(f)) {
+      throw new Error("Your comment contains language that's not allowed on this site.");
+    }
+  }
+}
+
 async function fetchCommentsFor(item) {
   const fb = await getFirebase();
   if (!fb) return [];
@@ -721,7 +765,9 @@ async function fetchCommentsFor(item) {
     limit(50),
   );
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(c => c.moderationStatus !== "blocked");
 }
 
 // Average rating across one or more comment-target keys. Used to display
@@ -738,13 +784,16 @@ async function fetchAverageRating(itemKeys) {
   const q = query(collection(fb.db, "comments"), where("item", "in", keys));
   const snap = await getDocs(q);
   for (const d of snap.docs) {
-    const r = d.data().rating;
+    const data = d.data();
+    if (data.moderationStatus === "blocked") continue;
+    const r = data.rating;
     if (typeof r === "number" && r >= 1 && r <= 5) { sum += r; count++; }
   }
   return { avg: count ? sum / count : null, count };
 }
 
 async function postComment({ item, rating, text, imageUrl }) {
+  checkClientWordlist(text, getUsername());
   const fb = await getFirebase();
   if (!fb) throw new Error("Comments aren't configured for this site yet.");
   const user = await AUTH_READY;
@@ -756,6 +805,9 @@ async function postComment({ item, rating, text, imageUrl }) {
     username: getUsername(),
     week: isoWeekKey(new Date()),
     createdAt: serverTimestamp(),
+    // The moderate.mjs Action looks for "pending" and flips it to "ok" or
+    // "blocked" within ~15 min. Until then comments display normally.
+    moderationStatus: "pending",
   };
   if (rating)               doc.rating   = Math.max(1, Math.min(5, Number(rating)));
   if (text && text.trim())  doc.text     = String(text).slice(0, 2000);
@@ -764,6 +816,7 @@ async function postComment({ item, rating, text, imageUrl }) {
 }
 
 async function updateComment(id, { rating, text, imageUrl }) {
+  checkClientWordlist(text, getUsername());
   const fb = await getFirebase();
   if (!fb) throw new Error("Not configured.");
   const user = await AUTH_READY;
@@ -772,6 +825,8 @@ async function updateComment(id, { rating, text, imageUrl }) {
   const patch = {
     username: getUsername(),
     updatedAt: serverTimestamp(),
+    // Re-classify after an edit since the text might have changed.
+    moderationStatus: "pending",
   };
   patch.rating   = rating ? Math.max(1, Math.min(5, Number(rating))) : deleteField();
   patch.text     = text && text.trim() ? String(text).slice(0, 2000) : deleteField();
@@ -858,7 +913,7 @@ async function regenerateSummaryFromBrowser() {
     "=== Feature requests for the website (this week) ===",
     requestLines.length ? requestLines.join("\n") : "(none)",
   ].join("\n");
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_BROWSER_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_BROWSER_KEY}`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1358,11 +1413,9 @@ async function refreshComments(item, container, btn) {
 
 function refreshCardHeadForItem(itemKey) {
   if (typeof itemKey !== "string" || !currentDay) return;
-  if (itemKey === ITEM_OVERALL_HOUSE || itemKey.startsWith("__DAY__HOUSE__")) {
-    refreshCardHead("house", currentDay);
-  }
-  if (itemKey === ITEM_OVERALL_BROWNE || itemKey.startsWith("__DAY__BROWNE__")) {
-    refreshCardHead("browne", currentDay);
+  if (itemKey === ITEM_OVERALL_HOUSE  || itemKey.startsWith("__DAY__HOUSE__")
+   || itemKey === ITEM_OVERALL_BROWNE || itemKey.startsWith("__DAY__BROWNE__")) {
+    refreshFooterRatings();
   }
 }
 
@@ -1826,38 +1879,37 @@ function isoDate(day, week) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// Update the rating chip and "Today's comments" button at the top of a menu
-// card. `kind` is "house" or "browne"; ratings include the menu's overall
-// target + the day-level target for the currently-selected day.
-async function refreshCardHead(kind, day) {
+// Wire the "💬 Today's comments" button next to each menu's title to open
+// the menu-level comment modal for the currently-selected day.
+function setupTodayCommentsButton(kind, day) {
   if (!firebaseEnabled()) return;
   const dayItem = kind === "house" ? ITEM_DAY_HOUSE(isoDate(day, currentWeek)) : ITEM_DAY_BROWNE(isoDate(day, currentWeek));
-  const overall = kind === "house" ? ITEM_OVERALL_HOUSE : ITEM_OVERALL_BROWNE;
   const label   = kind === "house" ? `today's House dinner (${day})` : `today's Browne menu (${day})`;
-  const avgEl   = document.getElementById(`${kind}-avg`);
-  const todayEl = document.getElementById(`${kind}-today`);
-  // Show the "today's comments" button immediately — it shouldn't wait on the
-  // rating query.
-  if (todayEl) {
-    todayEl.hidden = false;
-    todayEl.onclick = () => openMenuComment(dayItem, label);
-  }
-  if (!avgEl) return;
-  avgEl.hidden = false;
-  avgEl.classList.add("empty");
-  avgEl.textContent = "★ —";
-  try {
-    const { avg, count } = await fetchAverageRating([overall, dayItem]);
-    if (!count) {
-      avgEl.classList.add("empty");
-      avgEl.textContent = "No ratings yet";
-    } else {
-      avgEl.classList.remove("empty");
-      avgEl.textContent = `★ ${avg.toFixed(1)} (${count})`;
-      avgEl.title = `Average across "overall" + today's day-level ratings for ${kind === "house" ? "House" : "Browne"}`;
+  const btn = document.getElementById(`${kind}-today`);
+  if (!btn) return;
+  btn.hidden = false;
+  btn.onclick = () => openMenuComment(dayItem, label);
+}
+
+// Fetch average ratings for both menus (overall + currently-selected day's
+// day-level target) and update the footer rating values.
+async function refreshFooterRatings() {
+  if (!firebaseEnabled() || !currentDay) return;
+  const day = currentDay;
+  const targets = {
+    house:  [ITEM_OVERALL_HOUSE,  ITEM_DAY_HOUSE(isoDate(day, currentWeek))],
+    browne: [ITEM_OVERALL_BROWNE, ITEM_DAY_BROWNE(isoDate(day, currentWeek))],
+  };
+  for (const [kind, keys] of Object.entries(targets)) {
+    const el = document.getElementById(`${kind}-avg`);
+    if (!el) continue;
+    try {
+      const { avg, count } = await fetchAverageRating(keys);
+      el.textContent = count ? `★ ${avg.toFixed(1)} (${count})` : "No ratings yet";
+      el.title = `Average across "overall" + today's day-level ratings for ${kind === "house" ? "House" : "Browne"}`;
+    } catch {
+      el.textContent = "—";
     }
-  } catch (e) {
-    avgEl.textContent = "★ —";
   }
 }
 
@@ -1962,9 +2014,18 @@ function selectDay(day) {
   // Mobile view toggle: hidden on weekends (only Browne is shown anyway).
   const toggle = document.getElementById("view-toggle");
   if (toggle) toggle.style.display = isWeekend ? "none" : "";
-  if (!isWeekend) { loadHouse(day); refreshCardHead("house", day); }
+  // On weekends, force the mobile layout to show Browne — otherwise the
+  // .show-house mobile CSS rule would hide both cards (house via inline
+  // style, browne via the show-house class). On weekdays we honour whatever
+  // the user picked (default "house").
+  if (isWeekend) {
+    mainEl.classList.remove("show-house");
+    mainEl.classList.add("show-browne");
+  }
+  if (!isWeekend) { loadHouse(day); setupTodayCommentsButton("house", day); }
   loadBrowne(day);
-  refreshCardHead("browne", day);
+  setupTodayCommentsButton("browne", day);
+  refreshFooterRatings();
 }
 
 function selectView(view) {
@@ -2067,8 +2128,8 @@ async function loadImageCache() {
 function openModal(id) { document.getElementById(id).classList.add("open"); }
 function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
-function wireHeaderActions() {
-  const host = document.getElementById("header-actions");
+function wireFooterActions() {
+  const host = document.getElementById("footer-actions");
   if (!host) return;
   host.innerHTML = "";
   // Weekly summary toggle is always present — page falls back to "summary not
@@ -2258,7 +2319,7 @@ async function init() {
   // Mobile default: show the House card first; selectDay will hide the toggle
   // entirely on weekends since only Browne is available then.
   selectView("house");
-  wireHeaderActions();
+  wireFooterActions();
   await configReady;
   currentDay = today;
   selectDay(today);

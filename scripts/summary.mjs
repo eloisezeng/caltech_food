@@ -72,7 +72,7 @@ if (!commentLines.length && !requestLines.length) {
     requestLines.length ? requestLines.join("\n") : "(none)",
   ].join("\n");
 
-  const model = "gemini-1.5-flash";
+  const model = "gemini-2.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI}`;
   const res = await fetch(url, {
     method: "POST",

@@ -144,6 +144,24 @@ clicked — the page still shows the latest Action-generated summary.
 
 After that, every nightly run will refresh the summary.
 
+### Moderation
+
+Two layers keep the worst content off the site:
+
+1. **Client wordlist** in `index.html` rejects obvious profanity at submit
+   time. Bypassable via DevTools, but catches lazy attempts.
+2. **`scripts/moderate.mjs`** runs every 15 minutes (workflow
+   `.github/workflows/moderate.yml`). For each comment whose
+   `moderationStatus == "pending"`, it asks Gemini to classify as `"ok"`
+   or `"blocked"` (with a short reason). The frontend hides anything
+   marked `"blocked"`. Edits reset a comment to `"pending"` so it's
+   re-classified.
+
+To unblock a comment manually, find the doc in **Firestore → comments**
+in the Firebase console and set `moderationStatus = "ok"`. Conversely,
+set `moderationStatus = "blocked"` to hide a comment the model missed.
+The `moderationReason` field tells you why something was flagged.
+
 ### Privacy / safety notes
 
 - Anyone can post anonymously. The Firestore Rules in `firestore.rules` cap
