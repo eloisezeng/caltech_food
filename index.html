@@ -91,13 +91,6 @@
   }
   .day-btn.today { box-shadow: 0 0 0 2px var(--accent) inset; }
   .day-btn.today.active { box-shadow: none; }
-  .freshness {
-    margin-top: 12px;
-    font-size: 11px;
-    color: var(--muted);
-    font-style: italic;
-  }
-  .freshness:empty { display: none; }
   main {
     max-width: 1200px;
     margin: 0 auto;
@@ -186,13 +179,23 @@
     background: var(--surface);
     border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
-    padding: 2px 6px;
-    line-height: 1;
-    color: var(--muted);
+    padding: 2px 4px;
+    line-height: 0;
     flex-shrink: 0;
+    height: 22px;
+    width: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
-  .img-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .img-toggle img {
+    height: 14px;
+    width: auto;
+    display: block;
+    opacity: 0.6;
+  }
+  .img-toggle:hover { border-color: var(--accent); }
+  .img-toggle:hover img { opacity: 1; }
   .item-image {
     margin-top: 6px;
     max-width: 240px;
@@ -231,7 +234,6 @@
     <button data-week="1">Next Week</button>
   </div>
   <div class="day-buttons" id="day-buttons"></div>
-  <div id="data-freshness" class="freshness"></div>
 </header>
 
 <main>
@@ -276,7 +278,6 @@ let HOUSE_GIDS_NEXT = {
 // `data/images.json` (refreshed daily by the GitHub Action via DuckDuckGo image
 // search). Used as the first source in `lookupImage` before any live API calls.
 let IMAGE_CACHE = {};
-let DATA_LAST_UPDATED = null;
 
 const BROWNE_DAY_GIDS = {
   Monday: [
@@ -567,7 +568,11 @@ function renderItem(entry) {
   btn.className = "img-toggle";
   btn.type = "button";
   btn.title = "Show image";
-  btn.textContent = "📷";
+  btn.setAttribute("aria-label", "Show image for " + entry.item);
+  const icon = document.createElement("img");
+  icon.src = "image.png";
+  icon.alt = "";
+  btn.appendChild(icon);
   const imgContainer = document.createElement("div");
   imgContainer.className = "item-image";
   imgContainer.style.display = "none";
@@ -899,7 +904,6 @@ async function loadConfig() {
     const r = await fetch("data/sheets.json", { cache: "no-cache" });
     if (!r.ok) return;
     const cfg = await r.json();
-    DATA_LAST_UPDATED = cfg.lastUpdated || null;
     const src = cfg.sources || {};
     if (src.house?.sheetId)      HOUSE_SHEET       = src.house.sheetId;
     if (src.houseNext?.sheetId)  HOUSE_SHEET_NEXT  = src.houseNext.sheetId;
@@ -981,17 +985,6 @@ async function loadImageCache() {
   } catch (e) { /* ignore */ }
 }
 
-function renderDataFreshness() {
-  if (!DATA_LAST_UPDATED) return;
-  const el = document.getElementById("data-freshness");
-  if (!el) return;
-  const d = new Date(DATA_LAST_UPDATED);
-  if (isNaN(d)) return;
-  const days = Math.round((Date.now() - d.getTime()) / 86400000);
-  const ago = days === 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
-  el.textContent = "Menu data refreshed " + ago;
-}
-
 async function init() {
   // Kick off config + image cache loads in parallel with day-button DOM build.
   const configReady = Promise.all([loadConfig(), loadImageCache()]);
@@ -1016,7 +1009,6 @@ async function init() {
     btn.addEventListener("click", () => selectWeek(Number(btn.dataset.week)));
   }
   await configReady;
-  renderDataFreshness();
   currentDay = today;
   selectDay(today);
 }

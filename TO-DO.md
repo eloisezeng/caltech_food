@@ -1,2 +1,2 @@
-- Choose a better icon for images button
-- Don't need to state the full date beneath the header.
+- You don't need to say the menu data was refreshed today
+- Use image.png for the image icon
