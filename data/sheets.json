@@ -1,0 +1,65 @@
+{
+  "lastUpdated": "2026-05-16T18:45:12.350Z",
+  "sources": {
+    "house": {
+      "sheetId": "2PACX-1vQkl7UZwIzBznKuZA0DgMCtVr7HezxIIocup7F-o3qXz4pK4wNa2BF3nn6-ExQeLkwrK24m4cgrzqwO",
+      "gids": {
+        "Template": 0,
+        "Cooking 101 Dinner Menu": 610922637,
+        "101 Updated": 388513685,
+        "PDF Version": 654862392,
+        "Monday": 1016216716,
+        "Tuesday": 2096911467,
+        "Wednesday": 420765482,
+        "Thursday": 1437404462,
+        "Friday": 573455844
+      }
+    },
+    "houseNext": {
+      "sheetId": "2PACX-1vR7JMFfwfz_xh5O51CvePvQJxZSpKMCSrs9duMqplFyjTJ3R1VrCMpCkOOwpMd8SRRCSmqQhKMRsnjL",
+      "gids": {
+        "PDF Version": 1145003942,
+        "Monday": 704796713,
+        "Tuesday": 1332587610,
+        "Wednesday": 791711783,
+        "Thursday": 1795860430,
+        "Friday": 1900461197
+      }
+    },
+    "browne": {
+      "sheetId": "2PACX-1vSwOJIiYDl5a11hZnPhOPvy5h3ChZ5hyoD33wfP0pAd6JVScrjtI9zsHnRQJWl0v80kaaxWtDtJzHZd",
+      "gids": {
+        "Pizza Special": 1389289090,
+        "Grill Special": 812292265,
+        "PDF Version": 747881802,
+        "Monday": 1584350749,
+        "Tuesday": 10318477,
+        "Wednesday": 1130846014,
+        "Thurday": 451236279,
+        "Friday": 231408986,
+        "Monday PB": 476021946,
+        "Tuesday PB": 525833261,
+        "Wednesday PB": 949595192,
+        "Thursday PB": 1690973571,
+        "Friday PB": 1642716127,
+        "Saturday 101": 2097766047,
+        "Saturday Comfort": 1645736782,
+        "Saturday Specials": 1257008787,
+        "Sunday 101": 1703176335,
+        "Sunday Comfort": 256192733,
+        "Sunday Specials": 1551581221
+      }
+    },
+    "browneNext": {
+      "sheetId": "2PACX-1vTPnIHkfwW3ygCnzSF3xuY_y3YaxrdRDR7Xiy77WHK8VX3XPXdKhh6iKup9SvLe3-KSWrvNNPc4DR7g",
+      "gids": {
+        "PDF Version": 1636370193,
+        "Monday": 759832069,
+        "Tuesday": 882491706,
+        "Wednesday": 1290845257,
+        "Thurday": 648998850,
+        "Friday": 428592530
+      }
+    }
+  }
+}

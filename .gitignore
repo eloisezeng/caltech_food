@@ -1,0 +1,15 @@
+# Local scratch / not for GitHub
+ignore/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Node (in case we add deps later — the current refresh.mjs has none)
+node_modules/
+npm-debug.log*

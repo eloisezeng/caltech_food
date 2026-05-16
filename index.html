@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caltech House Dinner and Browne Menus</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --muted: #666;
+    --accent: #ff6f00;
+    --accent-hover: #e65100;
+    --border: #e0e0e0;
+    --section: #fff8e1;
+    --allergen: #b71c1c;
+    --source: #5d4037;
+    --source-bg: #efebe9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 16px 16px;
+    text-align: center;
+  }
+  h1 { margin: 0 0 8px; font-size: 28px; }
+  .date {
+    color: var(--muted);
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+  .week-toggle {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .week-toggle button {
+    background: var(--surface);
+    color: var(--text);
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .week-toggle button.active {
+    background: var(--accent);
+    color: white;
+  }
+  .day-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .day-btn {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    min-width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.2;
+    gap: 2px;
+  }
+  .day-btn:hover { border-color: var(--accent); }
+  .day-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .day-btn .day-name { font-weight: 600; }
+  .day-btn .day-date {
+    font-size: 11px;
+    opacity: 0.85;
+  }
+  .day-btn.today { box-shadow: 0 0 0 2px var(--accent) inset; }
+  .day-btn.today.active { box-shadow: none; }
+  .freshness {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .freshness:empty { display: none; }
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 768px) {
+    main { grid-template-columns: 1fr; }
+  }
+  .menu-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    min-height: 200px;
+  }
+  .menu-card h2 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    color: var(--accent);
+  }
+  .menu-card .source-link {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .menu-card .source-link a {
+    color: var(--muted);
+    text-decoration: underline;
+  }
+  .source-label {
+    background: var(--source-bg);
+    color: var(--source);
+    padding: 10px 14px;
+    margin: 20px 0 10px;
+    border-left: 4px solid var(--source);
+    border-radius: 4px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .source-label:first-child { margin-top: 0; }
+  .group {
+    margin: 10px 0 12px;
+  }
+  .group-title {
+    background: var(--section);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #5d4037;
+  }
+  .item {
+    margin: 4px 0 8px;
+    padding: 0 8px 0 12px;
+  }
+  .item-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .item-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .item-heading {
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .item-name {
+    font-weight: 500;
+  }
+  .item-allergens {
+    font-size: 12px;
+    color: var(--allergen);
+    margin-top: 2px;
+  }
+  .img-toggle {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 2px 6px;
+    line-height: 1;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .img-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .item-image {
+    margin-top: 6px;
+    max-width: 240px;
+  }
+  .item-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .item-image .img-caption {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .item-image .img-error {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .empty, .loading, .error {
+    color: var(--muted);
+    padding: 24px 0;
+    text-align: center;
+    font-style: italic;
+  }
+  .error { color: var(--allergen); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Caltech House Dinner and Browne Menus</h1>
+  <div class="date" id="date-display"></div>
+  <div class="week-toggle" id="week-toggle">
+    <button data-week="0" class="active">This Week</button>
+    <button data-week="1">Next Week</button>
+  </div>
+  <div class="day-buttons" id="day-buttons"></div>
+  <div id="data-freshness" class="freshness"></div>
+</header>
+
+<main>
+  <div class="menu-card">
+    <h2>House Dinner Menu</h2>
+    <div class="source-link">
+      Source: <a href="https://caltechdining.my.canva.site/meal-plan-menus" target="_blank" rel="noopener">caltechdining.my.canva.site</a>
+    </div>
+    <div id="house-menu"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="menu-card">
+    <h2>Browne Menu</h2>
+    <div class="source-link">
+      Source: <a href="https://diningcaltech.info/browne-dining-specials" target="_blank" rel="noopener">diningcaltech.info</a>
+    </div>
+    <div id="browne-menu"><div class="loading">Loading…</div></div>
+  </div>
+</main>
+
+<script>
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+// These are the defaults; `loadConfig()` will override them at startup from
+// `data/sheets.json` (refreshed daily by the GitHub Action). The defaults exist
+// so the page still works when opened without the data file present.
+let HOUSE_SHEET       = "2PACX-1vQkl7UZwIzBznKuZA0DgMCtVr7HezxIIocup7F-o3qXz4pK4wNa2BF3nn6-ExQeLkwrK24m4cgrzqwO";
+let BROWNE_SHEET      = "2PACX-1vSwOJIiYDl5a11hZnPhOPvy5h3ChZ5hyoD33wfP0pAd6JVScrjtI9zsHnRQJWl0v80kaaxWtDtJzHZd";
+let HOUSE_SHEET_NEXT  = "2PACX-1vR7JMFfwfz_xh5O51CvePvQJxZSpKMCSrs9duMqplFyjTJ3R1VrCMpCkOOwpMd8SRRCSmqQhKMRsnjL";
+let BROWNE_SHEET_NEXT = "2PACX-1vTPnIHkfwW3ygCnzSF3xuY_y3YaxrdRDR7Xiy77WHK8VX3XPXdKhh6iKup9SvLe3-KSWrvNNPc4DR7g";
+
+let HOUSE_GIDS = {
+  Monday: 1016216716, Tuesday: 2096911467, Wednesday: 420765482,
+  Thursday: 1437404462, Friday: 573455844,
+};
+let HOUSE_GIDS_NEXT = {
+  Monday: 704796713, Tuesday: 1332587610, Wednesday: 791711783,
+  Thursday: 1795860430, Friday: 1900461197,
+};
+
+// Map of "Food Name" → pre-fetched image URL (Google-quality), populated from
+// `data/images.json` (refreshed daily by the GitHub Action via DuckDuckGo image
+// search). Used as the first source in `lookupImage` before any live API calls.
+let IMAGE_CACHE = {};
+let DATA_LAST_UPDATED = null;
+
+const BROWNE_DAY_GIDS = {
+  Monday: [
+    { label: "Comfort Equation (Lunch)", gid: 1584350749 },
+    { label: "Plant Based (Lunch)", gid: 476021946 },
+    { label: "Cooking 101 (Dinner)", gid: 610922637, sheetRef: "house", filterDay: "Monday" },
+  ],
+  Tuesday: [
+    { label: "Comfort Equation (Lunch)", gid: 10318477 },
+    { label: "Plant Based (Lunch)", gid: 525833261 },
+    { label: "Cooking 101 (Dinner)", gid: 610922637, sheetRef: "house", filterDay: "Tuesday" },
+  ],
+  Wednesday: [
+    { label: "Comfort Equation (Lunch)", gid: 1130846014 },
+    { label: "Plant Based (Lunch)", gid: 949595192 },
+    { label: "Cooking 101 (Dinner)", gid: 610922637, sheetRef: "house", filterDay: "Wednesday" },
+  ],
+  Thursday: [
+    { label: "Comfort Equation (Lunch)", gid: 451236279 },
+    { label: "Plant Based (Lunch)", gid: 1690973571 },
+    { label: "Cooking 101 (Dinner)", gid: 610922637, sheetRef: "house", filterDay: "Thursday" },
+  ],
+  Friday: [
+    { label: "Comfort Equation (Lunch)", gid: 231408986 },
+    { label: "Plant Based (Lunch)", gid: 1642716127 },
+    { label: "Cooking 101 (Dinner)", gid: 610922637, sheetRef: "house", filterDay: "Friday" },
+  ],
+  Saturday: [
+    { label: "101 Brunch", gid: 2097766047 },
+    { label: "Comfort Brunch", gid: 1645736782 },
+    { label: "Brunch Specials", gid: 1257008787 },
+  ],
+  Sunday: [
+    { label: "101 Brunch", gid: 1703176335 },
+    { label: "Comfort Brunch", gid: 256192733 },
+    { label: "Brunch Specials", gid: 1551581221 },
+  ],
+};
+
+const BROWNE_DAY_GIDS_NEXT = {
+  Monday: [{ label: "Comfort Equation (Lunch)", gid: 759832069 }],
+  Tuesday: [{ label: "Comfort Equation (Lunch)", gid: 882491706 }],
+  Wednesday: [{ label: "Comfort Equation (Lunch)", gid: 1290845257 }],
+  Thursday: [{ label: "Comfort Equation (Lunch)", gid: 648998850 }],
+  Friday: [{ label: "Comfort Equation (Lunch)", gid: 428592530 }],
+};
+
+// Categories used to group items by heading/item text. First match wins.
+const GROUPS = [
+  { key: "vegan",      name: "Vegan",         match: /\bvegan\b|plant.?based|plantbased/i },
+  { key: "vegetarian", name: "Vegetarian",    match: /\bvegetarian\b/i },
+  { key: "pasta",      name: "Pasta Bar",     match: /\bpastas?\b/i },
+  { key: "soup",       name: "Soups",         match: /\bsoups?\b|chowder/i },
+  { key: "entree",     name: "Entrees",       match: /\bentrees?\b|comfort\s+equation|latino|wok|tandoori|grill|special\b/i },
+  { key: "side",       name: "Sides",         match: /\bsides?\b|vegetable|starch|rice|potato/i },
+  { key: "bread",      name: "Bread",         match: /\bbreads?\b|loaf/i },
+  { key: "dessert",    name: "Dessert",       match: /\bdesserts?\b|cookie|cake|pie|brownie/i },
+];
+const OTHER_GROUP = { key: "other", name: "Other" };
+const GROUP_ORDER = ["entree", "vegetarian", "vegan", "pasta", "soup", "side", "bread", "dessert", "other"];
+
+// Browne section labels (passed in from source.label) that should override or
+// rename groupings. None for now — but we keep the source label as a top header.
+
+let currentWeek = 0; // 0 = this week, 1 = next week
+let currentDay = null;
+
+function csvUrl(sheet, gid) {
+  return `https://docs.google.com/spreadsheets/d/e/${sheet}/pub?output=csv&gid=${gid}`;
+}
+
+function parseCsv(text) {
+  const rows = []; let row = []; let field = ""; let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else { inQuotes = false; } }
+      else { field += c; }
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ""; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ""; }
+      else if (c === '\r') {}
+      else { field += c; }
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+async function fetchCsv(sheet, gid) {
+  const res = await fetch(csvUrl(sheet, gid));
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return parseCsv(await res.text());
+}
+
+// Walk one column of a sheet and return an array of {heading, item, allergens}
+// triples. Pattern in source: heading row → item row → optional "Allergens: ..." row.
+// Blank cells advance without contributing. If a row has only an item with no
+// preceding heading, we carry the previous heading (e.g., second sandwich under
+// "Brunch Special").
+function extractEntries(rows, colIndex, startRow) {
+  const cells = [];
+  let prevWasEmpty = false;
+  for (let i = startRow; i < rows.length; i++) {
+    const cell = ((rows[i] || [])[colIndex] || "").trim();
+    cells.push({ text: cell, blankAfter: false });
+    if (!cell && cells.length > 1) {
+      const last = cells[cells.length - 2];
+      if (last && last.text) last.blankAfter = true;
+    }
+  }
+  const entries = [];
+  let lastHeading = "";
+  let i = 0;
+  while (i < cells.length) {
+    const c = cells[i];
+    if (!c.text) { i++; continue; }
+    if (/^Allergens:/i.test(c.text)) {
+      // Orphan allergens — attach to previous entry if any
+      if (entries.length) {
+        entries[entries.length - 1].allergens = c.text;
+      }
+      i++;
+      continue;
+    }
+    // Find next non-empty cell
+    let j = i + 1;
+    while (j < cells.length && !cells[j].text) j++;
+    const nextText = j < cells.length ? cells[j].text : "";
+    if (nextText && !/^Allergens:/i.test(nextText) && !cells[i].blankAfter) {
+      // c is heading, nextText is item
+      const heading = c.text;
+      const item = nextText;
+      lastHeading = heading;
+      let allergens = "";
+      // Look further for allergens line
+      let k = j + 1;
+      while (k < cells.length && !cells[k].text) k++;
+      if (k < cells.length && /^Allergens:/i.test(cells[k].text)) {
+        allergens = cells[k].text;
+        i = k + 1;
+      } else {
+        i = j + 1;
+      }
+      entries.push({ heading, item, allergens });
+    } else {
+      // Either no following item, or blank row right after — treat current cell as item under previous heading
+      const item = c.text;
+      let allergens = "";
+      let k = i + 1;
+      while (k < cells.length && !cells[k].text) k++;
+      if (k < cells.length && /^Allergens:/i.test(cells[k].text)) {
+        allergens = cells[k].text;
+        i = k + 1;
+      } else {
+        i = i + 1;
+      }
+      entries.push({ heading: lastHeading, item, allergens });
+    }
+  }
+  return entries;
+}
+
+function startRowFor(rows) {
+  return rows[0] && /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/i
+    .test((rows[0][0] || "").trim()) ? 1 : 0;
+}
+
+function extractAllEntries(rows) {
+  if (!rows.length) return [];
+  const start = startRowFor(rows);
+  const entries = [];
+  for (const col of [0, 2]) {
+    let hasContent = false;
+    for (let i = start; i < rows.length; i++) {
+      if (((rows[i] || [])[col] || "").trim()) { hasContent = true; break; }
+    }
+    if (hasContent) entries.push(...extractEntries(rows, col, start));
+  }
+  return cleanEntries(entries);
+}
+
+// Standalone section-title strings that appear as items in source data but
+// aren't real dishes — they introduce a section already labelled elsewhere.
+const SECTION_TITLE_PATTERNS = [
+  /^Comfort\s+Equation\s+Center\s+Line$/i,
+  /^Comfort\s+Special:?\s*Brunch$/i,
+  /^Plant\s*Based\s+Special$/i,
+  /^101\s+Special$/i,
+  /^Brunch\s+Specials?$/i,
+];
+
+const SEP_RE = /^[-—–_=*\s]+$/;
+
+function cleanEntries(entries) {
+  const out = [];
+  let lastRealHeading = "";
+  for (const e of entries) {
+    const item = (e.item || "").trim();
+    const heading = (e.heading || "").trim();
+    // Drop entries whose item is just a separator
+    if (SEP_RE.test(item)) continue;
+    // Standalone diet label "Vegan" / "vegan" as the item: tag the previous
+    // entry as vegan and drop this one.
+    if (/^vegan$/i.test(item) && !e.allergens) {
+      if (out.length) out[out.length - 1].vegan = true;
+      continue;
+    }
+    // Heading is just "Vegan" — leaked flag from the source. Drop the heading
+    // and mark the entry as vegan.
+    if (/^vegan$/i.test(heading)) {
+      e.heading = "";
+      e.vegan = true;
+    }
+    // Drop separator-only headings; carry the previous real heading forward.
+    if (SEP_RE.test(heading)) {
+      e.heading = lastRealHeading;
+    } else if (heading) {
+      lastRealHeading = heading;
+    }
+    // Drop known section titles that appear alone (no heading or allergens).
+    if (!e.heading && !e.allergens && SECTION_TITLE_PATTERNS.some(p => p.test(item))) continue;
+    out.push(e);
+  }
+  return out;
+}
+
+function categorize(entry) {
+  if (entry.vegan) return GROUPS.find(g => g.key === "vegan");
+  const text = `${entry.heading || ""} ${entry.item || ""}`;
+  for (const g of GROUPS) {
+    if (g.match.test(text)) return g;
+  }
+  return OTHER_GROUP;
+}
+
+// Group an array of entries by category and return DOM
+function renderGroupedEntries(entries) {
+  const wrap = document.createElement("div");
+  const buckets = {};
+  for (const e of entries) {
+    const g = categorize(e);
+    (buckets[g.key] = buckets[g.key] || { name: g.name, items: [] }).items.push(e);
+  }
+  for (const key of GROUP_ORDER) {
+    const b = buckets[key];
+    if (!b || !b.items.length) continue;
+    const groupEl = document.createElement("div");
+    groupEl.className = "group";
+    const titleEl = document.createElement("div");
+    titleEl.className = "group-title";
+    titleEl.textContent = b.name;
+    groupEl.appendChild(titleEl);
+    for (const e of b.items) {
+      groupEl.appendChild(renderItem(e));
+    }
+    wrap.appendChild(groupEl);
+  }
+  return wrap;
+}
+
+function renderItem(entry) {
+  const itemEl = document.createElement("div");
+  itemEl.className = "item";
+  const row = document.createElement("div");
+  row.className = "item-row";
+  const text = document.createElement("div");
+  text.className = "item-text";
+  if (entry.heading) {
+    const h = document.createElement("div");
+    h.className = "item-heading";
+    h.textContent = entry.heading;
+    text.appendChild(h);
+  }
+  const name = document.createElement("div");
+  name.className = "item-name";
+  name.textContent = entry.item;
+  text.appendChild(name);
+  if (entry.allergens) {
+    const a = document.createElement("div");
+    a.className = "item-allergens";
+    a.textContent = entry.allergens;
+    text.appendChild(a);
+  }
+  row.appendChild(text);
+  const btn = document.createElement("button");
+  btn.className = "img-toggle";
+  btn.type = "button";
+  btn.title = "Show image";
+  btn.textContent = "🖼";
+  const imgContainer = document.createElement("div");
+  imgContainer.className = "item-image";
+  imgContainer.style.display = "none";
+  btn.addEventListener("click", () => toggleImage(entry.item, imgContainer, btn));
+  row.appendChild(btn);
+  itemEl.appendChild(row);
+  itemEl.appendChild(imgContainer);
+  return itemEl;
+}
+
+async function toggleImage(query, container, btn) {
+  if (container.dataset.loaded === "1") {
+    const showing = container.style.display !== "none";
+    container.style.display = showing ? "none" : "block";
+    btn.title = showing ? "Show image" : "Hide image";
+    return;
+  }
+  container.style.display = "block";
+  container.innerHTML = '<div class="img-error">Loading image…</div>';
+  const img = await lookupImage(query);
+  container.innerHTML = "";
+  const imgEl = document.createElement("img");
+  imgEl.src = img.thumbnail;
+  imgEl.alt = query;
+  imgEl.loading = "lazy";
+  // If even the LoremFlickr fallback errors (network etc.), at least don't
+  // show a broken-image icon — swap in a tiny inline placeholder.
+  imgEl.addEventListener("error", () => {
+    imgEl.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 160'><rect width='100%' height='100%' fill='%23efebe9'/><text x='50%' y='50%' fill='%235d4037' font-family='sans-serif' font-size='14' text-anchor='middle' dominant-baseline='middle'>image unavailable</text></svg>";
+  });
+  container.appendChild(imgEl);
+  const cap = document.createElement("div");
+  cap.className = "img-caption";
+  cap.appendChild(document.createTextNode("via " + img.source));
+  if (img.title) {
+    cap.appendChild(document.createTextNode(": "));
+    if (img.pageUrl) {
+      const a = document.createElement("a");
+      a.href = img.pageUrl;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = img.title;
+      cap.appendChild(a);
+    } else {
+      cap.appendChild(document.createTextNode(img.title));
+    }
+  }
+  cap.appendChild(document.createTextNode(" · "));
+  cap.appendChild(googleImagesLink(query));
+  container.appendChild(cap);
+  container.dataset.loaded = "1";
+  btn.title = "Hide image";
+}
+
+function googleImagesLink(query) {
+  const a = document.createElement("a");
+  a.href = "https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(query + " food");
+  a.target = "_blank";
+  a.rel = "noopener";
+  a.textContent = "search Google Images";
+  return a;
+}
+
+// Strip menu-specific decoration to get a cleaner food name for image search.
+function cleanFoodName(q) {
+  return q
+    .replace(/\s*\|\s*price.*$/i, "")
+    .replace(/\s+of\s+the\s+day\b/i, "")
+    .replace(/\s+special\s*\d*\s*$/i, "")
+    .replace(/\s+with\s+.+$/i, "")
+    .replace(/\s+\([^)]+\)\s*$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Cascade through image sources. Always returns a {thumbnail, title?, pageUrl?,
+// source} object. The first source checked is the pre-fetched cache built by
+// the GitHub Action (DuckDuckGo image search, Google-quality results). If that
+// misses, we fall back to live Wikipedia/Commons/MealDB and finally LoremFlickr.
+async function lookupImage(query) {
+  // 1. Pre-fetched image cache (built daily by scripts/refresh.mjs)
+  const cached = IMAGE_CACHE[query] || IMAGE_CACHE[query.replace(/\s*\|\s*Price.*$/i, "").trim()];
+  if (cached) {
+    return {
+      thumbnail: cached,
+      title: "",
+      pageUrl: "https://duckduckgo.com/?q=" + encodeURIComponent(query + " food") + "&iax=images&ia=images",
+      source: "DuckDuckGo Images",
+    };
+  }
+  const clean = cleanFoodName(query);
+  const tries = [
+    () => tryWikipediaSummary(clean),
+    () => tryWikimediaCommons(clean),
+    () => tryMealDB(clean),
+    // Try just the last 1–2 main words (e.g., "Beef Stroganoff" from
+    // "Hearty Beef Stroganoff Bowl") via Wikipedia again.
+    () => {
+      const words = clean.split(" ").filter(w => w.length > 2);
+      if (words.length <= 2) return null;
+      return tryWikipediaSummary(words.slice(-2).join(" "));
+    },
+  ];
+  for (const fn of tries) {
+    try {
+      const r = await fn();
+      if (r && r.thumbnail) return r;
+    } catch (e) { /* try next */ }
+  }
+  // Guaranteed fallback: LoremFlickr returns a keyword-matched Flickr image.
+  return loremFlickrImage(clean);
+}
+
+function loremFlickrImage(query) {
+  // Pick the LAST 1–2 keywords (food name nouns usually trail adjectives, e.g.
+  // "Hearty Beef Stroganoff Bowl" → "Stroganoff Bowl"). Always append "food"
+  // for context, so worst case we still get a generic food photo rather than
+  // LoremFlickr's no-match default placeholder.
+  const stop = /^(the|of|and|with|a|an|on|in|or|for|to|served|raw|fresh|hot|cold|day|special|bar|side)$/i;
+  const words = query.split(/[\s\-,&|]+/).filter(w => w && !stop.test(w));
+  const picked = words.slice(-2);
+  const tags = (picked.length ? picked.join(",") : "food") + ",food";
+  return {
+    thumbnail: `https://loremflickr.com/320/240/${encodeURIComponent(tags)}?lock=${hashCode(tags)}`,
+    title: "",
+    pageUrl: "https://www.flickr.com/search/?text=" + encodeURIComponent(query + " food"),
+    source: "Flickr",
+  };
+}
+
+// Stable hash so the same dish name always shows the same Flickr image (no
+// flicker when the user toggles the panel off and on within a session, and
+// repeat visitors see the same image).
+function hashCode(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+async function tryWikipediaSummary(query) {
+  const searchUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&origin=*&search=${encodeURIComponent(query)}`;
+  const sRes = await fetch(searchUrl);
+  if (!sRes.ok) return null;
+  const sJson = await sRes.json();
+  const title = (sJson[1] || [])[0];
+  const pageUrl = (sJson[3] || [])[0];
+  if (!title) return null;
+  const sumUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}?redirect=true`;
+  const tRes = await fetch(sumUrl);
+  if (!tRes.ok) return null;
+  const tJson = await tRes.json();
+  const thumb = tJson.thumbnail && tJson.thumbnail.source;
+  if (!thumb) return null;
+  return { thumbnail: thumb, title, pageUrl: pageUrl || (tJson.content_urls && tJson.content_urls.desktop && tJson.content_urls.desktop.page), source: "Wikipedia" };
+}
+
+async function tryWikimediaCommons(query) {
+  // Ask for 5 results and filter for actual image files, since Commons search
+  // returns PDFs, audio, video etc. in the File namespace too.
+  const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrsearch=${encodeURIComponent(query + " food")}&gsrnamespace=6&gsrlimit=5&prop=imageinfo&iiprop=url|mime&iiurlwidth=320&origin=*`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const json = await res.json();
+  const pages = (json.query && json.query.pages) || {};
+  // Pages object is keyed by random IDs; iterate by their `index` to preserve order.
+  const ordered = Object.values(pages).sort((a, b) => (a.index || 0) - (b.index || 0));
+  for (const p of ordered) {
+    const ii = (p.imageinfo || [])[0];
+    if (!ii || !ii.thumburl) continue;
+    const mime = (ii.mime || "").toLowerCase();
+    if (!mime.startsWith("image/")) continue;
+    const title = (p.title || "").replace(/^File:/, "").replace(/\.[a-z0-9]+$/i, "");
+    return { thumbnail: ii.thumburl, title, pageUrl: ii.descriptionurl, source: "Wikimedia Commons" };
+  }
+  return null;
+}
+
+async function tryMealDB(query) {
+  const url = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const json = await res.json();
+  const meal = (json.meals || [])[0];
+  if (!meal || !meal.strMealThumb) return null;
+  return {
+    thumbnail: meal.strMealThumb,
+    title: meal.strMeal,
+    pageUrl: meal.strSource || `https://www.themealdb.com/meal/${meal.idMeal}`,
+    source: "TheMealDB",
+  };
+}
+
+// Filter Cooking 101 sheet (Day | Item | Allergens table) to a specific day's entries.
+function extract101ForDay(rows, day) {
+  const entries = [];
+  let inDay = false;
+  const allDays = /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/i;
+  for (let i = 0; i < rows.length; i++) {
+    const dayCell = (rows[i][0] || "").trim();
+    const item = (rows[i][1] || "").trim();
+    const allergens = (rows[i][2] || "").trim();
+    if (allDays.test(dayCell)) {
+      inDay = dayCell.toLowerCase() === day.toLowerCase();
+    }
+    if (!inDay || !item) continue;
+    entries.push({
+      heading: "",
+      item,
+      allergens: allergens ? "Allergens: " + allergens : "",
+    });
+  }
+  return entries;
+}
+
+async function loadHouse(day) {
+  const el = document.getElementById("house-menu");
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  const sheet = currentWeek === 0 ? HOUSE_SHEET : HOUSE_SHEET_NEXT;
+  const gids = currentWeek === 0 ? HOUSE_GIDS : HOUSE_GIDS_NEXT;
+  const gid = gids[day];
+  if (!gid) {
+    el.innerHTML = '<div class="empty">No house dinner is served on ' + day + '.</div>';
+    return;
+  }
+  try {
+    const rows = await fetchCsv(sheet, gid);
+    const entries = extractAllEntries(rows);
+    el.innerHTML = "";
+    if (!entries.length) {
+      el.innerHTML = '<div class="empty">No menu posted for ' + day + ' yet.</div>';
+    } else {
+      el.appendChild(renderGroupedEntries(entries));
+    }
+  } catch (err) {
+    el.innerHTML = '<div class="error">Could not load menu: ' + err.message + '</div>';
+  }
+}
+
+async function loadBrowne(day) {
+  const el = document.getElementById("browne-menu");
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  const map = currentWeek === 0 ? BROWNE_DAY_GIDS : BROWNE_DAY_GIDS_NEXT;
+  const sheetDefault = currentWeek === 0 ? BROWNE_SHEET : BROWNE_SHEET_NEXT;
+  const sources = map[day] || [];
+  if (!sources.length) {
+    el.innerHTML = '<div class="empty">No Browne menu' + (currentWeek === 1 ? " published yet for next " + day : " for " + day) + '.</div>';
+    return;
+  }
+  el.innerHTML = "";
+  const results = await Promise.allSettled(sources.map(s => {
+    // Next-week 101 uses this-week's sheet (only this-week 101 is published).
+    // `sheetRef` lets us resolve HOUSE_SHEET lazily, since loadConfig() may
+    // override it at startup with a value from data/sheets.json.
+    const sheet = s.sheetRef === "house" ? HOUSE_SHEET : (s.sheet || sheetDefault);
+    return fetchCsv(sheet, s.gid).then(rows => ({ src: s, rows }));
+  }));
+  let anyRendered = false;
+  for (const r of results) {
+    if (r.status !== "fulfilled") continue;
+    const { src, rows } = r.value;
+    let entries;
+    if (src.filterDay) {
+      entries = extract101ForDay(rows, src.filterDay);
+    } else {
+      entries = extractAllEntries(rows);
+    }
+    if (!entries.length) continue;
+    const labelEl = document.createElement("div");
+    labelEl.className = "source-label";
+    labelEl.textContent = src.label;
+    el.appendChild(labelEl);
+    el.appendChild(renderGroupedEntries(entries));
+    anyRendered = true;
+  }
+  if (!anyRendered) {
+    el.innerHTML = '<div class="empty">No Browne menu posted for ' + day + ' yet.</div>';
+  }
+}
+
+// Compute the Date object for `day` of `week`.
+// week 0 = current week (Sun-Sat containing today), week 1 = next week.
+function dateForDay(day, week) {
+  const now = new Date();
+  const todayIdx = now.getDay(); // 0=Sun..6=Sat
+  const targetIdx = DAYS.indexOf(day);
+  const diff = (targetIdx - todayIdx) + week * 7;
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff);
+  return d;
+}
+
+function formatShortDate(d) {
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+function formatLongDate(d) {
+  return d.toLocaleDateString(undefined, {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
+  });
+}
+
+function updateDayButtons() {
+  const today = DAYS[new Date().getDay()];
+  for (const btn of document.querySelectorAll(".day-btn")) {
+    const day = btn.dataset.day;
+    const d = dateForDay(day, currentWeek);
+    btn.querySelector(".day-date").textContent = formatShortDate(d);
+    const isToday = currentWeek === 0 && day === today;
+    btn.classList.toggle("today", isToday);
+    btn.classList.toggle("active", day === currentDay);
+  }
+  if (currentDay) {
+    const d = dateForDay(currentDay, currentWeek);
+    document.getElementById("date-display").textContent = formatLongDate(d);
+  }
+}
+
+function selectDay(day) {
+  currentDay = day;
+  updateDayButtons();
+  loadHouse(day);
+  loadBrowne(day);
+}
+
+function selectWeek(week) {
+  currentWeek = week;
+  for (const btn of document.querySelectorAll("#week-toggle button")) {
+    btn.classList.toggle("active", Number(btn.dataset.week) === week);
+  }
+  selectDay(currentDay);
+}
+
+// Apply the auto-discovered sheet IDs and per-day gids from data/sheets.json
+// over the hardcoded defaults. Failures are silent — the page still works
+// against the defaults if the data file is missing or malformed.
+async function loadConfig() {
+  try {
+    const r = await fetch("data/sheets.json", { cache: "no-cache" });
+    if (!r.ok) return;
+    const cfg = await r.json();
+    DATA_LAST_UPDATED = cfg.lastUpdated || null;
+    const src = cfg.sources || {};
+    if (src.house?.sheetId)      HOUSE_SHEET       = src.house.sheetId;
+    if (src.houseNext?.sheetId)  HOUSE_SHEET_NEXT  = src.houseNext.sheetId;
+    if (src.browne?.sheetId)     BROWNE_SHEET      = src.browne.sheetId;
+    if (src.browneNext?.sheetId) BROWNE_SHEET_NEXT = src.browneNext.sheetId;
+    // The dining team's published sheets have a "Thurday" typo on some tabs.
+    const pick = (gids, day) => {
+      if (gids?.[day] != null) return gids[day];
+      if (day === "Thursday" && gids?.["Thurday"] != null) return gids["Thurday"];
+      return undefined;
+    };
+    if (src.house?.gids) {
+      for (const d of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]) {
+        const g = pick(src.house.gids, d);
+        if (g) HOUSE_GIDS[d] = g;
+      }
+    }
+    if (src.houseNext?.gids) {
+      for (const d of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]) {
+        const g = pick(src.houseNext.gids, d);
+        if (g) HOUSE_GIDS_NEXT[d] = g;
+      }
+    }
+    // Browne weekday Comfort Equation tabs are named just by day.
+    // Plant Based tabs are named "Monday PB", "Tuesday PB", etc.
+    if (src.browne?.gids) {
+      for (const d of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]) {
+        const gComfort = pick(src.browne.gids, d);
+        if (gComfort && BROWNE_DAY_GIDS[d]) {
+          const slot = BROWNE_DAY_GIDS[d].find(x => /Comfort.*Lunch/.test(x.label));
+          if (slot) slot.gid = gComfort;
+        }
+        const gPb = src.browne.gids[`${d} PB`];
+        if (gPb && BROWNE_DAY_GIDS[d]) {
+          const slot = BROWNE_DAY_GIDS[d].find(x => /Plant.?Based/i.test(x.label));
+          if (slot) slot.gid = gPb;
+        }
+      }
+    }
+    if (src.browneNext?.gids) {
+      for (const d of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]) {
+        const g = pick(src.browneNext.gids, d);
+        if (g && BROWNE_DAY_GIDS_NEXT[d]) {
+          BROWNE_DAY_GIDS_NEXT[d][0].gid = g;
+        }
+      }
+    }
+    // Cooking 101 dinner gid lives in the house sheet as "Cooking 101 Dinner Menu".
+    const c101 = src.house?.gids?.["Cooking 101 Dinner Menu"];
+    if (c101) {
+      for (const d of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]) {
+        const slot = BROWNE_DAY_GIDS[d]?.find(x => /Cooking 101/.test(x.label));
+        if (slot) slot.gid = c101;
+      }
+    }
+    // Weekend Browne tabs follow names like "Saturday 101", "Saturday Comfort",
+    // "Saturday Specials".
+    const labelMap = { "101 Brunch": "101", "Comfort Brunch": "Comfort", "Brunch Specials": "Specials" };
+    for (const day of ["Saturday", "Sunday"]) {
+      for (const slot of BROWNE_DAY_GIDS[day] || []) {
+        const suffix = labelMap[slot.label];
+        if (!suffix) continue;
+        const key = `${day} ${suffix}`;
+        const g = src.browne?.gids?.[key];
+        if (g) slot.gid = g;
+      }
+    }
+  } catch (e) {
+    // Silent — falling back to hardcoded defaults.
+  }
+}
+
+async function loadImageCache() {
+  try {
+    const r = await fetch("data/images.json", { cache: "no-cache" });
+    if (!r.ok) return;
+    const j = await r.json();
+    IMAGE_CACHE = j.cache || {};
+  } catch (e) { /* ignore */ }
+}
+
+function renderDataFreshness() {
+  if (!DATA_LAST_UPDATED) return;
+  const el = document.getElementById("data-freshness");
+  if (!el) return;
+  const d = new Date(DATA_LAST_UPDATED);
+  if (isNaN(d)) return;
+  const days = Math.round((Date.now() - d.getTime()) / 86400000);
+  const ago = days === 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
+  el.textContent = "Menu data refreshed " + ago;
+}
+
+async function init() {
+  // Kick off config + image cache loads in parallel with day-button DOM build.
+  const configReady = Promise.all([loadConfig(), loadImageCache()]);
+  const today = DAYS[new Date().getDay()];
+  const btnContainer = document.getElementById("day-buttons");
+  for (const day of DAYS) {
+    const btn = document.createElement("button");
+    btn.className = "day-btn";
+    btn.dataset.day = day;
+    const nameEl = document.createElement("span");
+    nameEl.className = "day-name";
+    nameEl.textContent = day.slice(0, 3);
+    btn.appendChild(nameEl);
+    const dateEl = document.createElement("span");
+    dateEl.className = "day-date";
+    btn.appendChild(dateEl);
+    btn.title = day;
+    btn.addEventListener("click", () => selectDay(day));
+    btnContainer.appendChild(btn);
+  }
+  for (const btn of document.querySelectorAll("#week-toggle button")) {
+    btn.addEventListener("click", () => selectWeek(Number(btn.dataset.week)));
+  }
+  await configReady;
+  renderDataFreshness();
+  currentDay = today;
+  selectDay(today);
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+
+</body>
+</html>
