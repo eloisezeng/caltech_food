@@ -446,14 +446,34 @@ function extractAllEntries(rows) {
   if (!rows.length) return [];
   const start = startRowFor(rows);
   const entries = [];
+  // Process each column independently so the "station" tracker (Centerline →
+  // Plant-Based → 101 Special) resets between columns. Most sheets only put
+  // station transitions in column 0; column 2 stays Centerline throughout.
   for (const col of [0, 2]) {
     let hasContent = false;
     for (let i = start; i < rows.length; i++) {
       if (((rows[i] || [])[col] || "").trim()) { hasContent = true; break; }
     }
-    if (hasContent) entries.push(...extractEntries(rows, col, start));
+    if (!hasContent) continue;
+    const cleaned = cleanEntries(extractEntries(rows, col, start));
+    entries.push(...tagStations(cleaned));
   }
-  return cleanEntries(entries);
+  return entries;
+}
+
+// Browne's Comfort Equation sheet bundles three stations into one sheet:
+// Centerline (the standing stuff), Plant-Based (the dedicated PB station),
+// and 101 Special (the daily lunch special). We detect station transitions
+// by recognizing the station headers in entry.heading.
+function tagStations(entries) {
+  let station = "Centerline";
+  for (const e of entries) {
+    const h = e.heading || "";
+    if (/^plant\s*based\s+special\b/i.test(h)) station = "Plant-Based";
+    else if (/^101\s+special\b/i.test(h))      station = "101 Special";
+    e.station = station;
+  }
+  return entries;
 }
 
 // Standalone section-title strings that appear as items in source data but
@@ -588,6 +608,50 @@ function renderEntriesBySourceSection(entries) {
     }
     wrap.appendChild(groupEl);
   }
+  return wrap;
+}
+
+// Weekday Browne lunch rendering: group items by Browne's three lunch
+// stations as the dining team organizes them in Canva — Centerline,
+// Plant-Based, 101 Special — using the station tag set by extractAllEntries.
+const WEEKDAY_STATION_ORDER = ["Centerline", "Plant-Based", "101 Special"];
+
+function renderEntriesByStation(entries) {
+  const buckets = {};
+  for (const e of entries) {
+    const s = e.station || "Centerline";
+    (buckets[s] = buckets[s] || []).push(e);
+  }
+  const wrap = document.createElement("div");
+  const seen = new Set(WEEKDAY_STATION_ORDER);
+  const order = WEEKDAY_STATION_ORDER.concat(
+    Object.keys(buckets).filter(k => !seen.has(k))
+  );
+  for (const name of order) {
+    const items = buckets[name];
+    if (!items || !items.length) continue;
+    const groupEl = document.createElement("div");
+    groupEl.className = "group";
+    const titleEl = document.createElement("div");
+    titleEl.className = "group-title";
+    titleEl.textContent = name;
+    groupEl.appendChild(titleEl);
+    for (const e of items) {
+      groupEl.appendChild(renderItem(e));
+    }
+    wrap.appendChild(groupEl);
+  }
+  return wrap;
+}
+
+// Plain list (used for the Cooking 101 Dinner source, which is a single tab
+// with no internal sub-grouping).
+function renderEntriesFlat(entries) {
+  const wrap = document.createElement("div");
+  const groupEl = document.createElement("div");
+  groupEl.className = "group";
+  for (const e of entries) groupEl.appendChild(renderItem(e));
+  wrap.appendChild(groupEl);
   return wrap;
 }
 
@@ -908,8 +972,16 @@ async function loadBrowne(day) {
     labelEl.className = "source-label";
     labelEl.textContent = src.label;
     el.appendChild(labelEl);
+    // Pick the renderer that matches how the dining team organises this source:
+    //   - Cooking 101 Dinner: a single short list of dishes, just render flat.
+    //   - Sat/Sun brunch: source's own Entrees / Sides / Specials sections.
+    //   - Weekday Comfort Equation: Browne's three lunch stations
+    //     (Centerline / Plant-Based / 101 Special), tagged in extractAllEntries.
     const isWeekend = day === "Saturday" || day === "Sunday";
-    el.appendChild(isWeekend ? renderEntriesBySourceSection(entries) : renderGroupedEntries(entries));
+    const renderFn = src.filterDay ? renderEntriesFlat
+                  : isWeekend       ? renderEntriesBySourceSection
+                                    : renderEntriesByStation;
+    el.appendChild(renderFn(entries));
     anyRendered = true;
   }
   if (!anyRendered) {
