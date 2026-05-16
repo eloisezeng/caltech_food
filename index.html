@@ -467,35 +467,46 @@ const SECTION_TITLE_PATTERNS = [
 ];
 
 const SEP_RE = /^[-—–_=*\s]+$/;
+// Cells the dining team uses as inline dietary notes (e.g., "Vegan",
+// "Contains Pork", "Gluten Free, Vegan"). They get mis-extracted as headings
+// when they appear between an item's allergen line and the next item, so we
+// reset such headings back to the previous real section.
+const NOTE_HEADING_RE = /^(vegan|contains\s+|gluten\s+free|halal\b|kosher\b)/i;
 
 function cleanEntries(entries) {
   const out = [];
   let lastRealHeading = "";
   for (const e of entries) {
     const item = (e.item || "").trim();
-    const heading = (e.heading || "").trim();
+    let heading = (e.heading || "").trim();
     // Drop entries whose item is just a separator
     if (SEP_RE.test(item)) continue;
+    // Drop service-time sub-headings like "Brunch Special 3:30pm - 8pm"
+    // — they're metadata, not dishes.
+    if (/^Brunch\s+Special\s+\d{1,2}:?\d{0,2}\s*[ap]m/i.test(item)) continue;
     // Standalone diet label "Vegan" / "vegan" as the item: tag the previous
     // entry as vegan and drop this one.
     if (/^vegan$/i.test(item) && !e.allergens) {
       if (out.length) out[out.length - 1].vegan = true;
       continue;
     }
-    // Heading is just "Vegan" — leaked flag from the source. Drop the heading
-    // and mark the entry as vegan.
-    if (/^vegan$/i.test(heading)) {
-      e.heading = "";
-      e.vegan = true;
+    // Note-like cells mis-extracted as headings — restore the previous real
+    // section so the item ends up under the correct group, and mark vegan
+    // when applicable.
+    if (NOTE_HEADING_RE.test(heading)) {
+      if (/vegan/i.test(heading)) e.vegan = true;
+      e.heading = lastRealHeading;
+      heading = lastRealHeading;
     }
-    // Drop separator-only headings; carry the previous real heading forward.
+    // Separator-only headings: carry forward the previous real heading.
     if (SEP_RE.test(heading)) {
       e.heading = lastRealHeading;
+      heading = lastRealHeading;
     } else if (heading) {
       lastRealHeading = heading;
     }
-    // Drop known section titles that appear alone (no heading or allergens).
-    if (!e.heading && !e.allergens && SECTION_TITLE_PATTERNS.some(p => p.test(item))) continue;
+    // Drop known section-title strings (whether or not they got a heading).
+    if (SECTION_TITLE_PATTERNS.some(p => p.test(item))) continue;
     out.push(e);
   }
   return out;
@@ -529,6 +540,51 @@ function renderGroupedEntries(entries) {
     groupEl.appendChild(titleEl);
     for (const e of b.items) {
       groupEl.appendChild(renderItem(e));
+    }
+    wrap.appendChild(groupEl);
+  }
+  return wrap;
+}
+
+// Weekend rendering: preserve the source spreadsheet's own section structure
+// (Entrees / Sides / Brunch Specials) in that order, rather than re-grouping
+// by vegan / entree / pasta etc. — those categories don't fit a brunch menu.
+const WEEKEND_SECTIONS = [
+  { name: "Entrees",  match: /^entree/i },
+  { name: "Sides",    match: /^side/i },
+  { name: "Specials", match: /special|brunch/i },
+];
+const WEEKEND_OTHER = "Other";
+
+function renderEntriesBySourceSection(entries) {
+  const buckets = new Map();
+  const order = [];
+  const place = (name, entry) => {
+    if (!buckets.has(name)) { buckets.set(name, []); order.push(name); }
+    buckets.get(name).push(entry);
+  };
+  for (const e of entries) {
+    const h = e.heading || "";
+    const match = WEEKEND_SECTIONS.find(s => s.match.test(h));
+    place(match ? match.name : WEEKEND_OTHER, e);
+  }
+  // Force Entrees → Sides → Specials → Other order regardless of source order
+  const desired = ["Entrees", "Sides", "Specials", WEEKEND_OTHER];
+  const sorted = desired.filter(n => buckets.has(n)).concat(order.filter(n => !desired.includes(n)));
+  const wrap = document.createElement("div");
+  for (const name of sorted) {
+    const items = buckets.get(name);
+    if (!items || !items.length) continue;
+    const groupEl = document.createElement("div");
+    groupEl.className = "group";
+    const titleEl = document.createElement("div");
+    titleEl.className = "group-title";
+    titleEl.textContent = name;
+    groupEl.appendChild(titleEl);
+    for (const e of items) {
+      // Strip the redundant heading from each entry since it's already the
+      // section title above ("Entrees: Beef Machaca" → just "Beef Machaca").
+      groupEl.appendChild(renderItem({ ...e, heading: "" }));
     }
     wrap.appendChild(groupEl);
   }
@@ -852,7 +908,8 @@ async function loadBrowne(day) {
     labelEl.className = "source-label";
     labelEl.textContent = src.label;
     el.appendChild(labelEl);
-    el.appendChild(renderGroupedEntries(entries));
+    const isWeekend = day === "Saturday" || day === "Sunday";
+    el.appendChild(isWeekend ? renderEntriesBySourceSection(entries) : renderGroupedEntries(entries));
     anyRendered = true;
   }
   if (!anyRendered) {
