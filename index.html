@@ -33,14 +33,16 @@
     text-align: center;
   }
   h1 { margin: 0 0 8px; font-size: 28px; }
-  .week-toggle {
+  .week-toggle,
+  .view-toggle {
     display: inline-flex;
     border: 1px solid var(--border);
     border-radius: 8px;
     overflow: hidden;
     margin-bottom: 16px;
   }
-  .week-toggle button {
+  .week-toggle button,
+  .view-toggle button {
     background: var(--surface);
     color: var(--text);
     border: none;
@@ -49,10 +51,14 @@
     font-size: 14px;
     font-weight: 500;
   }
-  .week-toggle button.active {
+  .week-toggle button.active,
+  .view-toggle button.active {
     background: var(--accent);
     color: white;
   }
+  /* Mobile-only House/Browne toggle. On desktop both panels show side by side
+     so the toggle is hidden; on narrow screens we collapse to one at a time. */
+  .view-toggle { display: none; margin-top: 12px; }
   .day-buttons {
     display: flex;
     justify-content: center;
@@ -102,6 +108,11 @@
   main.solo { grid-template-columns: minmax(0, 720px); justify-content: center; }
   @media (max-width: 768px) {
     main { grid-template-columns: 1fr; }
+    /* On mobile, the toggle is visible AND only one card shows at a time
+       (controlled by .show-house / .show-browne on <main>). */
+    .view-toggle { display: inline-flex; }
+    main.show-house  #browne-card { display: none; }
+    main.show-browne #house-card  { display: none; }
   }
   .menu-card {
     background: var(--surface);
@@ -235,9 +246,13 @@
     <button data-week="1">Next Week</button>
   </div>
   <div class="day-buttons" id="day-buttons"></div>
+  <div class="view-toggle" id="view-toggle">
+    <button data-view="house"  class="active">House</button>
+    <button data-view="browne">Browne</button>
+  </div>
 </header>
 
-<main>
+<main id="menus">
   <div class="menu-card" id="house-card">
     <h2>House Dinner Menu</h2>
     <div class="source-link">
@@ -246,7 +261,7 @@
     <div id="house-menu"><div class="loading">Loading…</div></div>
   </div>
 
-  <div class="menu-card">
+  <div class="menu-card" id="browne-card">
     <h2>Browne Menu</h2>
     <div class="source-link">
       Source: <a href="https://diningcaltech.info/browne-dining-specials" target="_blank" rel="noopener">diningcaltech.info</a>
@@ -615,6 +630,13 @@ function renderEntriesBySourceSection(entries) {
 // stations as the dining team organizes them in Canva — Centerline,
 // Plant-Based, 101 Special — using the station tag set by extractAllEntries.
 const WEEKDAY_STATION_ORDER = ["Centerline", "Plant-Based", "101 Special"];
+// Headings whose information is fully captured by the station title above —
+// strip them on render so we don't show "101 Special: Pasta Bar" under a
+// "101 Special" section title.
+const STATION_REDUNDANT_HEADING = {
+  "101 Special":  /^101\s+special\b/i,
+  "Plant-Based":  /^plant\s*based\s+special\b/i,
+};
 
 function renderEntriesByStation(entries) {
   const buckets = {};
@@ -636,8 +658,12 @@ function renderEntriesByStation(entries) {
     titleEl.className = "group-title";
     titleEl.textContent = name;
     groupEl.appendChild(titleEl);
+    const redundant = STATION_REDUNDANT_HEADING[name];
     for (const e of items) {
-      groupEl.appendChild(renderItem(e));
+      const stripped = redundant && redundant.test(e.heading || "")
+        ? { ...e, heading: "" }
+        : e;
+      groupEl.appendChild(renderItem(stripped));
     }
     wrap.appendChild(groupEl);
   }
@@ -1024,9 +1050,22 @@ function selectDay(day) {
   const isWeekend = day === "Saturday" || day === "Sunday";
   const houseCard = document.getElementById("house-card");
   if (houseCard) houseCard.style.display = isWeekend ? "none" : "";
-  document.querySelector("main").classList.toggle("solo", isWeekend);
+  const mainEl = document.querySelector("main");
+  mainEl.classList.toggle("solo", isWeekend);
+  // Mobile view toggle: hidden on weekends (only Browne is shown anyway).
+  const toggle = document.getElementById("view-toggle");
+  if (toggle) toggle.style.display = isWeekend ? "none" : "";
   if (!isWeekend) loadHouse(day);
   loadBrowne(day);
+}
+
+function selectView(view) {
+  const mainEl = document.querySelector("main");
+  mainEl.classList.toggle("show-house",  view === "house");
+  mainEl.classList.toggle("show-browne", view === "browne");
+  for (const btn of document.querySelectorAll("#view-toggle button")) {
+    btn.classList.toggle("active", btn.dataset.view === view);
+  }
 }
 
 function selectWeek(week) {
@@ -1138,6 +1177,12 @@ async function init() {
   for (const btn of document.querySelectorAll("#week-toggle button")) {
     btn.addEventListener("click", () => selectWeek(Number(btn.dataset.week)));
   }
+  for (const btn of document.querySelectorAll("#view-toggle button")) {
+    btn.addEventListener("click", () => selectView(btn.dataset.view));
+  }
+  // Mobile default: show the House card first; selectDay will hide the toggle
+  // entirely on weekends since only Browne is available then.
+  selectView("house");
   await configReady;
   currentDay = today;
   selectDay(today);
