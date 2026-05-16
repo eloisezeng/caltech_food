@@ -13,7 +13,7 @@
     --accent: #ff6f00;
     --accent-hover: #e65100;
     --border: #e0e0e0;
-    --section: #fff8e1;
+    --section: #ffe0b2;
     --allergen: #b71c1c;
     --source: #5d4037;
     --source-bg: #efebe9;
@@ -658,12 +658,12 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "7210715094",
   appId: "1:7210715094:web:054935e6aca140c6cb0677",
 };
-// Optional: paste a domain-restricted Gemini API key to enable the
-// "Regenerate summary now" button. Falls back to whatever the GitHub Action
-// last wrote to data/summary.json if empty. Lock the key in Google Cloud
-// console to https://eloisezeng.github.io/* and "Generative Language API"
-// only — otherwise anyone visiting the site could use it for anything.
-const GEMINI_BROWSER_KEY = "AIzaSyCWtRD6pR2Bqgil-GfW_oJ_F6lIorA9SqI"; // e.g. "AIzaSy..."
+// DO NOT paste a Gemini API key here. Any key committed to a public repo is
+// auto-revoked by Google's secret scanner within minutes (we learned this the
+// hard way — see the 403 "leaked" error). The "Regenerate now" button only
+// works if you set up a serverless proxy (Cloudflare Workers / Vercel) and
+// route the call through it. Leaving this empty disables the button cleanly.
+const GEMINI_BROWSER_KEY = "";
 
 // Image attachments on comments are disabled by default because Firebase
 // Storage requires the Blaze (pay-as-you-go) plan to enable. If you upgrade
@@ -774,6 +774,29 @@ async function fetchCommentsFor(item) {
 // "House food: ★ 4.2 (12)" at the top of each menu card. Returns
 // { avg: number|null, count: number } so callers can show "No ratings yet"
 // when nothing's been posted.
+// Returns the current user's existing rating-bearing comment for an item,
+// or undefined if they haven't rated it. Used to enforce one-rating-per-user.
+async function findUsersRatingFor(item) {
+  const fb = await getFirebase();
+  if (!fb) return undefined;
+  const user = await AUTH_READY;
+  if (!user) return undefined;
+  const { collection, query, where, getDocs, limit } = fb.fs;
+  // Equality on (item, authorId) only — no composite index needed.
+  const q = query(
+    collection(fb.db, "comments"),
+    where("item", "==", item),
+    where("authorId", "==", user.uid),
+    limit(20),
+  );
+  const snap = await getDocs(q);
+  for (const d of snap.docs) {
+    const data = d.data();
+    if (typeof data.rating === "number") return { id: d.id, ...data };
+  }
+  return undefined;
+}
+
 async function fetchAverageRating(itemKeys) {
   const fb = await getFirebase();
   if (!fb) return { avg: null, count: 0 };
@@ -798,6 +821,14 @@ async function postComment({ item, rating, text, imageUrl }) {
   if (!fb) throw new Error("Comments aren't configured for this site yet.");
   const user = await AUTH_READY;
   if (!user) throw new Error("Couldn't sign in anonymously — try refreshing.");
+  // One rating per user per item — they can still post text-only comments,
+  // and they can edit the existing rating instead.
+  if (rating) {
+    const existing = await findUsersRatingFor(item);
+    if (existing) {
+      throw new Error("You've already rated this. Edit your previous comment to change your rating.");
+    }
+  }
   const { collection, addDoc, serverTimestamp } = fb.fs;
   const doc = {
     item: String(item).slice(0, 200),
@@ -821,6 +852,21 @@ async function updateComment(id, { rating, text, imageUrl }) {
   if (!fb) throw new Error("Not configured.");
   const user = await AUTH_READY;
   if (!user) throw new Error("Not signed in.");
+  // If they're adding a rating to a previously text-only comment, make sure
+  // they don't already have a different rating-bearing comment on this item.
+  if (rating) {
+    const itemSnap = await (async () => {
+      const { doc, getDoc } = fb.fs;
+      return getDoc(doc(fb.db, "comments", id));
+    })();
+    const item = itemSnap.data()?.item;
+    if (item) {
+      const existing = await findUsersRatingFor(item);
+      if (existing && existing.id !== id) {
+        throw new Error("You've already rated this in another comment. Edit that one instead.");
+      }
+    }
+  }
   const { doc, updateDoc, deleteField, serverTimestamp } = fb.fs;
   const patch = {
     username: getUsername(),
@@ -1400,8 +1446,12 @@ async function refreshComments(item, container, btn) {
   let comments = [];
   try { comments = await fetchCommentsFor(item); }
   catch (e) { container.innerHTML = '<div class="form-msg error">Could not load comments: ' + e.message + '</div>'; return; }
+  // Identify the current user's existing rating-comment for this item so
+  // the form can hide the star widget and steer them to Edit instead.
+  const user = await getCurrentUser();
+  const userRating = user ? comments.find(c => c.authorId === user.uid && typeof c.rating === "number") : undefined;
   container.innerHTML = "";
-  container.appendChild(buildCommentForm({ item, container, btn }));
+  container.appendChild(buildCommentForm({ item, container, btn, userRating }));
   const listEl = document.createElement("div");
   listEl.className = "comment-list";
   await renderCommentsInto(listEl, comments, { item, container, btn });
@@ -1421,11 +1471,14 @@ function refreshCardHeadForItem(itemKey) {
 
 // Generic comment-form builder. `existing` (optional) puts the form into edit
 // mode: pre-fills the fields and updates that doc on submit instead of creating
-// a new one.
-function buildCommentForm({ item, container, btn, existing, onDone }) {
+// a new one. `userRating` (optional) is the user's already-posted rating
+// comment for this item — when set we hide the star widget so they can't post
+// a second rating (they can still post text-only comments, and edit existing).
+function buildCommentForm({ item, container, btn, existing, onDone, userRating }) {
   const form = document.createElement("div");
   form.className = "comment-form";
-  // Star rating
+  // Star rating — only shown when (a) editing the rated comment itself, or
+  // (b) the user hasn't yet rated this item. Text-only adds always allowed.
   const stars = document.createElement("div");
   stars.className = "star-row";
   stars.setAttribute("role", "radiogroup");
@@ -1439,7 +1492,21 @@ function buildCommentForm({ item, container, btn, existing, onDone }) {
     s.addEventListener("click", () => { stars.dataset.rating = String(i); });
     stars.appendChild(s);
   }
-  form.appendChild(stars);
+  const hideStars = userRating && !existing;
+  if (!hideStars) form.appendChild(stars);
+  else {
+    const note = document.createElement("div");
+    note.className = "form-msg";
+    note.innerHTML = `You rated this ${"★".repeat(userRating.rating)}${"☆".repeat(5 - userRating.rating)}. ` +
+                     `<a href="#" data-edit-mine="1">Edit your rating</a> instead.`;
+    note.querySelector("[data-edit-mine]").addEventListener("click", e => {
+      e.preventDefault();
+      // Scroll to the user's own comment and trigger Edit on it.
+      const myEl = container.querySelector(".comment .comment-actions button");
+      if (myEl) myEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    form.appendChild(note);
+  }
   // Textarea
   const ta = document.createElement("textarea");
   ta.placeholder = existing
@@ -1892,7 +1959,7 @@ function setupTodayCommentsButton(kind, day) {
 }
 
 // Fetch average ratings for both menus (overall + currently-selected day's
-// day-level target) and update the footer rating values.
+// day-level target) and update the footer rating values + bar colors.
 async function refreshFooterRatings() {
   if (!firebaseEnabled() || !currentDay) return;
   const day = currentDay;
@@ -1903,14 +1970,30 @@ async function refreshFooterRatings() {
   for (const [kind, keys] of Object.entries(targets)) {
     const el = document.getElementById(`${kind}-avg`);
     if (!el) continue;
+    const bar = el.closest(".rating-item");
     try {
       const { avg, count } = await fetchAverageRating(keys);
       el.textContent = count ? `★ ${avg.toFixed(1)} (${count})` : "No ratings yet";
       el.title = `Average across "overall" + today's day-level ratings for ${kind === "house" ? "House" : "Browne"}`;
+      if (bar) bar.style.background = ratingBarColor(avg);
     } catch {
       el.textContent = "—";
+      if (bar) bar.style.background = "";
     }
   }
+}
+
+// Interpolate the rating bar's background from very pale at 1 star to a
+// solid accent orange at 5 stars. `avg` may be null when nothing's rated.
+function ratingBarColor(avg) {
+  if (avg == null) return "";
+  const ratio = Math.max(0, Math.min(1, (avg - 1) / 4));
+  // 1 star → rgb(255, 236, 224) (very pale peach)
+  // 5 stars → rgb(255, 111,   0) (var(--accent), solid orange)
+  const r = 255;
+  const g = Math.round(236 - ratio * (236 - 111));
+  const b = Math.round(224 - ratio * (224 -   0));
+  return `rgb(${r}, ${g}, ${b})`;
 }
 
 async function loadBrowne(day) {
@@ -2247,11 +2330,14 @@ async function openMenuComment(itemKey, title) {
   openModal("menu-comment-modal");
   try {
     const comments = await fetchCommentsFor(itemKey);
+    const user = await getCurrentUser();
+    const userRating = user ? comments.find(c => c.authorId === user.uid && typeof c.rating === "number") : undefined;
     host.innerHTML = "";
     const ctx = { item: itemKey, container: host };
     host.appendChild(buildCommentForm({
       item: itemKey,
       container: host,
+      userRating,
       onDone: async () => {
         host.innerHTML = "";
         await openMenuComment(itemKey, title);
