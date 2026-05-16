@@ -208,6 +208,80 @@
   }
   .img-toggle:hover { border-color: var(--accent); }
   .img-toggle:hover img { opacity: 1; }
+  .comment-toggle {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 2px 6px;
+    line-height: 1;
+    flex-shrink: 0;
+    height: 22px;
+    font-size: 12px;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .comment-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .comment-toggle .count { font-weight: 600; }
+  .item-comments {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    max-width: 520px;
+  }
+  .star-row { display: inline-flex; gap: 2px; cursor: pointer; user-select: none; }
+  .star { font-size: 18px; color: #ddd; transition: color 0.1s; }
+  .star.lit { color: #ffb300; }
+  .star-row:hover .star { color: #ddd; }
+  .star-row .star.hover, .star-row .star.hover ~ .star { color: #ffb300; }
+  .star-row[data-rating="1"] .star:nth-child(1),
+  .star-row[data-rating="2"] .star:nth-child(-n+2),
+  .star-row[data-rating="3"] .star:nth-child(-n+3),
+  .star-row[data-rating="4"] .star:nth-child(-n+4),
+  .star-row[data-rating="5"] .star:nth-child(-n+5) { color: #ffb300; }
+  .comment-form textarea {
+    width: 100%;
+    min-height: 50px;
+    padding: 6px 8px;
+    margin-top: 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 13px;
+    box-sizing: border-box;
+    resize: vertical;
+  }
+  .comment-form button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .comment-form button:hover { background: var(--accent-hover); }
+  .comment-form button:disabled { opacity: 0.5; cursor: default; }
+  .comment-form .form-msg {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .comment-form .form-msg.error { color: var(--allergen); }
+  .comment-list { margin-top: 8px; }
+  .comment {
+    font-size: 13px;
+    border-top: 1px solid #eee;
+    padding: 6px 0;
+  }
+  .comment .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .comment .text { margin-top: 2px; white-space: pre-wrap; word-wrap: break-word; }
   .item-image {
     margin-top: 6px;
     max-width: 240px;
@@ -235,6 +309,96 @@
     font-style: italic;
   }
   .error { color: var(--allergen); }
+  /* Feature request + summary header links */
+  .header-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .header-actions button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 0;
+    text-decoration: underline;
+  }
+  .header-actions button:hover { color: var(--accent-hover); }
+  /* Modal for feature request + summary */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+  .modal h3 { margin: 0 0 12px; font-size: 18px; }
+  .modal .close {
+    float: right;
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 0;
+  }
+  .modal .close:hover { color: var(--text); }
+  .modal textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+    box-sizing: border-box;
+    resize: vertical;
+  }
+  .modal .actions {
+    margin-top: 12px;
+    text-align: right;
+  }
+  .modal .actions button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .modal .actions button:hover { background: var(--accent-hover); }
+  .modal .actions button:disabled { opacity: 0.5; cursor: default; }
+  .modal .summary-body {
+    white-space: pre-wrap;
+    line-height: 1.55;
+    font-size: 14px;
+  }
+  .modal .summary-meta {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
 </style>
 </head>
 <body>
@@ -250,7 +414,33 @@
     <button data-view="house"  class="active">House</button>
     <button data-view="browne">Browne</button>
   </div>
+  <div class="header-actions" id="header-actions"></div>
 </header>
+
+<div class="modal-backdrop" id="feature-modal">
+  <div class="modal">
+    <button class="close" data-close="feature-modal" aria-label="Close">×</button>
+    <h3>Suggest a feature</h3>
+    <p style="font-size: 13px; color: var(--muted); margin: 0 0 12px;">
+      Got an idea for this site? Send it here. The site maintainer reviews
+      requests and implements popular ones.
+    </p>
+    <textarea id="feature-text" placeholder="e.g., Add a dark mode toggle…"></textarea>
+    <div class="actions">
+      <span class="form-msg" id="feature-msg" style="color: var(--muted); font-size: 12px; margin-right: 12px;"></span>
+      <button type="button" id="feature-submit">Submit</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="summary-modal">
+  <div class="modal">
+    <button class="close" data-close="summary-modal" aria-label="Close">×</button>
+    <h3>This week's feedback</h3>
+    <div class="summary-meta" id="summary-meta"></div>
+    <div class="summary-body" id="summary-body">Loading…</div>
+  </div>
+</div>
 
 <main id="menus">
   <div class="menu-card" id="house-card">
@@ -294,6 +484,91 @@ let HOUSE_GIDS_NEXT = {
 // `data/images.json` (refreshed daily by the GitHub Action via DuckDuckGo image
 // search). Used as the first source in `lookupImage` before any live API calls.
 let IMAGE_CACHE = {};
+
+// ---------- Firebase (comments, ratings, feature requests) ----------
+// Paste your Firebase web-app config here. apiKey-starts-with "REPLACE_" means
+// comments are disabled and the comment UI is hidden. Setup steps are in the
+// README under "Comments and feedback".
+const FIREBASE_CONFIG = {
+  apiKey: "REPLACE_ME",
+  authDomain: "REPLACE_ME",
+  projectId: "REPLACE_ME",
+  storageBucket: "REPLACE_ME",
+  messagingSenderId: "REPLACE_ME",
+  appId: "REPLACE_ME",
+};
+function firebaseEnabled() {
+  return FIREBASE_CONFIG && typeof FIREBASE_CONFIG.apiKey === "string"
+      && !FIREBASE_CONFIG.apiKey.startsWith("REPLACE");
+}
+
+let FIREBASE = null; // { db, fs } once initialized
+async function getFirebase() {
+  if (FIREBASE) return FIREBASE;
+  if (!firebaseEnabled()) return null;
+  try {
+    const [appMod, fsMod] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"),
+    ]);
+    const app = appMod.initializeApp(FIREBASE_CONFIG);
+    const db = fsMod.getFirestore(app);
+    FIREBASE = { db, fs: fsMod };
+    return FIREBASE;
+  } catch (e) {
+    console.warn("Firebase init failed:", e);
+    return null;
+  }
+}
+
+function isoWeekKey(d) {
+  const t = new Date(d.valueOf());
+  t.setHours(0, 0, 0, 0);
+  t.setDate(t.getDate() + 3 - (t.getDay() + 6) % 7);
+  const w1 = new Date(t.getFullYear(), 0, 4);
+  const week = 1 + Math.round(((t - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
+  return `${t.getFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+
+async function fetchCommentsFor(item) {
+  const fb = await getFirebase();
+  if (!fb) return [];
+  const { collection, query, where, orderBy, limit, getDocs } = fb.fs;
+  const q = query(
+    collection(fb.db, "comments"),
+    where("item", "==", item),
+    orderBy("createdAt", "desc"),
+    limit(50),
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function postComment({ item, rating, text }) {
+  const fb = await getFirebase();
+  if (!fb) throw new Error("Comments aren't configured for this site yet.");
+  const { collection, addDoc, serverTimestamp } = fb.fs;
+  const doc = {
+    item: String(item).slice(0, 200),
+    week: isoWeekKey(new Date()),
+    createdAt: serverTimestamp(),
+  };
+  if (rating)            doc.rating = Math.max(1, Math.min(5, Number(rating)));
+  if (text && text.trim()) doc.text = String(text).slice(0, 2000);
+  await addDoc(collection(fb.db, "comments"), doc);
+}
+
+async function postFeatureRequest(text) {
+  const fb = await getFirebase();
+  if (!fb) throw new Error("Feature requests aren't configured for this site yet.");
+  const { collection, addDoc, serverTimestamp } = fb.fs;
+  await addDoc(collection(fb.db, "feature_requests"), {
+    text: String(text).slice(0, 5000),
+    status: "pending",
+    createdAt: serverTimestamp(),
+  });
+}
+// ---------- end Firebase ----------
 
 // The dining team's "Plant Based" weekday tab and the "101 Brunch" /
 // "Comfort Brunch" weekend tabs duplicate content that's already in the
@@ -719,9 +994,137 @@ function renderItem(entry) {
   imgContainer.style.display = "none";
   btn.addEventListener("click", () => toggleImage(entry.item, imgContainer, btn));
   row.appendChild(btn);
+  // Comment + rating button (only when Firebase is configured)
+  let commentContainer = null;
+  if (firebaseEnabled()) {
+    const cBtn = document.createElement("button");
+    cBtn.className = "comment-toggle";
+    cBtn.type = "button";
+    cBtn.title = "Leave a comment or rating";
+    cBtn.setAttribute("aria-label", "Comment on " + entry.item);
+    cBtn.appendChild(document.createTextNode("💬"));
+    const count = document.createElement("span");
+    count.className = "count";
+    cBtn.appendChild(count);
+    commentContainer = document.createElement("div");
+    commentContainer.className = "item-comments";
+    commentContainer.style.display = "none";
+    cBtn.addEventListener("click", () => toggleComments(entry.item, commentContainer, cBtn));
+    row.appendChild(cBtn);
+  }
   itemEl.appendChild(row);
   itemEl.appendChild(imgContainer);
+  if (commentContainer) itemEl.appendChild(commentContainer);
   return itemEl;
+}
+
+async function toggleComments(item, container, btn) {
+  if (container.dataset.loaded === "1") {
+    const showing = container.style.display !== "none";
+    container.style.display = showing ? "none" : "block";
+    return;
+  }
+  container.style.display = "block";
+  container.innerHTML = '<div class="form-msg">Loading…</div>';
+  let comments = [];
+  try { comments = await fetchCommentsFor(item); }
+  catch (e) { container.innerHTML = '<div class="form-msg error">Could not load comments: ' + e.message + '</div>'; return; }
+  container.innerHTML = "";
+  container.appendChild(buildCommentForm(item, container, btn));
+  const listEl = document.createElement("div");
+  listEl.className = "comment-list";
+  renderCommentsInto(listEl, comments);
+  container.appendChild(listEl);
+  updateCommentCount(btn, comments.length);
+  container.dataset.loaded = "1";
+}
+
+function buildCommentForm(item, container, btn) {
+  const form = document.createElement("div");
+  form.className = "comment-form";
+  // Star rating
+  const stars = document.createElement("div");
+  stars.className = "star-row";
+  stars.setAttribute("role", "radiogroup");
+  stars.setAttribute("aria-label", "Rating");
+  stars.dataset.rating = "";
+  for (let i = 1; i <= 5; i++) {
+    const s = document.createElement("span");
+    s.className = "star";
+    s.textContent = "★";
+    s.dataset.value = String(i);
+    s.addEventListener("click", () => { stars.dataset.rating = String(i); });
+    stars.appendChild(s);
+  }
+  form.appendChild(stars);
+  // Textarea
+  const ta = document.createElement("textarea");
+  ta.placeholder = "Optional comment about " + item + "…";
+  ta.maxLength = 2000;
+  form.appendChild(ta);
+  // Submit
+  const submit = document.createElement("button");
+  submit.type = "button";
+  submit.textContent = "Post";
+  const msg = document.createElement("div");
+  msg.className = "form-msg";
+  submit.addEventListener("click", async () => {
+    const rating = stars.dataset.rating ? Number(stars.dataset.rating) : null;
+    const text = ta.value.trim();
+    if (!rating && !text) { msg.textContent = "Pick a rating or write a comment first."; msg.classList.add("error"); return; }
+    submit.disabled = true; msg.classList.remove("error"); msg.textContent = "Posting…";
+    try {
+      await postComment({ item, rating, text });
+      stars.dataset.rating = ""; ta.value = "";
+      msg.textContent = "Thanks! Reloading…";
+      const fresh = await fetchCommentsFor(item);
+      const listEl = container.querySelector(".comment-list");
+      if (listEl) { listEl.innerHTML = ""; renderCommentsInto(listEl, fresh); }
+      updateCommentCount(btn, fresh.length);
+      msg.textContent = "Thanks for the feedback!";
+    } catch (e) {
+      msg.classList.add("error");
+      msg.textContent = "Couldn't post: " + e.message;
+    } finally {
+      submit.disabled = false;
+    }
+  });
+  form.appendChild(submit);
+  form.appendChild(msg);
+  return form;
+}
+
+function renderCommentsInto(listEl, comments) {
+  if (!comments.length) {
+    const empty = document.createElement("div");
+    empty.className = "form-msg";
+    empty.textContent = "No comments yet — be the first.";
+    listEl.appendChild(empty);
+    return;
+  }
+  for (const c of comments) {
+    const el = document.createElement("div");
+    el.className = "comment";
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const parts = [];
+    if (c.rating) parts.push("★".repeat(c.rating) + "☆".repeat(5 - c.rating));
+    if (c.createdAt && c.createdAt.toDate) parts.push(c.createdAt.toDate().toLocaleDateString());
+    meta.textContent = parts.join("  ·  ");
+    el.appendChild(meta);
+    if (c.text) {
+      const t = document.createElement("div");
+      t.className = "text";
+      t.textContent = c.text;
+      el.appendChild(t);
+    }
+    listEl.appendChild(el);
+  }
+}
+
+function updateCommentCount(btn, n) {
+  const count = btn.querySelector(".count");
+  if (count) count.textContent = n ? String(n) : "";
 }
 
 async function toggleImage(query, container, btn) {
@@ -1154,6 +1557,85 @@ async function loadImageCache() {
   } catch (e) { /* ignore */ }
 }
 
+// ---------- Header action buttons (feature request + summary modal) ----------
+
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+function wireHeaderActions() {
+  const host = document.getElementById("header-actions");
+  if (!host) return;
+  host.innerHTML = "";
+  // Weekly summary toggle is always present — page falls back to "summary not
+  // generated yet" if data/summary.json is missing.
+  const sumBtn = document.createElement("button");
+  sumBtn.type = "button";
+  sumBtn.textContent = "📋 Weekly feedback summary";
+  sumBtn.addEventListener("click", openSummary);
+  host.appendChild(sumBtn);
+  // Feature request button is gated on Firebase being configured.
+  if (firebaseEnabled()) {
+    const frBtn = document.createElement("button");
+    frBtn.type = "button";
+    frBtn.textContent = "💡 Suggest a feature";
+    frBtn.addEventListener("click", () => {
+      document.getElementById("feature-text").value = "";
+      document.getElementById("feature-msg").textContent = "";
+      openModal("feature-modal");
+    });
+    host.appendChild(frBtn);
+  }
+  // Modal close buttons + backdrop click
+  for (const btn of document.querySelectorAll("[data-close]")) {
+    btn.addEventListener("click", () => closeModal(btn.dataset.close));
+  }
+  for (const m of document.querySelectorAll(".modal-backdrop")) {
+    m.addEventListener("click", e => { if (e.target === m) closeModal(m.id); });
+  }
+  // Feature request submit
+  const fSubmit = document.getElementById("feature-submit");
+  if (fSubmit) {
+    fSubmit.addEventListener("click", async () => {
+      const ta = document.getElementById("feature-text");
+      const msg = document.getElementById("feature-msg");
+      const text = (ta.value || "").trim();
+      if (!text) { msg.textContent = "Type something first."; return; }
+      fSubmit.disabled = true; msg.textContent = "Sending…";
+      try {
+        await postFeatureRequest(text);
+        msg.textContent = "Thanks! Closing…";
+        setTimeout(() => closeModal("feature-modal"), 800);
+      } catch (e) {
+        msg.textContent = "Couldn't send: " + e.message;
+      } finally {
+        fSubmit.disabled = false;
+      }
+    });
+  }
+}
+
+async function openSummary() {
+  const body = document.getElementById("summary-body");
+  const meta = document.getElementById("summary-meta");
+  openModal("summary-modal");
+  body.textContent = "Loading…";
+  meta.textContent = "";
+  try {
+    const r = await fetch("data/summary.json", { cache: "no-cache" });
+    if (!r.ok) throw new Error("not generated yet");
+    const j = await r.json();
+    body.textContent = j.summary || "(no summary text)";
+    const when = j.generatedAt ? new Date(j.generatedAt) : null;
+    const counts = [];
+    if (j.commentCount != null) counts.push(`${j.commentCount} comments`);
+    if (j.requestCount != null) counts.push(`${j.requestCount} feature requests`);
+    meta.textContent = (when ? `Generated ${when.toLocaleString()}  ·  ` : "") + counts.join("  ·  ");
+  } catch (e) {
+    body.textContent = "No summary yet — the daily refresh action generates it once feedback is collected.";
+    meta.textContent = "";
+  }
+}
+
 async function init() {
   // Kick off config + image cache loads in parallel with day-button DOM build.
   const configReady = Promise.all([loadConfig(), loadImageCache()]);
@@ -1183,6 +1665,7 @@ async function init() {
   // Mobile default: show the House card first; selectDay will hide the toggle
   // entirely on weekends since only Browne is available then.
   selectView("house");
+  wireHeaderActions();
   await configReady;
   currentDay = today;
   selectDay(today);

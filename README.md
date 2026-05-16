@@ -71,21 +71,86 @@ node scripts/refresh.mjs
 - **Next-week Browne** is only the Comfort Equation Mon-Fri (Caltech doesn't
   publish PB / 101 / weekend menus a week in advance).
 
+## Comments and feedback (Firebase + Gemini)
+
+Each menu item has a 💬 button that lets students post a star rating + comment
+to a public Firestore collection. There's also a "Suggest a feature" button in
+the header, and a "Weekly feedback summary" button that displays an
+AI-generated digest aimed at Caltech Dining.
+
+These features are **disabled by default** — `FIREBASE_CONFIG` in `index.html`
+starts with placeholder values, and the comment buttons are hidden until
+the placeholders are replaced. To turn them on:
+
+### 1. Set up Firebase
+
+1. Go to <https://console.firebase.google.com>, create a project (any name).
+2. In the project, click **Build → Firestore Database → Create database**.
+   Pick "production mode" and your nearest region.
+3. **Project settings → General → Your apps → Web** (the `</>` icon). Register
+   the app. Copy the `firebaseConfig` object shown.
+4. Open `index.html` and paste those six values into `FIREBASE_CONFIG`,
+   replacing the `"REPLACE_ME"` placeholders.
+5. Deploy the rules in `firestore.rules`:
+   ```sh
+   npm i -g firebase-tools
+   firebase login
+   firebase use <your-project-id>
+   firebase deploy --only firestore:rules
+   ```
+   (Or paste the rules into the Firestore Rules tab in the console.)
+
+That's all the browser needs — comments and feature requests now work. The
+"weekly summary" button still says "no summary yet" until step 2.
+
+### 2. Set up the daily summary
+
+1. In Firebase console: **Project settings → Service accounts → Generate new
+   private key**. Save the downloaded JSON.
+2. In the GitHub repo: **Settings → Secrets and variables → Actions → New
+   repository secret**:
+   - Name: `FIREBASE_SERVICE_ACCOUNT`
+   - Value: the full JSON file contents (paste it all)
+3. Get a Gemini API key at <https://aistudio.google.com/apikey>. Add another
+   secret:
+   - Name: `GEMINI_API_KEY`
+   - Value: your key
+4. From the **Actions** tab, run the "Refresh menu data" workflow once. It
+   will write `data/summary.json` and commit it back to the repo.
+
+After that, every nightly run will refresh the summary.
+
+### Privacy / safety notes
+
+- Anyone can post anonymously. The Firestore Rules in `firestore.rules` cap
+  field sizes and forbid edits/deletes, so the worst case is unwanted text
+  in the database — you can delete documents from the Firebase console.
+- If you ever want to take comments offline temporarily, set
+  `FIREBASE_CONFIG.apiKey` back to `"REPLACE_ME"` and redeploy. The buttons
+  vanish; existing comments stay in Firestore.
+- For "AI implements a feature" — the chat box is **submit-only**. Requests
+  go to the `feature_requests` Firestore collection and surface in the
+  weekly summary, so you can review and decide which to implement.
+
 ## File layout
 
 ```
 .
 ├── index.html                  # the page (HTML + CSS + JS, one file)
+├── image.png                   # icon used by the per-item image button
+├── firestore.rules             # public-write rules for comments/feature_requests
 ├── data/
 │   ├── sheets.json             # spreadsheet IDs + per-day gids (Action-managed)
-│   └── images.json             # cached Google-quality image URLs (Action-managed)
+│   ├── images.json             # cached Google-quality image URLs (Action-managed)
+│   └── summary.json            # AI-generated weekly feedback summary (Action-managed)
 ├── scripts/
-│   └── refresh.mjs             # Node script the Action runs each night
+│   ├── refresh.mjs             # Node script the Action runs each night
+│   └── summary.mjs             # Generates summary from Firestore + Gemini
 ├── .github/workflows/
 │   ├── refresh.yml             # nightly cron + manual trigger
 │   └── pages.yml               # deploy index.html + data to GitHub Pages
 ├── README.md
-└── TO-DO.md
+└── TO-DO-*.md                  # rolling list of asks
 ```
 
 ## How it works

@@ -23,11 +23,22 @@ jobs:
         with:
           node-version: "20"
       - run: node scripts/refresh.mjs
+      - name: Install firebase-admin for summary script
+        run: npm install firebase-admin --no-save --silent
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT != '' && env.GEMINI_API_KEY != '' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - name: Generate weekly feedback summary
+        run: node scripts/summary.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Commit updated data
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/sheets.json data/images.json
+          git add data/sheets.json data/images.json data/summary.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes."
           else
