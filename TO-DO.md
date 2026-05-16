@@ -1,2 +1,0 @@
-- You don't need to say the menu data was refreshed today
-- Use image.png for the image icon

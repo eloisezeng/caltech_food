@@ -99,6 +99,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 24px;
   }
+  main.solo { grid-template-columns: minmax(0, 720px); justify-content: center; }
   @media (max-width: 768px) {
     main { grid-template-columns: 1fr; }
   }
@@ -237,7 +238,7 @@
 </header>
 
 <main>
-  <div class="menu-card">
+  <div class="menu-card" id="house-card">
     <h2>House Dinner Menu</h2>
     <div class="source-link">
       Source: <a href="https://caltechdining.my.canva.site/meal-plan-menus" target="_blank" rel="noopener">caltechdining.my.canva.site</a>
@@ -884,7 +885,13 @@ function updateDayButtons() {
 function selectDay(day) {
   currentDay = day;
   updateDayButtons();
-  loadHouse(day);
+  // House dinner isn't served on weekends, so hide that whole card and let
+  // the Browne card take the full width on Sat/Sun.
+  const isWeekend = day === "Saturday" || day === "Sunday";
+  const houseCard = document.getElementById("house-card");
+  if (houseCard) houseCard.style.display = isWeekend ? "none" : "";
+  document.querySelector("main").classList.toggle("solo", isWeekend);
+  if (!isWeekend) loadHouse(day);
   loadBrowne(day);
 }
 
