@@ -129,8 +129,10 @@ After that, every nightly run will refresh the summary.
   `FIREBASE_CONFIG.apiKey` back to `"REPLACE_ME"` and redeploy. The buttons
   vanish; existing comments stay in Firestore.
 - For "AI implements a feature" — the chat box is **submit-only**. Requests
-  go to the `feature_requests` Firestore collection and surface in the
-  weekly summary, so you can review and decide which to implement.
+  go to the `feature_requests` Firestore collection, are mirrored to GitHub
+  Issues by the `sync-requests.yml` workflow (every 15 min), and also
+  surface in the weekly summary. To approve a request, close the GitHub
+  issue as completed; to decline, close as not planned.
 
 ## File layout
 
@@ -144,10 +146,12 @@ After that, every nightly run will refresh the summary.
 │   ├── images.json             # cached Google-quality image URLs (Action-managed)
 │   └── summary.json            # AI-generated weekly feedback summary (Action-managed)
 ├── scripts/
-│   ├── refresh.mjs             # Node script the Action runs each night
-│   └── summary.mjs             # Generates summary from Firestore + Gemini
+│   ├── refresh.mjs                  # nightly menu data + image cache refresh
+│   ├── summary.mjs                  # weekly feedback summary via Gemini
+│   └── sync-feature-requests.mjs    # turns pending Firestore requests into issues
 ├── .github/workflows/
 │   ├── refresh.yml             # nightly cron + manual trigger
+│   ├── sync-requests.yml       # every 15 min, mirror requests → GitHub issues
 │   └── pages.yml               # deploy index.html + data to GitHub Pages
 ├── README.md
 └── TO-DO-*.md                  # rolling list of asks

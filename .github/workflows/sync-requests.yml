@@ -1,0 +1,31 @@
+name: Sync feature requests to issues
+
+on:
+  schedule:
+    # Every 15 minutes. Adjust if you want faster pickup or fewer Action runs.
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: sync-feature-requests
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install firebase-admin
+        run: npm install firebase-admin --no-save --silent
+      - name: Open issues for new feature requests
+        run: node scripts/sync-feature-requests.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
