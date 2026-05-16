@@ -543,10 +543,6 @@
     <h3>This week's feedback</h3>
     <div class="summary-meta" id="summary-meta"></div>
     <div class="summary-body" id="summary-body">Loading…</div>
-    <div class="actions" style="margin-top: 16px; text-align: left;">
-      <button type="button" id="summary-refresh" style="background: var(--surface); color: var(--accent); border: 1px solid var(--accent);">↻ Regenerate now</button>
-      <span id="summary-refresh-msg" style="font-size: 12px; color: var(--muted); margin-left: 8px;"></span>
-    </div>
   </div>
 </div>
 
@@ -658,13 +654,6 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "7210715094",
   appId: "1:7210715094:web:054935e6aca140c6cb0677",
 };
-// DO NOT paste a Gemini API key here. Any key committed to a public repo is
-// auto-revoked by Google's secret scanner within minutes (we learned this the
-// hard way — see the 403 "leaked" error). The "Regenerate now" button only
-// works if you set up a serverless proxy (Cloudflare Workers / Vercel) and
-// route the call through it. Leaving this empty disables the button cleanly.
-const GEMINI_BROWSER_KEY = "";
-
 // Image attachments on comments are disabled by default because Firebase
 // Storage requires the Blaze (pay-as-you-go) plan to enable. If you upgrade
 // later, set this to true and publish storage.rules.
@@ -927,59 +916,6 @@ async function postFeatureRequest(text) {
   });
 }
 
-// Fetch this week's comments + feature requests and ask Gemini for a summary
-// directly from the browser. Used by the "Regenerate now" button.
-async function regenerateSummaryFromBrowser() {
-  if (!GEMINI_BROWSER_KEY) throw new Error("GEMINI_BROWSER_KEY not configured — open index.html to set it.");
-  const fb = await getFirebase();
-  if (!fb) throw new Error("Firebase not configured.");
-  const { collection, query, where, orderBy, getDocs, Timestamp } = fb.fs;
-  const since = Timestamp.fromMillis(Date.now() - 7 * 86400000);
-  const [c, r] = await Promise.all([
-    getDocs(query(collection(fb.db, "comments"),         where("createdAt", ">=", since), orderBy("createdAt", "desc"))),
-    getDocs(query(collection(fb.db, "feature_requests"), where("createdAt", ">=", since), orderBy("createdAt", "desc"))),
-  ]);
-  const commentLines = c.docs.map(d => {
-    const x = d.data(); const p = [];
-    if (x.item) p.push(`[${x.item}]`);
-    if (x.rating) p.push(`${x.rating}/5`);
-    if (x.text) p.push(x.text);
-    return p.join(" ");
-  }).filter(Boolean);
-  const requestLines = r.docs.map(d => (d.data().text || "").trim()).filter(Boolean);
-  const prompt = [
-    "You are summarizing student feedback for Caltech Dining Services.",
-    "Be concrete and brief: 5–10 bullets MAX. Group complaints by dish or theme,",
-    "highlight any safety/allergen concerns first, and surface the most-asked-for",
-    "feature requests. Do not invent foods or themes that aren't in the data.",
-    "",
-    "=== Comments and ratings (this week) ===",
-    commentLines.length ? commentLines.join("\n") : "(none)",
-    "",
-    "=== Feature requests for the website (this week) ===",
-    requestLines.length ? requestLines.join("\n") : "(none)",
-  ].join("\n");
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_BROWSER_KEY}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.4, maxOutputTokens: 1024 },
-    }),
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Gemini HTTP ${res.status}: ${body.slice(0, 200)}`);
-  }
-  const json = await res.json();
-  return {
-    generatedAt: new Date().toISOString(),
-    commentCount: c.docs.length,
-    requestCount: r.docs.length,
-    summary: (json.candidates?.[0]?.content?.parts?.[0]?.text || "").trim() || "Empty response.",
-  };
-}
 // ---------- end Firebase ----------
 
 // The dining team's "Plant Based" weekday tab and the "101 Brunch" /
@@ -2291,27 +2227,6 @@ function wireFooterActions() {
       setUsername(v);
       updateUsernameButton();
       closeModal("username-modal");
-    });
-  }
-  // Summary regenerate
-  const sRefresh = document.getElementById("summary-refresh");
-  if (sRefresh) {
-    sRefresh.addEventListener("click", async () => {
-      const msg = document.getElementById("summary-refresh-msg");
-      const body = document.getElementById("summary-body");
-      const meta = document.getElementById("summary-meta");
-      sRefresh.disabled = true;
-      msg.textContent = "Generating… (~5–10 s)";
-      try {
-        const j = await regenerateSummaryFromBrowser();
-        body.textContent = j.summary;
-        meta.textContent = `Generated ${new Date(j.generatedAt).toLocaleString()}  ·  ${j.commentCount} comments  ·  ${j.requestCount} feature requests  ·  live`;
-        msg.textContent = "Refreshed.";
-      } catch (e) {
-        msg.textContent = "Couldn't regenerate: " + e.message;
-      } finally {
-        sRefresh.disabled = false;
-      }
     });
   }
 }
