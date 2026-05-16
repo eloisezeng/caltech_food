@@ -135,6 +135,46 @@
     color: var(--muted);
     text-decoration: underline;
   }
+  .menu-card .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .menu-card .card-head h2 { margin: 0; }
+  .menu-card .head-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .menu-card .avg-rating {
+    font-size: 13px;
+    color: var(--source);
+    background: var(--source-bg);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .menu-card .avg-rating.empty {
+    color: var(--muted);
+    background: transparent;
+    border: 1px dashed var(--border);
+    font-weight: 400;
+  }
+  .menu-card .today-comments {
+    background: var(--surface);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .menu-card .today-comments:hover { background: var(--accent); color: white; }
   .source-label {
     background: var(--source-bg);
     color: var(--source);
@@ -522,7 +562,13 @@
 
 <main id="menus">
   <div class="menu-card" id="house-card">
-    <h2>House Dinner Menu</h2>
+    <div class="card-head">
+      <h2>House Dinner Menu</h2>
+      <div class="head-meta">
+        <span class="avg-rating empty" id="house-avg" hidden></span>
+        <button type="button" class="today-comments" id="house-today" hidden>💬 Today's comments</button>
+      </div>
+    </div>
     <div class="source-link">
       Source: <a href="https://caltechdining.my.canva.site/meal-plan-menus" target="_blank" rel="noopener">caltechdining.my.canva.site</a>
     </div>
@@ -530,7 +576,13 @@
   </div>
 
   <div class="menu-card" id="browne-card">
-    <h2>Browne Menu</h2>
+    <div class="card-head">
+      <h2>Browne Menu</h2>
+      <div class="head-meta">
+        <span class="avg-rating empty" id="browne-avg" hidden></span>
+        <button type="button" class="today-comments" id="browne-today" hidden>💬 Today's comments</button>
+      </div>
+    </div>
     <div class="source-link">
       Source: <a href="https://diningcaltech.info/browne-dining-specials" target="_blank" rel="noopener">diningcaltech.info</a>
     </div>
@@ -580,7 +632,7 @@ const FIREBASE_CONFIG = {
 // last wrote to data/summary.json if empty. Lock the key in Google Cloud
 // console to https://eloisezeng.github.io/* and "Generative Language API"
 // only — otherwise anyone visiting the site could use it for anything.
-const GEMINI_BROWSER_KEY = ""; // e.g. "AIzaSy..."
+const GEMINI_BROWSER_KEY = "AIzaSyCWtRD6pR2Bqgil-GfW_oJ_F6lIorA9SqI"; // e.g. "AIzaSy..."
 
 // Image attachments on comments are disabled by default because Firebase
 // Storage requires the Blaze (pay-as-you-go) plan to enable. If you upgrade
@@ -670,6 +722,26 @@ async function fetchCommentsFor(item) {
   );
   const snap = await getDocs(q);
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+// Average rating across one or more comment-target keys. Used to display
+// "House food: ★ 4.2 (12)" at the top of each menu card. Returns
+// { avg: number|null, count: number } so callers can show "No ratings yet"
+// when nothing's been posted.
+async function fetchAverageRating(itemKeys) {
+  const fb = await getFirebase();
+  if (!fb) return { avg: null, count: 0 };
+  const { collection, query, where, getDocs } = fb.fs;
+  const keys = Array.isArray(itemKeys) ? itemKeys : [itemKeys];
+  let sum = 0, count = 0;
+  // Firestore "in" supports up to 30 values per query — easily enough here.
+  const q = query(collection(fb.db, "comments"), where("item", "in", keys));
+  const snap = await getDocs(q);
+  for (const d of snap.docs) {
+    const r = d.data().rating;
+    if (typeof r === "number" && r >= 1 && r <= 5) { sum += r; count++; }
+  }
+  return { avg: count ? sum / count : null, count };
 }
 
 async function postComment({ item, rating, text, imageUrl }) {
@@ -1280,6 +1352,18 @@ async function refreshComments(item, container, btn) {
   await renderCommentsInto(listEl, comments, { item, container, btn });
   container.appendChild(listEl);
   if (btn) updateCommentCount(btn, comments.length);
+  // If this was a menu-level target (overall/day), bump the card's avg rating.
+  refreshCardHeadForItem(item);
+}
+
+function refreshCardHeadForItem(itemKey) {
+  if (typeof itemKey !== "string" || !currentDay) return;
+  if (itemKey === ITEM_OVERALL_HOUSE || itemKey.startsWith("__DAY__HOUSE__")) {
+    refreshCardHead("house", currentDay);
+  }
+  if (itemKey === ITEM_OVERALL_BROWNE || itemKey.startsWith("__DAY__BROWNE__")) {
+    refreshCardHead("browne", currentDay);
+  }
 }
 
 // Generic comment-form builder. `existing` (optional) puts the form into edit
@@ -1728,8 +1812,6 @@ async function loadHouse(day) {
     if (!entries.length) {
       el.innerHTML = '<div class="empty">No menu posted for ' + day + ' yet.</div>';
     } else {
-      maybePrependMenuCommentButton(el, ITEM_DAY_HOUSE(isoDate(currentDay, currentWeek)),
-        `today's House dinner (${currentDay})`);
       el.appendChild(renderGroupedEntries(entries));
     }
   } catch (err) {
@@ -1744,14 +1826,39 @@ function isoDate(day, week) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function maybePrependMenuCommentButton(host, itemKey, label) {
+// Update the rating chip and "Today's comments" button at the top of a menu
+// card. `kind` is "house" or "browne"; ratings include the menu's overall
+// target + the day-level target for the currently-selected day.
+async function refreshCardHead(kind, day) {
   if (!firebaseEnabled()) return;
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "menu-comment-btn";
-  btn.textContent = "💬 Comment on " + label;
-  btn.addEventListener("click", () => openMenuComment(itemKey, label));
-  host.appendChild(btn);
+  const dayItem = kind === "house" ? ITEM_DAY_HOUSE(isoDate(day, currentWeek)) : ITEM_DAY_BROWNE(isoDate(day, currentWeek));
+  const overall = kind === "house" ? ITEM_OVERALL_HOUSE : ITEM_OVERALL_BROWNE;
+  const label   = kind === "house" ? `today's House dinner (${day})` : `today's Browne menu (${day})`;
+  const avgEl   = document.getElementById(`${kind}-avg`);
+  const todayEl = document.getElementById(`${kind}-today`);
+  // Show the "today's comments" button immediately — it shouldn't wait on the
+  // rating query.
+  if (todayEl) {
+    todayEl.hidden = false;
+    todayEl.onclick = () => openMenuComment(dayItem, label);
+  }
+  if (!avgEl) return;
+  avgEl.hidden = false;
+  avgEl.classList.add("empty");
+  avgEl.textContent = "★ —";
+  try {
+    const { avg, count } = await fetchAverageRating([overall, dayItem]);
+    if (!count) {
+      avgEl.classList.add("empty");
+      avgEl.textContent = "No ratings yet";
+    } else {
+      avgEl.classList.remove("empty");
+      avgEl.textContent = `★ ${avg.toFixed(1)} (${count})`;
+      avgEl.title = `Average across "overall" + today's day-level ratings for ${kind === "house" ? "House" : "Browne"}`;
+    }
+  } catch (e) {
+    avgEl.textContent = "★ —";
+  }
 }
 
 async function loadBrowne(day) {
@@ -1765,8 +1872,6 @@ async function loadBrowne(day) {
     return;
   }
   el.innerHTML = "";
-  maybePrependMenuCommentButton(el, ITEM_DAY_BROWNE(isoDate(day, currentWeek)),
-    `today's Browne menu (${day})`);
   const results = await Promise.allSettled(sources.map(s => {
     // Next-week 101 uses this-week's sheet (only this-week 101 is published).
     // `sheetRef` lets us resolve HOUSE_SHEET lazily, since loadConfig() may
@@ -1857,8 +1962,9 @@ function selectDay(day) {
   // Mobile view toggle: hidden on weekends (only Browne is shown anyway).
   const toggle = document.getElementById("view-toggle");
   if (toggle) toggle.style.display = isWeekend ? "none" : "";
-  if (!isWeekend) loadHouse(day);
+  if (!isWeekend) { loadHouse(day); refreshCardHead("house", day); }
   loadBrowne(day);
+  refreshCardHead("browne", day);
 }
 
 function selectView(view) {
@@ -2094,6 +2200,8 @@ async function openMenuComment(itemKey, title) {
     list.className = "comment-list";
     await renderCommentsInto(list, comments, ctx);
     host.appendChild(list);
+    // Re-fetch the card-head rating in case a comment was just posted/edited.
+    refreshCardHeadForItem(itemKey);
   } catch (e) {
     host.innerHTML = '<div class="form-msg error">Could not load: ' + e.message + '</div>';
   }

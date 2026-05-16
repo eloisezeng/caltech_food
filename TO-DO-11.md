@@ -1,0 +1,2 @@
+- display the average rating of the house and browne food
+- put "Today's comments" button to the right of house dinner or browne menu
