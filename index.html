@@ -409,19 +409,31 @@
   }
   .footer-ratings { display: flex; flex-direction: column; gap: 8px; }
   .rating-item {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 14px;
-    background: var(--source-bg);
+    background: #e0e0e0;
     border-radius: 6px;
+    overflow: hidden;
     font-size: 14px;
   }
-  .rating-item .rating-label { color: var(--source); }
+  .rating-item .rating-fill {
+    position: absolute;
+    inset: 0 auto 0 0;          /* anchor top/bottom/left */
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+    z-index: 0;
+  }
+  .rating-item .rating-label,
   .rating-item .rating-value {
-    font-weight: 700;
+    position: relative;          /* sit above the fill */
+    z-index: 1;
     color: var(--source);
   }
+  .rating-item .rating-value { font-weight: 700; }
   .footer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .footer-actions button {
     background: var(--surface);
@@ -1895,7 +1907,9 @@ function setupTodayCommentsButton(kind, day) {
 }
 
 // Fetch average ratings for both menus (overall + currently-selected day's
-// day-level target) and update the footer rating values + bar colors.
+// day-level target) and update the footer rating bars. Each bar is rendered
+// as a gray track with an orange .rating-fill child whose width is set to
+// (avg / 5) — empty when no ratings, fully filled at 5 stars.
 async function refreshFooterRatings() {
   if (!firebaseEnabled() || !currentDay) return;
   const day = currentDay;
@@ -1907,29 +1921,29 @@ async function refreshFooterRatings() {
     const el = document.getElementById(`${kind}-avg`);
     if (!el) continue;
     const bar = el.closest(".rating-item");
+    const fill = bar ? ensureRatingFill(bar) : null;
     try {
       const { avg, count } = await fetchAverageRating(keys);
       el.textContent = count ? `★ ${avg.toFixed(1)} (${count})` : "No ratings yet";
       el.title = `Average across "overall" + today's day-level ratings for ${kind === "house" ? "House" : "Browne"}`;
-      if (bar) bar.style.background = ratingBarColor(avg);
+      if (fill) fill.style.width = avg ? `${(avg / 5) * 100}%` : "0%";
     } catch {
       el.textContent = "—";
-      if (bar) bar.style.background = "";
+      if (fill) fill.style.width = "0%";
     }
   }
 }
 
-// Interpolate the rating bar's background from very pale at 1 star to a
-// solid accent orange at 5 stars. `avg` may be null when nothing's rated.
-function ratingBarColor(avg) {
-  if (avg == null) return "";
-  const ratio = Math.max(0, Math.min(1, (avg - 1) / 4));
-  // 1 star → rgb(255, 236, 224) (very pale peach)
-  // 5 stars → rgb(255, 111,   0) (var(--accent), solid orange)
-  const r = 255;
-  const g = Math.round(236 - ratio * (236 - 111));
-  const b = Math.round(224 - ratio * (224 -   0));
-  return `rgb(${r}, ${g}, ${b})`;
+// The .rating-fill div is created lazily on first render so existing
+// .rating-item markup doesn't need to ship the child node.
+function ensureRatingFill(bar) {
+  let fill = bar.querySelector(".rating-fill");
+  if (!fill) {
+    fill = document.createElement("div");
+    fill.className = "rating-fill";
+    bar.insertBefore(fill, bar.firstChild);
+  }
+  return fill;
 }
 
 async function loadBrowne(day) {
