@@ -1,36 +1,58 @@
 rules_version = '2';
 
-// Public read + capped public write for the two feedback collections. The
-// site's web SDK can read and create documents anonymously; nobody can update
-// or delete. Validation caps field length so a misbehaving client can't fill
-// the database with megabytes of junk.
+// Comments + feature requests require an authenticated user (Anonymous Auth
+// counts). The author of a doc can update or delete only their own. Field
+// caps prevent a misbehaving client from filling the database with junk.
 //
-// Deploy with:  firebase deploy --only firestore:rules
+// Deploy via console (paste into the Rules tab) or `firebase deploy --only firestore:rules`.
 service cloud.firestore {
   match /databases/{database}/documents {
 
     match /comments/{id} {
       allow read: if true;
+
       allow create: if
-        request.resource.data.keys().hasOnly(["item","rating","text","week","createdAt"])
+        request.auth != null
+        && request.resource.data.authorId == request.auth.uid
         && request.resource.data.item is string
         && request.resource.data.item.size() <= 200
-        && (!('text'   in request.resource.data) || (request.resource.data.text is string  && request.resource.data.text.size()  <= 2000))
-        && (!('rating' in request.resource.data) || (request.resource.data.rating is int   && request.resource.data.rating >= 1 && request.resource.data.rating <= 5))
-        && (!('week'   in request.resource.data) || (request.resource.data.week is string  && request.resource.data.week.size()  <= 16))
+        && request.resource.data.username is string
+        && request.resource.data.username.size() <= 40
+        && (!('text'     in request.resource.data) || (request.resource.data.text     is string  && request.resource.data.text.size()     <= 2000))
+        && (!('rating'   in request.resource.data) || (request.resource.data.rating   is int     && request.resource.data.rating >= 1 && request.resource.data.rating <= 5))
+        && (!('imageUrl' in request.resource.data) || (request.resource.data.imageUrl is string  && request.resource.data.imageUrl.size() <= 500))
+        && (!('week'     in request.resource.data) || (request.resource.data.week     is string  && request.resource.data.week.size()     <= 16))
         && request.resource.data.createdAt == request.time;
-      allow update, delete: if false;
+
+      allow update: if
+        request.auth != null
+        && resource.data.authorId == request.auth.uid
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.item == resource.data.item
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (!('text'     in request.resource.data) || (request.resource.data.text     is string  && request.resource.data.text.size()     <= 2000))
+        && (!('rating'   in request.resource.data) || (request.resource.data.rating   is int     && request.resource.data.rating >= 1 && request.resource.data.rating <= 5))
+        && (!('imageUrl' in request.resource.data) || (request.resource.data.imageUrl is string  && request.resource.data.imageUrl.size() <= 500));
+
+      allow delete: if
+        request.auth != null
+        && resource.data.authorId == request.auth.uid;
     }
 
     match /feature_requests/{id} {
       allow read: if true;
+
       allow create: if
-        request.resource.data.keys().hasOnly(["text","status","createdAt"])
+        request.auth != null
+        && request.resource.data.authorId == request.auth.uid
         && request.resource.data.text is string
         && request.resource.data.text.size() > 0
         && request.resource.data.text.size() <= 5000
         && request.resource.data.status == "pending"
         && request.resource.data.createdAt == request.time;
+
+      // Server-side script (firebase-admin) bypasses these rules to mark
+      // requests as "issued", so we don't allow client edits.
       allow update, delete: if false;
     }
   }

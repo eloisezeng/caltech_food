@@ -282,6 +282,57 @@
   }
   .comment .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
   .comment .text { margin-top: 2px; white-space: pre-wrap; word-wrap: break-word; }
+  .comment .comment-image { margin-top: 4px; }
+  .comment .comment-image img { max-width: 180px; max-height: 180px; border-radius: 4px; }
+  .comment .comment-actions { margin-top: 4px; display: flex; gap: 6px; }
+  .comment-form button.secondary,
+  .comment .comment-actions button {
+    background: var(--surface);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 0;
+  }
+  .comment-form button.secondary:hover,
+  .comment .comment-actions button:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .comment-form .image-row {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .comment-form .img-preview {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .comment-form .img-preview img {
+    max-height: 40px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  /* Per-card "comment on the whole menu" button (above the menu items) */
+  .menu-card .menu-comment-btn {
+    margin: 0 0 12px;
+    background: var(--source-bg);
+    color: var(--source);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .menu-card .menu-comment-btn:hover { border-color: var(--accent); color: var(--accent); }
   .item-image {
     margin-top: 6px;
     max-width: 240px;
@@ -439,6 +490,33 @@
     <h3>This week's feedback</h3>
     <div class="summary-meta" id="summary-meta"></div>
     <div class="summary-body" id="summary-body">Loading…</div>
+    <div class="actions" style="margin-top: 16px; text-align: left;">
+      <button type="button" id="summary-refresh" style="background: var(--surface); color: var(--accent); border: 1px solid var(--accent);">↻ Regenerate now</button>
+      <span id="summary-refresh-msg" style="font-size: 12px; color: var(--muted); margin-left: 8px;"></span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="username-modal">
+  <div class="modal">
+    <button class="close" data-close="username-modal" aria-label="Close">×</button>
+    <h3>Your display name</h3>
+    <p style="font-size: 13px; color: var(--muted); margin: 0 0 8px;">
+      Shown next to your comments. Leave blank to stay "Anonymous".
+    </p>
+    <input id="username-input" type="text" maxlength="40" placeholder="Anonymous"
+      style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font: inherit; box-sizing: border-box;">
+    <div class="actions">
+      <button type="button" id="username-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="menu-comment-modal">
+  <div class="modal">
+    <button class="close" data-close="menu-comment-modal" aria-label="Close">×</button>
+    <h3 id="menu-comment-title">Comment</h3>
+    <div id="menu-comment-host"></div>
   </div>
 </div>
 
@@ -485,7 +563,7 @@ let HOUSE_GIDS_NEXT = {
 // search). Used as the first source in `lookupImage` before any live API calls.
 let IMAGE_CACHE = {};
 
-// ---------- Firebase (comments, ratings, feature requests) ----------
+// ---------- Firebase (comments, ratings, feature requests, images) ----------
 // Paste your Firebase web-app config here. apiKey-starts-with "REPLACE_" means
 // comments are disabled and the comment UI is hidden. Setup steps are in the
 // README under "Comments and feedback".
@@ -497,28 +575,62 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "7210715094",
   appId: "1:7210715094:web:054935e6aca140c6cb0677",
 };
+// Optional: paste a domain-restricted Gemini API key to enable the
+// "Regenerate summary now" button. Falls back to whatever the GitHub Action
+// last wrote to data/summary.json if empty. Lock the key in Google Cloud
+// console to https://eloisezeng.github.io/* and "Generative Language API"
+// only — otherwise anyone visiting the site could use it for anything.
+const GEMINI_BROWSER_KEY = ""; // e.g. "AIzaSy..."
+
 function firebaseEnabled() {
   return FIREBASE_CONFIG && typeof FIREBASE_CONFIG.apiKey === "string"
       && !FIREBASE_CONFIG.apiKey.startsWith("REPLACE");
 }
 
-let FIREBASE = null; // { db, fs } once initialized
+// Synthetic comment-target keys for menu-wide (not item-specific) comments.
+const ITEM_DAY_HOUSE     = day => `__DAY__HOUSE__${day}`;       // e.g. "__DAY__HOUSE__2026-05-18"
+const ITEM_DAY_BROWNE    = day => `__DAY__BROWNE__${day}`;
+const ITEM_OVERALL_HOUSE  = "__OVERALL__HOUSE__";
+const ITEM_OVERALL_BROWNE = "__OVERALL__BROWNE__";
+
+let FIREBASE = null; // { db, auth, storage, fs, authMod, storageMod }
+let AUTH_READY = null; // Promise<User|null>
 async function getFirebase() {
   if (FIREBASE) return FIREBASE;
   if (!firebaseEnabled()) return null;
   try {
-    const [appMod, fsMod] = await Promise.all([
+    const [appMod, fsMod, authMod, storageMod] = await Promise.all([
       import("https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"),
       import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"),
+      import("https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js"),
     ]);
     const app = appMod.initializeApp(FIREBASE_CONFIG);
     const db = fsMod.getFirestore(app);
-    FIREBASE = { db, fs: fsMod };
+    const auth = authMod.getAuth(app);
+    const storage = storageMod.getStorage(app);
+    FIREBASE = { db, auth, storage, fs: fsMod, authMod, storageMod };
+    // Kick off anonymous sign-in eagerly; commenting/editing waits on it.
+    AUTH_READY = new Promise(resolve => {
+      authMod.onAuthStateChanged(auth, user => {
+        if (user) resolve(user);
+      });
+      authMod.signInAnonymously(auth).catch(e => {
+        console.warn("Anonymous sign-in failed:", e);
+        resolve(null);
+      });
+    });
     return FIREBASE;
   } catch (e) {
     console.warn("Firebase init failed:", e);
     return null;
   }
+}
+
+async function getCurrentUser() {
+  const fb = await getFirebase();
+  if (!fb) return null;
+  return AUTH_READY;
 }
 
 function isoWeekKey(d) {
@@ -528,6 +640,17 @@ function isoWeekKey(d) {
   const w1 = new Date(t.getFullYear(), 0, 4);
   const week = 1 + Math.round(((t - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
   return `${t.getFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+
+const USERNAME_KEY = "caltech-food.username";
+function getUsername() {
+  try { return localStorage.getItem(USERNAME_KEY) || "Anonymous"; }
+  catch { return "Anonymous"; }
+}
+function setUsername(name) {
+  const clean = String(name || "").trim().slice(0, 40) || "Anonymous";
+  try { localStorage.setItem(USERNAME_KEY, clean); } catch {}
+  return clean;
 }
 
 async function fetchCommentsFor(item) {
@@ -544,29 +667,140 @@ async function fetchCommentsFor(item) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-async function postComment({ item, rating, text }) {
+async function postComment({ item, rating, text, imageUrl }) {
   const fb = await getFirebase();
   if (!fb) throw new Error("Comments aren't configured for this site yet.");
+  const user = await AUTH_READY;
+  if (!user) throw new Error("Couldn't sign in anonymously — try refreshing.");
   const { collection, addDoc, serverTimestamp } = fb.fs;
   const doc = {
     item: String(item).slice(0, 200),
+    authorId: user.uid,
+    username: getUsername(),
     week: isoWeekKey(new Date()),
     createdAt: serverTimestamp(),
   };
-  if (rating)            doc.rating = Math.max(1, Math.min(5, Number(rating)));
-  if (text && text.trim()) doc.text = String(text).slice(0, 2000);
+  if (rating)               doc.rating   = Math.max(1, Math.min(5, Number(rating)));
+  if (text && text.trim())  doc.text     = String(text).slice(0, 2000);
+  if (imageUrl)             doc.imageUrl = String(imageUrl).slice(0, 500);
   await addDoc(collection(fb.db, "comments"), doc);
+}
+
+async function updateComment(id, { rating, text, imageUrl }) {
+  const fb = await getFirebase();
+  if (!fb) throw new Error("Not configured.");
+  const user = await AUTH_READY;
+  if (!user) throw new Error("Not signed in.");
+  const { doc, updateDoc, deleteField, serverTimestamp } = fb.fs;
+  const patch = {
+    username: getUsername(),
+    updatedAt: serverTimestamp(),
+  };
+  patch.rating   = rating ? Math.max(1, Math.min(5, Number(rating))) : deleteField();
+  patch.text     = text && text.trim() ? String(text).slice(0, 2000) : deleteField();
+  patch.imageUrl = imageUrl ? String(imageUrl).slice(0, 500) : deleteField();
+  await updateDoc(doc(fb.db, "comments", id), patch);
+}
+
+async function deleteCommentDoc(id) {
+  const fb = await getFirebase();
+  if (!fb) throw new Error("Not configured.");
+  const { doc, deleteDoc } = fb.fs;
+  await deleteDoc(doc(fb.db, "comments", id));
+}
+
+async function uploadCommentImage(file) {
+  const fb = await getFirebase();
+  if (!fb) throw new Error("Not configured.");
+  const user = await AUTH_READY;
+  if (!user) throw new Error("Not signed in.");
+  // Resize to max 800px on the longest edge to keep uploads small.
+  const resized = await resizeImage(file, 800, 0.85);
+  const path = `comments/${user.uid}/${Date.now()}.jpg`;
+  const { ref, uploadBytes, getDownloadURL } = fb.storageMod;
+  const storageRef = ref(fb.storage, path);
+  await uploadBytes(storageRef, resized, { contentType: "image/jpeg" });
+  return getDownloadURL(storageRef);
+}
+
+async function resizeImage(file, maxEdge, quality) {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * scale);
+  const h = Math.round(bitmap.height * scale);
+  const canvas = document.createElement("canvas");
+  canvas.width = w; canvas.height = h;
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
+  return await new Promise(res => canvas.toBlob(res, "image/jpeg", quality));
 }
 
 async function postFeatureRequest(text) {
   const fb = await getFirebase();
   if (!fb) throw new Error("Feature requests aren't configured for this site yet.");
+  const user = await AUTH_READY;
+  if (!user) throw new Error("Couldn't sign in anonymously — try refreshing.");
   const { collection, addDoc, serverTimestamp } = fb.fs;
   await addDoc(collection(fb.db, "feature_requests"), {
     text: String(text).slice(0, 5000),
+    authorId: user.uid,
+    username: getUsername(),
     status: "pending",
     createdAt: serverTimestamp(),
   });
+}
+
+// Fetch this week's comments + feature requests and ask Gemini for a summary
+// directly from the browser. Used by the "Regenerate now" button.
+async function regenerateSummaryFromBrowser() {
+  if (!GEMINI_BROWSER_KEY) throw new Error("GEMINI_BROWSER_KEY not configured — open index.html to set it.");
+  const fb = await getFirebase();
+  if (!fb) throw new Error("Firebase not configured.");
+  const { collection, query, where, orderBy, getDocs, Timestamp } = fb.fs;
+  const since = Timestamp.fromMillis(Date.now() - 7 * 86400000);
+  const [c, r] = await Promise.all([
+    getDocs(query(collection(fb.db, "comments"),         where("createdAt", ">=", since), orderBy("createdAt", "desc"))),
+    getDocs(query(collection(fb.db, "feature_requests"), where("createdAt", ">=", since), orderBy("createdAt", "desc"))),
+  ]);
+  const commentLines = c.docs.map(d => {
+    const x = d.data(); const p = [];
+    if (x.item) p.push(`[${x.item}]`);
+    if (x.rating) p.push(`${x.rating}/5`);
+    if (x.text) p.push(x.text);
+    return p.join(" ");
+  }).filter(Boolean);
+  const requestLines = r.docs.map(d => (d.data().text || "").trim()).filter(Boolean);
+  const prompt = [
+    "You are summarizing student feedback for Caltech Dining Services.",
+    "Be concrete and brief: 5–10 bullets MAX. Group complaints by dish or theme,",
+    "highlight any safety/allergen concerns first, and surface the most-asked-for",
+    "feature requests. Do not invent foods or themes that aren't in the data.",
+    "",
+    "=== Comments and ratings (this week) ===",
+    commentLines.length ? commentLines.join("\n") : "(none)",
+    "",
+    "=== Feature requests for the website (this week) ===",
+    requestLines.length ? requestLines.join("\n") : "(none)",
+  ].join("\n");
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_BROWSER_KEY}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.4, maxOutputTokens: 1024 },
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Gemini HTTP ${res.status}: ${body.slice(0, 200)}`);
+  }
+  const json = await res.json();
+  return {
+    generatedAt: new Date().toISOString(),
+    commentCount: c.docs.length,
+    requestCount: r.docs.length,
+    summary: (json.candidates?.[0]?.content?.parts?.[0]?.text || "").trim() || "Empty response.",
+  };
 }
 // ---------- end Firebase ----------
 
@@ -1025,21 +1259,28 @@ async function toggleComments(item, container, btn) {
     return;
   }
   container.style.display = "block";
+  await refreshComments(item, container, btn);
+  container.dataset.loaded = "1";
+}
+
+async function refreshComments(item, container, btn) {
   container.innerHTML = '<div class="form-msg">Loading…</div>';
   let comments = [];
   try { comments = await fetchCommentsFor(item); }
   catch (e) { container.innerHTML = '<div class="form-msg error">Could not load comments: ' + e.message + '</div>'; return; }
   container.innerHTML = "";
-  container.appendChild(buildCommentForm(item, container, btn));
+  container.appendChild(buildCommentForm({ item, container, btn }));
   const listEl = document.createElement("div");
   listEl.className = "comment-list";
-  renderCommentsInto(listEl, comments);
+  await renderCommentsInto(listEl, comments, { item, container, btn });
   container.appendChild(listEl);
-  updateCommentCount(btn, comments.length);
-  container.dataset.loaded = "1";
+  if (btn) updateCommentCount(btn, comments.length);
 }
 
-function buildCommentForm(item, container, btn) {
+// Generic comment-form builder. `existing` (optional) puts the form into edit
+// mode: pre-fills the fields and updates that doc on submit instead of creating
+// a new one.
+function buildCommentForm({ item, container, btn, existing, onDone }) {
   const form = document.createElement("div");
   form.className = "comment-form";
   // Star rating
@@ -1047,7 +1288,7 @@ function buildCommentForm(item, container, btn) {
   stars.className = "star-row";
   stars.setAttribute("role", "radiogroup");
   stars.setAttribute("aria-label", "Rating");
-  stars.dataset.rating = "";
+  stars.dataset.rating = existing?.rating ? String(existing.rating) : "";
   for (let i = 1; i <= 5; i++) {
     const s = document.createElement("span");
     s.className = "star";
@@ -1059,42 +1300,103 @@ function buildCommentForm(item, container, btn) {
   form.appendChild(stars);
   // Textarea
   const ta = document.createElement("textarea");
-  ta.placeholder = "Optional comment about " + item + "…";
+  ta.placeholder = existing
+    ? "Edit your comment…"
+    : "Optional comment about " + commentTargetLabel(item) + "…";
   ta.maxLength = 2000;
+  if (existing?.text) ta.value = existing.text;
   form.appendChild(ta);
+  // Image upload row
+  const imgRow = document.createElement("div");
+  imgRow.className = "image-row";
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = "image/*";
+  fileInput.style.display = "none";
+  const fileBtn = document.createElement("button");
+  fileBtn.type = "button";
+  fileBtn.className = "secondary";
+  fileBtn.textContent = "📎 Attach image";
+  fileBtn.addEventListener("click", () => fileInput.click());
+  const preview = document.createElement("div");
+  preview.className = "img-preview";
+  let pendingUrl = existing?.imageUrl || null;
+  function renderPreview() {
+    preview.innerHTML = "";
+    if (!pendingUrl) return;
+    const img = document.createElement("img");
+    img.src = pendingUrl;
+    preview.appendChild(img);
+    const x = document.createElement("button");
+    x.type = "button";
+    x.className = "secondary";
+    x.textContent = "×";
+    x.title = "Remove image";
+    x.addEventListener("click", () => { pendingUrl = null; renderPreview(); });
+    preview.appendChild(x);
+  }
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+    fileBtn.disabled = true; fileBtn.textContent = "Uploading…";
+    try {
+      pendingUrl = await uploadCommentImage(file);
+      renderPreview();
+    } catch (e) {
+      msg.classList.add("error");
+      msg.textContent = "Couldn't upload image: " + e.message;
+    } finally {
+      fileBtn.disabled = false; fileBtn.textContent = "📎 Attach image";
+      fileInput.value = "";
+    }
+  });
+  imgRow.appendChild(fileBtn);
+  imgRow.appendChild(fileInput);
+  imgRow.appendChild(preview);
+  form.appendChild(imgRow);
+  renderPreview();
   // Submit
   const submit = document.createElement("button");
   submit.type = "button";
-  submit.textContent = "Post";
+  submit.textContent = existing ? "Save" : "Post";
+  const cancelBtn = existing ? document.createElement("button") : null;
+  if (cancelBtn) {
+    cancelBtn.type = "button";
+    cancelBtn.className = "secondary";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.style.marginLeft = "8px";
+    cancelBtn.addEventListener("click", () => onDone && onDone());
+  }
   const msg = document.createElement("div");
   msg.className = "form-msg";
   submit.addEventListener("click", async () => {
     const rating = stars.dataset.rating ? Number(stars.dataset.rating) : null;
     const text = ta.value.trim();
-    if (!rating && !text) { msg.textContent = "Pick a rating or write a comment first."; msg.classList.add("error"); return; }
-    submit.disabled = true; msg.classList.remove("error"); msg.textContent = "Posting…";
+    if (!rating && !text && !pendingUrl) { msg.textContent = "Pick a rating, write a comment, or attach an image."; msg.classList.add("error"); return; }
+    submit.disabled = true; msg.classList.remove("error"); msg.textContent = existing ? "Saving…" : "Posting…";
     try {
-      await postComment({ item, rating, text });
-      stars.dataset.rating = ""; ta.value = "";
-      msg.textContent = "Thanks! Reloading…";
-      const fresh = await fetchCommentsFor(item);
-      const listEl = container.querySelector(".comment-list");
-      if (listEl) { listEl.innerHTML = ""; renderCommentsInto(listEl, fresh); }
-      updateCommentCount(btn, fresh.length);
-      msg.textContent = "Thanks for the feedback!";
+      if (existing) {
+        await updateComment(existing.id, { rating, text, imageUrl: pendingUrl });
+      } else {
+        await postComment({ item, rating, text, imageUrl: pendingUrl });
+      }
+      msg.textContent = "Thanks!";
+      if (onDone) onDone();
+      else if (container && btn !== undefined) await refreshComments(item, container, btn);
     } catch (e) {
       msg.classList.add("error");
-      msg.textContent = "Couldn't post: " + e.message;
+      msg.textContent = "Couldn't save: " + e.message;
     } finally {
       submit.disabled = false;
     }
   });
   form.appendChild(submit);
+  if (cancelBtn) form.appendChild(cancelBtn);
   form.appendChild(msg);
   return form;
 }
 
-function renderCommentsInto(listEl, comments) {
+async function renderCommentsInto(listEl, comments, ctx) {
   if (!comments.length) {
     const empty = document.createElement("div");
     empty.className = "form-msg";
@@ -1102,24 +1404,88 @@ function renderCommentsInto(listEl, comments) {
     listEl.appendChild(empty);
     return;
   }
+  const user = await getCurrentUser();
+  const myUid = user?.uid;
   for (const c of comments) {
-    const el = document.createElement("div");
-    el.className = "comment";
-    const meta = document.createElement("div");
-    meta.className = "meta";
-    const parts = [];
-    if (c.rating) parts.push("★".repeat(c.rating) + "☆".repeat(5 - c.rating));
-    if (c.createdAt && c.createdAt.toDate) parts.push(c.createdAt.toDate().toLocaleDateString());
-    meta.textContent = parts.join("  ·  ");
-    el.appendChild(meta);
-    if (c.text) {
-      const t = document.createElement("div");
-      t.className = "text";
-      t.textContent = c.text;
-      el.appendChild(t);
-    }
-    listEl.appendChild(el);
+    listEl.appendChild(renderComment(c, ctx, myUid));
   }
+}
+
+function renderComment(c, ctx, myUid) {
+  const el = document.createElement("div");
+  el.className = "comment";
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  const parts = [];
+  if (c.rating) parts.push("★".repeat(c.rating) + "☆".repeat(5 - c.rating));
+  if (c.username) parts.push(c.username);
+  if (c.createdAt && c.createdAt.toDate) {
+    const date = c.createdAt.toDate().toLocaleDateString();
+    parts.push(c.updatedAt && c.updatedAt.toDate ? `${date} (edited)` : date);
+  }
+  meta.textContent = parts.join("  ·  ");
+  el.appendChild(meta);
+  if (c.text) {
+    const t = document.createElement("div");
+    t.className = "text";
+    t.textContent = c.text;
+    el.appendChild(t);
+  }
+  if (c.imageUrl) {
+    const wrap = document.createElement("div");
+    wrap.className = "comment-image";
+    const a = document.createElement("a");
+    a.href = c.imageUrl; a.target = "_blank"; a.rel = "noopener";
+    const img = document.createElement("img");
+    img.src = c.imageUrl;
+    img.loading = "lazy";
+    img.alt = "";
+    a.appendChild(img);
+    wrap.appendChild(a);
+    el.appendChild(wrap);
+  }
+  // Edit / delete buttons only for the user's own comments
+  if (myUid && c.authorId === myUid) {
+    const actions = document.createElement("div");
+    actions.className = "comment-actions";
+    const edit = document.createElement("button");
+    edit.type = "button"; edit.className = "secondary"; edit.textContent = "Edit";
+    edit.addEventListener("click", () => beginEdit(c, el, ctx));
+    const del = document.createElement("button");
+    del.type = "button"; del.className = "secondary"; del.textContent = "Delete";
+    del.addEventListener("click", () => beginDelete(c, ctx));
+    actions.appendChild(edit); actions.appendChild(del);
+    el.appendChild(actions);
+  }
+  return el;
+}
+
+function beginEdit(c, commentEl, ctx) {
+  commentEl.innerHTML = "";
+  const form = buildCommentForm({
+    item: c.item,
+    existing: c,
+    onDone: () => ctx && refreshComments(ctx.item, ctx.container, ctx.btn),
+  });
+  commentEl.appendChild(form);
+}
+
+async function beginDelete(c, ctx) {
+  if (!confirm("Delete this comment?")) return;
+  try {
+    await deleteCommentDoc(c.id);
+    if (ctx) await refreshComments(ctx.item, ctx.container, ctx.btn);
+  } catch (e) {
+    alert("Couldn't delete: " + e.message);
+  }
+}
+
+function commentTargetLabel(item) {
+  if (item.startsWith("__DAY__HOUSE__"))   return "today's House dinner";
+  if (item.startsWith("__DAY__BROWNE__"))  return "today's Browne menu";
+  if (item === "__OVERALL__HOUSE__")        return "House dining in general";
+  if (item === "__OVERALL__BROWNE__")       return "Browne dining in general";
+  return item;
 }
 
 function updateCommentCount(btn, n) {
@@ -1350,11 +1716,30 @@ async function loadHouse(day) {
     if (!entries.length) {
       el.innerHTML = '<div class="empty">No menu posted for ' + day + ' yet.</div>';
     } else {
+      maybePrependMenuCommentButton(el, ITEM_DAY_HOUSE(isoDate(currentDay, currentWeek)),
+        `today's House dinner (${currentDay})`);
       el.appendChild(renderGroupedEntries(entries));
     }
   } catch (err) {
     el.innerHTML = '<div class="error">Could not load menu: ' + err.message + '</div>';
   }
+}
+
+// Returns the YYYY-MM-DD ISO date string for the selected day/week so the
+// per-day comment key is unique even across "this week" / "next week".
+function isoDate(day, week) {
+  const d = dateForDay(day, week);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function maybePrependMenuCommentButton(host, itemKey, label) {
+  if (!firebaseEnabled()) return;
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "menu-comment-btn";
+  btn.textContent = "💬 Comment on " + label;
+  btn.addEventListener("click", () => openMenuComment(itemKey, label));
+  host.appendChild(btn);
 }
 
 async function loadBrowne(day) {
@@ -1368,6 +1753,8 @@ async function loadBrowne(day) {
     return;
   }
   el.innerHTML = "";
+  maybePrependMenuCommentButton(el, ITEM_DAY_BROWNE(isoDate(day, currentWeek)),
+    `today's Browne menu (${day})`);
   const results = await Promise.allSettled(sources.map(s => {
     // Next-week 101 uses this-week's sheet (only this-week 101 is published).
     // `sheetRef` lets us resolve HOUSE_SHEET lazily, since loadConfig() may
@@ -1573,7 +1960,7 @@ function wireHeaderActions() {
   sumBtn.textContent = "📋 Weekly feedback summary";
   sumBtn.addEventListener("click", openSummary);
   host.appendChild(sumBtn);
-  // Feature request button is gated on Firebase being configured.
+  // Firebase-gated buttons
   if (firebaseEnabled()) {
     const frBtn = document.createElement("button");
     frBtn.type = "button";
@@ -1584,6 +1971,28 @@ function wireHeaderActions() {
       openModal("feature-modal");
     });
     host.appendChild(frBtn);
+
+    const houseOverall = document.createElement("button");
+    houseOverall.type = "button";
+    houseOverall.textContent = "⭐ Rate House (overall)";
+    houseOverall.addEventListener("click", () => openMenuComment(ITEM_OVERALL_HOUSE, "House dining in general"));
+    host.appendChild(houseOverall);
+
+    const browneOverall = document.createElement("button");
+    browneOverall.type = "button";
+    browneOverall.textContent = "⭐ Rate Browne (overall)";
+    browneOverall.addEventListener("click", () => openMenuComment(ITEM_OVERALL_BROWNE, "Browne dining in general"));
+    host.appendChild(browneOverall);
+
+    const nameBtn = document.createElement("button");
+    nameBtn.type = "button";
+    nameBtn.id = "username-btn";
+    nameBtn.addEventListener("click", () => {
+      document.getElementById("username-input").value = getUsername() === "Anonymous" ? "" : getUsername();
+      openModal("username-modal");
+    });
+    host.appendChild(nameBtn);
+    updateUsernameButton();
   }
   // Modal close buttons + backdrop click
   for (const btn of document.querySelectorAll("[data-close]")) {
@@ -1611,6 +2020,70 @@ function wireHeaderActions() {
         fSubmit.disabled = false;
       }
     });
+  }
+  // Username save
+  const uSave = document.getElementById("username-save");
+  if (uSave) {
+    uSave.addEventListener("click", () => {
+      const v = document.getElementById("username-input").value;
+      setUsername(v);
+      updateUsernameButton();
+      closeModal("username-modal");
+    });
+  }
+  // Summary regenerate
+  const sRefresh = document.getElementById("summary-refresh");
+  if (sRefresh) {
+    sRefresh.addEventListener("click", async () => {
+      const msg = document.getElementById("summary-refresh-msg");
+      const body = document.getElementById("summary-body");
+      const meta = document.getElementById("summary-meta");
+      sRefresh.disabled = true;
+      msg.textContent = "Generating… (~5–10 s)";
+      try {
+        const j = await regenerateSummaryFromBrowser();
+        body.textContent = j.summary;
+        meta.textContent = `Generated ${new Date(j.generatedAt).toLocaleString()}  ·  ${j.commentCount} comments  ·  ${j.requestCount} feature requests  ·  live`;
+        msg.textContent = "Refreshed.";
+      } catch (e) {
+        msg.textContent = "Couldn't regenerate: " + e.message;
+      } finally {
+        sRefresh.disabled = false;
+      }
+    });
+  }
+}
+
+function updateUsernameButton() {
+  const btn = document.getElementById("username-btn");
+  if (!btn) return;
+  btn.textContent = "👤 " + getUsername();
+}
+
+// Open the "menu-wide" comment modal for synthetic targets (whole-day or overall).
+async function openMenuComment(itemKey, title) {
+  document.getElementById("menu-comment-title").textContent = "Comment on " + title;
+  const host = document.getElementById("menu-comment-host");
+  host.innerHTML = '<div class="form-msg">Loading…</div>';
+  openModal("menu-comment-modal");
+  try {
+    const comments = await fetchCommentsFor(itemKey);
+    host.innerHTML = "";
+    const ctx = { item: itemKey, container: host };
+    host.appendChild(buildCommentForm({
+      item: itemKey,
+      container: host,
+      onDone: async () => {
+        host.innerHTML = "";
+        await openMenuComment(itemKey, title);
+      },
+    }));
+    const list = document.createElement("div");
+    list.className = "comment-list";
+    await renderCommentsInto(list, comments, ctx);
+    host.appendChild(list);
+  } catch (e) {
+    host.innerHTML = '<div class="form-msg error">Could not load: ' + e.message + '</div>';
   }
 }
 

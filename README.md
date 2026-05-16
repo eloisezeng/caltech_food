@@ -85,23 +85,46 @@ the placeholders are replaced. To turn them on:
 ### 1. Set up Firebase
 
 1. Go to <https://console.firebase.google.com>, create a project (any name).
-2. In the project, click **Build → Firestore Database → Create database**.
-   Pick "production mode" and your nearest region.
-3. **Project settings → General → Your apps → Web** (the `</>` icon). Register
-   the app. Copy the `firebaseConfig` object shown.
-4. Open `index.html` and paste those six values into `FIREBASE_CONFIG`,
+2. **Build → Firestore Database → Create database.** Pick "production mode"
+   and your nearest region.
+3. **Build → Authentication → Get started → Sign-in method → Anonymous →
+   Enable.** (Comments need to identify the author for edit/delete to work.)
+4. **Build → Storage → Get started.** Pick production mode and a region.
+   Needed for image attachments on comments.
+5. **Project settings → General → Your apps → Web** (the `</>` icon).
+   Register the app. Copy the `firebaseConfig` object shown.
+6. Open `index.html` and paste those six values into `FIREBASE_CONFIG`,
    replacing the `"REPLACE_ME"` placeholders.
-5. Deploy the rules in `firestore.rules`:
-   ```sh
-   npm i -g firebase-tools
-   firebase login
-   firebase use <your-project-id>
-   firebase deploy --only firestore:rules
-   ```
-   (Or paste the rules into the Firestore Rules tab in the console.)
+7. Deploy rules — paste each of these into the corresponding Rules tab in
+   the Firebase console, then click **Publish**:
+   - `firestore.rules` → Firestore → Rules
+   - `storage.rules` → Storage → Rules
+8. Firestore needs one composite index for the per-item comment query.
+   Either visit the auto-create link the page prints in the console the
+   first time you click 💬 (Firestore tells you exactly what to create),
+   or paste `firestore.indexes.json` via `firebase deploy --only firestore:indexes`.
 
-That's all the browser needs — comments and feature requests now work. The
-"weekly summary" button still says "no summary yet" until step 2.
+That's all the browser needs — commenting, editing/deleting your own
+comments, image uploads, and feature requests all work. The "weekly
+summary" button still says "no summary yet" until step 2.
+
+### 1b. (Optional) Enable on-demand summary regeneration
+
+By default the summary refreshes once a day via the GitHub Action. To let
+visitors click a "Regenerate now" button in the summary modal:
+
+1. Reuse your existing `GEMINI_API_KEY` (or create a separate one — same
+   place, <https://aistudio.google.com/apikey>).
+2. **Restrict the key** in Google Cloud Console first, otherwise anyone on
+   the page can spend your quota:
+   - <https://console.cloud.google.com/apis/credentials?project=caltech-food>
+   - Application restrictions → **Websites** →
+     add `https://eloisezeng.github.io/*` (and `http://localhost/*` for testing).
+   - API restrictions → **Restrict key** → only **Generative Language API**.
+3. Paste the key into `GEMINI_BROWSER_KEY` in `index.html`.
+
+If left blank, the button stays in the modal but says "not configured" when
+clicked — the page still shows the latest Action-generated summary.
 
 ### 2. Set up the daily summary
 
