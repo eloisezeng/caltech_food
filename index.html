@@ -280,41 +280,35 @@ let HOUSE_GIDS_NEXT = {
 // search). Used as the first source in `lookupImage` before any live API calls.
 let IMAGE_CACHE = {};
 
+// The dining team's "Plant Based" weekday tab and the "101 Brunch" /
+// "Comfort Brunch" weekend tabs duplicate content that's already in the
+// Comfort Equation / Specials sheets. We list only the superset sheet per day.
 const BROWNE_DAY_GIDS = {
   Monday: [
     { label: "Comfort Equation (Lunch)", gid: 1584350749 },
-    { label: "Plant Based (Lunch)", gid: 476021946 },
     { label: "Cooking 101 (Dinner)", gid: 610922637, sheetRef: "house", filterDay: "Monday" },
   ],
   Tuesday: [
     { label: "Comfort Equation (Lunch)", gid: 10318477 },
-    { label: "Plant Based (Lunch)", gid: 525833261 },
     { label: "Cooking 101 (Dinner)", gid: 610922637, sheetRef: "house", filterDay: "Tuesday" },
   ],
   Wednesday: [
     { label: "Comfort Equation (Lunch)", gid: 1130846014 },
-    { label: "Plant Based (Lunch)", gid: 949595192 },
     { label: "Cooking 101 (Dinner)", gid: 610922637, sheetRef: "house", filterDay: "Wednesday" },
   ],
   Thursday: [
     { label: "Comfort Equation (Lunch)", gid: 451236279 },
-    { label: "Plant Based (Lunch)", gid: 1690973571 },
     { label: "Cooking 101 (Dinner)", gid: 610922637, sheetRef: "house", filterDay: "Thursday" },
   ],
   Friday: [
     { label: "Comfort Equation (Lunch)", gid: 231408986 },
-    { label: "Plant Based (Lunch)", gid: 1642716127 },
     { label: "Cooking 101 (Dinner)", gid: 610922637, sheetRef: "house", filterDay: "Friday" },
   ],
   Saturday: [
-    { label: "101 Brunch", gid: 2097766047 },
-    { label: "Comfort Brunch", gid: 1645736782 },
-    { label: "Brunch Specials", gid: 1257008787 },
+    { label: "Brunch", gid: 1257008787 },
   ],
   Sunday: [
-    { label: "101 Brunch", gid: 1703176335 },
-    { label: "Comfort Brunch", gid: 256192733 },
-    { label: "Brunch Specials", gid: 1551581221 },
+    { label: "Brunch", gid: 1551581221 },
   ],
 };
 
@@ -832,6 +826,11 @@ async function loadBrowne(day) {
     const sheet = s.sheetRef === "house" ? HOUSE_SHEET : (s.sheet || sheetDefault);
     return fetchCsv(sheet, s.gid).then(rows => ({ src: s, rows }));
   }));
+  // De-duplicate items across sources within the same day (e.g., if a future
+  // Browne sheet adds back overlap, the same dish won't appear twice). First
+  // occurrence wins so source order in BROWNE_DAY_GIDS controls priority.
+  const seen = new Set();
+  const dedupeKey = e => (e.item || "").toLowerCase().replace(/\s+/g, " ").trim();
   let anyRendered = false;
   for (const r of results) {
     if (r.status !== "fulfilled") continue;
@@ -842,6 +841,12 @@ async function loadBrowne(day) {
     } else {
       entries = extractAllEntries(rows);
     }
+    entries = entries.filter(e => {
+      const k = dedupeKey(e);
+      if (!k || seen.has(k)) return !k;
+      seen.add(k);
+      return true;
+    });
     if (!entries.length) continue;
     const labelEl = document.createElement("div");
     labelEl.className = "source-label";
@@ -935,18 +940,12 @@ async function loadConfig() {
       }
     }
     // Browne weekday Comfort Equation tabs are named just by day.
-    // Plant Based tabs are named "Monday PB", "Tuesday PB", etc.
     if (src.browne?.gids) {
       for (const d of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]) {
         const gComfort = pick(src.browne.gids, d);
         if (gComfort && BROWNE_DAY_GIDS[d]) {
           const slot = BROWNE_DAY_GIDS[d].find(x => /Comfort.*Lunch/.test(x.label));
           if (slot) slot.gid = gComfort;
-        }
-        const gPb = src.browne.gids[`${d} PB`];
-        if (gPb && BROWNE_DAY_GIDS[d]) {
-          const slot = BROWNE_DAY_GIDS[d].find(x => /Plant.?Based/i.test(x.label));
-          if (slot) slot.gid = gPb;
         }
       }
     }
@@ -966,17 +965,12 @@ async function loadConfig() {
         if (slot) slot.gid = c101;
       }
     }
-    // Weekend Browne tabs follow names like "Saturday 101", "Saturday Comfort",
-    // "Saturday Specials".
-    const labelMap = { "101 Brunch": "101", "Comfort Brunch": "Comfort", "Brunch Specials": "Specials" };
+    // Weekend Browne tabs: we use only the "Saturday Specials" / "Sunday
+    // Specials" tab, which is the union of the 101 and Comfort brunches.
     for (const day of ["Saturday", "Sunday"]) {
-      for (const slot of BROWNE_DAY_GIDS[day] || []) {
-        const suffix = labelMap[slot.label];
-        if (!suffix) continue;
-        const key = `${day} ${suffix}`;
-        const g = src.browne?.gids?.[key];
-        if (g) slot.gid = g;
-      }
+      const slot = BROWNE_DAY_GIDS[day]?.[0];
+      const g = src.browne?.gids?.[`${day} Specials`];
+      if (slot && g) slot.gid = g;
     }
   } catch (e) {
     // Silent — falling back to hardcoded defaults.

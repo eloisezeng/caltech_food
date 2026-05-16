@@ -1,1 +1,0 @@
-- Don't show house dinner on sunday and saturday
