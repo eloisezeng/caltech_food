@@ -89,24 +89,25 @@ the placeholders are replaced. To turn them on:
    and your nearest region.
 3. **Build → Authentication → Get started → Sign-in method → Anonymous →
    Enable.** (Comments need to identify the author for edit/delete to work.)
-4. **Build → Storage → Get started.** Pick production mode and a region.
-   Needed for image attachments on comments.
-5. **Project settings → General → Your apps → Web** (the `</>` icon).
+4. **Project settings → General → Your apps → Web** (the `</>` icon).
    Register the app. Copy the `firebaseConfig` object shown.
-6. Open `index.html` and paste those six values into `FIREBASE_CONFIG`,
+5. Open `index.html` and paste those six values into `FIREBASE_CONFIG`,
    replacing the `"REPLACE_ME"` placeholders.
-7. Deploy rules — paste each of these into the corresponding Rules tab in
-   the Firebase console, then click **Publish**:
-   - `firestore.rules` → Firestore → Rules
-   - `storage.rules` → Storage → Rules
-8. Firestore needs one composite index for the per-item comment query.
+6. Deploy rules — paste `firestore.rules` into **Firestore → Rules** in
+   the Firebase console and click **Publish**.
+7. Firestore needs one composite index for the per-item comment query.
    Either visit the auto-create link the page prints in the console the
    first time you click 💬 (Firestore tells you exactly what to create),
    or paste `firestore.indexes.json` via `firebase deploy --only firestore:indexes`.
 
 That's all the browser needs — commenting, editing/deleting your own
-comments, image uploads, and feature requests all work. The "weekly
-summary" button still says "no summary yet" until step 2.
+comments, and feature requests all work. The "weekly summary" button
+still says "no summary yet" until step 2.
+
+> **Image attachments are disabled by default.** Firebase Storage requires
+> upgrading to the Blaze (pay-as-you-go) plan. If you upgrade later, set
+> `IMAGES_ENABLED = true` in `index.html`, enable Storage in the Firebase
+> console, and paste `storage.rules` into **Storage → Rules**.
 
 ### 1b. (Optional) Enable on-demand summary regeneration
 

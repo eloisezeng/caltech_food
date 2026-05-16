@@ -582,6 +582,11 @@ const FIREBASE_CONFIG = {
 // only — otherwise anyone visiting the site could use it for anything.
 const GEMINI_BROWSER_KEY = ""; // e.g. "AIzaSy..."
 
+// Image attachments on comments are disabled by default because Firebase
+// Storage requires the Blaze (pay-as-you-go) plan to enable. If you upgrade
+// later, set this to true and publish storage.rules.
+const IMAGES_ENABLED = false;
+
 function firebaseEnabled() {
   return FIREBASE_CONFIG && typeof FIREBASE_CONFIG.apiKey === "string"
       && !FIREBASE_CONFIG.apiKey.startsWith("REPLACE");
@@ -1306,55 +1311,57 @@ function buildCommentForm({ item, container, btn, existing, onDone }) {
   ta.maxLength = 2000;
   if (existing?.text) ta.value = existing.text;
   form.appendChild(ta);
-  // Image upload row
-  const imgRow = document.createElement("div");
-  imgRow.className = "image-row";
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.accept = "image/*";
-  fileInput.style.display = "none";
-  const fileBtn = document.createElement("button");
-  fileBtn.type = "button";
-  fileBtn.className = "secondary";
-  fileBtn.textContent = "📎 Attach image";
-  fileBtn.addEventListener("click", () => fileInput.click());
-  const preview = document.createElement("div");
-  preview.className = "img-preview";
+  // Image upload row — only built when image attachments are enabled.
   let pendingUrl = existing?.imageUrl || null;
-  function renderPreview() {
-    preview.innerHTML = "";
-    if (!pendingUrl) return;
-    const img = document.createElement("img");
-    img.src = pendingUrl;
-    preview.appendChild(img);
-    const x = document.createElement("button");
-    x.type = "button";
-    x.className = "secondary";
-    x.textContent = "×";
-    x.title = "Remove image";
-    x.addEventListener("click", () => { pendingUrl = null; renderPreview(); });
-    preview.appendChild(x);
-  }
-  fileInput.addEventListener("change", async () => {
-    const file = fileInput.files?.[0];
-    if (!file) return;
-    fileBtn.disabled = true; fileBtn.textContent = "Uploading…";
-    try {
-      pendingUrl = await uploadCommentImage(file);
-      renderPreview();
-    } catch (e) {
-      msg.classList.add("error");
-      msg.textContent = "Couldn't upload image: " + e.message;
-    } finally {
-      fileBtn.disabled = false; fileBtn.textContent = "📎 Attach image";
-      fileInput.value = "";
+  if (IMAGES_ENABLED) {
+    const imgRow = document.createElement("div");
+    imgRow.className = "image-row";
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.style.display = "none";
+    const fileBtn = document.createElement("button");
+    fileBtn.type = "button";
+    fileBtn.className = "secondary";
+    fileBtn.textContent = "📎 Attach image";
+    fileBtn.addEventListener("click", () => fileInput.click());
+    const preview = document.createElement("div");
+    preview.className = "img-preview";
+    function renderPreview() {
+      preview.innerHTML = "";
+      if (!pendingUrl) return;
+      const img = document.createElement("img");
+      img.src = pendingUrl;
+      preview.appendChild(img);
+      const x = document.createElement("button");
+      x.type = "button";
+      x.className = "secondary";
+      x.textContent = "×";
+      x.title = "Remove image";
+      x.addEventListener("click", () => { pendingUrl = null; renderPreview(); });
+      preview.appendChild(x);
     }
-  });
-  imgRow.appendChild(fileBtn);
-  imgRow.appendChild(fileInput);
-  imgRow.appendChild(preview);
-  form.appendChild(imgRow);
-  renderPreview();
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      fileBtn.disabled = true; fileBtn.textContent = "Uploading…";
+      try {
+        pendingUrl = await uploadCommentImage(file);
+        renderPreview();
+      } catch (e) {
+        msg.classList.add("error");
+        msg.textContent = "Couldn't upload image: " + e.message;
+      } finally {
+        fileBtn.disabled = false; fileBtn.textContent = "📎 Attach image";
+        fileInput.value = "";
+      }
+    });
+    imgRow.appendChild(fileBtn);
+    imgRow.appendChild(fileInput);
+    imgRow.appendChild(preview);
+    form.appendChild(imgRow);
+    renderPreview();
+  }
   // Submit
   const submit = document.createElement("button");
   submit.type = "button";
@@ -1372,7 +1379,12 @@ function buildCommentForm({ item, container, btn, existing, onDone }) {
   submit.addEventListener("click", async () => {
     const rating = stars.dataset.rating ? Number(stars.dataset.rating) : null;
     const text = ta.value.trim();
-    if (!rating && !text && !pendingUrl) { msg.textContent = "Pick a rating, write a comment, or attach an image."; msg.classList.add("error"); return; }
+    if (!rating && !text && !pendingUrl) {
+      msg.textContent = IMAGES_ENABLED
+        ? "Pick a rating, write a comment, or attach an image."
+        : "Pick a rating or write a comment first.";
+      msg.classList.add("error"); return;
+    }
     submit.disabled = true; msg.classList.remove("error"); msg.textContent = existing ? "Saving…" : "Posting…";
     try {
       if (existing) {
