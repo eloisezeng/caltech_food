@@ -33,11 +33,6 @@
     text-align: center;
   }
   h1 { margin: 0 0 8px; font-size: 28px; }
-  .date {
-    color: var(--muted);
-    font-size: 16px;
-    margin-bottom: 16px;
-  }
   .week-toggle {
     display: inline-flex;
     border: 1px solid var(--border);
@@ -231,7 +226,6 @@
 
 <header>
   <h1>Caltech House Dinner and Browne Menus</h1>
-  <div class="date" id="date-display"></div>
   <div class="week-toggle" id="week-toggle">
     <button data-week="0" class="active">This Week</button>
     <button data-week="1">Next Week</button>
@@ -573,7 +567,7 @@ function renderItem(entry) {
   btn.className = "img-toggle";
   btn.type = "button";
   btn.title = "Show image";
-  btn.textContent = "🖼";
+  btn.textContent = "📷";
   const imgContainer = document.createElement("div");
   imgContainer.className = "item-image";
   imgContainer.style.display = "none";
@@ -870,12 +864,6 @@ function formatShortDate(d) {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-function formatLongDate(d) {
-  return d.toLocaleDateString(undefined, {
-    weekday: "long", year: "numeric", month: "long", day: "numeric",
-  });
-}
-
 function updateDayButtons() {
   const today = DAYS[new Date().getDay()];
   for (const btn of document.querySelectorAll(".day-btn")) {
@@ -885,10 +873,6 @@ function updateDayButtons() {
     const isToday = currentWeek === 0 && day === today;
     btn.classList.toggle("today", isToday);
     btn.classList.toggle("active", day === currentDay);
-  }
-  if (currentDay) {
-    const d = dateForDay(currentDay, currentWeek);
-    document.getElementById("date-display").textContent = formatLongDate(d);
   }
 }
 
