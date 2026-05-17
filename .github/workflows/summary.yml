@@ -45,5 +45,12 @@ jobs:
             echo "No change."
           else
             git commit -m "Refresh weekly summary"
-            git push
+            # Two concurrent workflows can land commits while we're working;
+            # rebase before pushing so we don't fail with a non-fast-forward.
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && exit 0
+              echo "Push attempt $i lost the race; retrying…"
+              sleep 3
+            done
+            echo "Push still failed after 3 retries." && exit 1
           fi

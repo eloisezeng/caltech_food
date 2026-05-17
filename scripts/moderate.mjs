@@ -26,10 +26,11 @@ catch (e) { console.error("FIREBASE_SERVICE_ACCOUNT is not valid JSON:", e.messa
 initializeApp({ credential: cert(sa) });
 const db = getFirestore();
 
-// Oldest pending first so a backlog doesn't starve early submissions.
+// Up to 50 pending comments per run. Skipping orderBy keeps this as a
+// single-field query (no composite index needed). At current volume the
+// limit comfortably exceeds any plausible backlog, so starvation is moot.
 const snap = await db.collection("comments")
   .where("moderationStatus", "==", "pending")
-  .orderBy("createdAt", "asc")
   .limit(50)
   .get();
 
