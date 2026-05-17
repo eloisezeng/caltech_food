@@ -32,26 +32,14 @@ jobs:
         with:
           node-version: "20"
       - run: node scripts/refresh.mjs
-      - name: Install firebase-admin for summary script
-        # Always install — the script early-exits when the secrets are
-        # missing, so it's cheaper to install unconditionally than to gate
-        # on env vars that GitHub Actions evaluates before the step env
-        # block is wired up (the previous `if:` here never matched).
-        run: npm install firebase-admin --no-save --silent
-      - name: Generate weekly feedback summary
-        # A Gemini outage / quota issue here shouldn't block the menu-data
-        # commit step below; the old summary keeps serving until the next
-        # successful run.
-        continue-on-error: true
-        run: node scripts/summary.mjs
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      # Summary regeneration lives in its own workflow (summary.yml) — runs
+      # on every push and every 6 hours, so removing it from here keeps this
+      # workflow focused on Canva scraping + image cache rebuild.
       - name: Commit updated data
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/sheets.json data/images.json data/summary.json 2>/dev/null || true
+          git add data/sheets.json data/images.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes."
           else

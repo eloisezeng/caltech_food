@@ -601,6 +601,18 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="recent-modal">
+  <div class="modal">
+    <button class="close" data-close="recent-modal" aria-label="Close">×</button>
+    <h3>Recent comments</h3>
+    <p style="font-size: 13px; color: var(--muted); margin: 0 0 12px;">
+      The latest comments across every dish. Useful if you're looking for a
+      friend's comment on something that isn't on today's menu.
+    </p>
+    <div id="recent-host">Loading…</div>
+  </div>
+</div>
+
 <main id="menus">
   <div class="menu-card" id="house-card">
     <div class="card-head">
@@ -806,6 +818,25 @@ function checkClientWordlist(...fields) {
       throw new Error("Your comment contains language that's not allowed on this site.");
     }
   }
+}
+
+// Newest-first list of comments across every item in the collection. Used
+// by the "📝 Recent comments" footer button so users can find a friend's
+// comment even when its dish isn't on today's menu.
+async function fetchRecentComments(max = 50) {
+  const fb = await getFirebase();
+  if (!fb) return [];
+  const { collection, query, orderBy, limit, getDocs } = fb.fs;
+  const snap = await getDocs(query(
+    collection(fb.db, "comments"),
+    orderBy("createdAt", "desc"),
+    limit(max),
+  ));
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(c => c.moderationStatus !== "blocked")
+    // Hide rating-only docs from the list — they're just for the average.
+    .filter(c => (c.text && c.text.trim()) || c.imageUrl);
 }
 
 async function fetchCommentsFor(item) {
@@ -2363,6 +2394,15 @@ function wireFooterActions() {
   sumBtn.textContent = "📋 Weekly feedback summary";
   sumBtn.addEventListener("click", openSummary);
   host.appendChild(sumBtn);
+  // Browse-all-comments button. Always shown when Firebase is wired up,
+  // since it's the answer to "my friend commented, where is it?".
+  if (firebaseEnabled()) {
+    const recentBtn = document.createElement("button");
+    recentBtn.type = "button";
+    recentBtn.textContent = "📝 Recent comments";
+    recentBtn.addEventListener("click", openRecentComments);
+    host.appendChild(recentBtn);
+  }
   // Firebase-gated buttons
   // Feature-request button is gated on the Worker being configured;
   // Firebase is no longer required for that flow.
@@ -2504,6 +2544,60 @@ async function updateMenuCommentRating(itemKey) {
     value.innerHTML = formatGoogleRating(avg, count);
   } catch {
     value.textContent = "—";
+  }
+}
+
+async function openRecentComments() {
+  const host = document.getElementById("recent-host");
+  openModal("recent-modal");
+  host.innerHTML = '<div class="form-msg">Loading…</div>';
+  let comments;
+  try { comments = await fetchRecentComments(50); }
+  catch (e) {
+    host.innerHTML = '<div class="form-msg error">Could not load: ' + e.message + '</div>';
+    return;
+  }
+  if (!comments.length) {
+    host.innerHTML = '<div class="form-msg">No comments yet.</div>';
+    return;
+  }
+  host.innerHTML = "";
+  for (const c of comments) {
+    const el = document.createElement("div");
+    el.className = "comment";
+    // Item header (which dish / menu the comment is on)
+    const itemEl = document.createElement("div");
+    itemEl.style.fontSize = "11px";
+    itemEl.style.fontWeight = "600";
+    itemEl.style.color = "var(--accent)";
+    itemEl.style.textTransform = "uppercase";
+    itemEl.style.letterSpacing = "0.3px";
+    itemEl.textContent = commentTargetLabel(c.item || "(unknown)");
+    el.appendChild(itemEl);
+    // Standard meta line: stars · username · date
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const parts = [];
+    if (c.rating) parts.push("★".repeat(c.rating) + "☆".repeat(5 - c.rating));
+    if (c.username) parts.push(c.username);
+    if (c.createdAt && c.createdAt.toDate) parts.push(c.createdAt.toDate().toLocaleString());
+    meta.textContent = parts.join("  ·  ");
+    el.appendChild(meta);
+    if (c.text) {
+      const t = document.createElement("div");
+      t.className = "text";
+      t.textContent = c.text;
+      el.appendChild(t);
+    }
+    if (c.imageUrl) {
+      const wrap = document.createElement("div");
+      wrap.className = "comment-image";
+      const img = document.createElement("img");
+      img.src = c.imageUrl; img.loading = "lazy"; img.alt = "";
+      wrap.appendChild(img);
+      el.appendChild(wrap);
+    }
+    host.appendChild(el);
   }
 }
 

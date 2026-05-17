@@ -1,0 +1,49 @@
+name: Refresh weekly summary
+
+# The summary regenerates whenever code is pushed (so a deployment of new
+# features also publishes a fresh write-up of how students reacted) and on
+# a 6-hour cron as a safety net. paths-ignore prevents the bot's own
+# `data/summary.json` commit from infinitely re-triggering the job.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "data/**"
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-summary
+  cancel-in-progress: false
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install firebase-admin
+        run: npm install firebase-admin --no-save --silent
+      - name: Generate weekly summary
+        run: node scripts/summary.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GEMINI_API_KEY:           ${{ secrets.GEMINI_API_KEY }}
+      - name: Commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/summary.json
+          if git diff --staged --quiet; then
+            echo "No change."
+          else
+            git commit -m "Refresh weekly summary"
+            git push
+          fi
