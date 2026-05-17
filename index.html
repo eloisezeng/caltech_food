@@ -262,6 +262,16 @@
   }
   .comment-toggle:hover { border-color: var(--accent); color: var(--accent); }
   .comment-toggle .count { font-weight: 600; }
+  /* Per-item Google-Maps-style rating, sits inline next to the image and
+     comment buttons. Empty (no ratings yet) collapses to nothing. */
+  .item-rating {
+    font-size: 12px;
+    color: var(--source);
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 1px 0;
+  }
+  .item-rating:empty { display: none; }
   .item-comments {
     margin-top: 6px;
     padding: 8px 12px;
@@ -420,31 +430,19 @@
   }
   .footer-ratings { display: flex; flex-direction: column; gap: 8px; }
   .rating-item {
-    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 14px;
-    background: #e0e0e0;
+    background: var(--source-bg);
     border-radius: 6px;
-    overflow: hidden;
     font-size: 14px;
   }
-  .rating-item .rating-fill {
-    position: absolute;
-    inset: 0 auto 0 0;          /* anchor top/bottom/left */
-    width: 0%;
-    background: var(--accent);
-    transition: width 0.3s ease;
-    z-index: 0;
-  }
-  .rating-item .rating-label,
+  .rating-item .rating-label { color: var(--source); }
   .rating-item .rating-value {
-    position: relative;          /* sit above the fill */
-    z-index: 1;
+    font-weight: 700;
     color: var(--source);
   }
-  .rating-item .rating-value { font-weight: 700; }
   .footer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .footer-actions button {
     background: var(--surface);
@@ -589,7 +587,6 @@
     <button class="close" data-close="menu-comment-modal" aria-label="Close">×</button>
     <h3 id="menu-comment-title">Comment</h3>
     <div id="menu-comment-rating" class="rating-item" style="margin-bottom:14px; display:none;">
-      <div class="rating-fill"></div>
       <span class="rating-label">Overall rating</span>
       <span class="rating-value" id="menu-comment-rating-value">—</span>
     </div>
@@ -700,41 +697,50 @@ const ITEM_DAY_BROWNE    = day => `__DAY__BROWNE__${day}`;
 const ITEM_OVERALL_HOUSE  = "__OVERALL__HOUSE__";
 const ITEM_OVERALL_BROWNE = "__OVERALL__BROWNE__";
 
-let FIREBASE = null; // { db, auth, storage, fs, authMod, storageMod }
+let FIREBASE = null;   // { db, auth, storage, fs, authMod, storageMod } when initialized
+let FIREBASE_INIT;     // in-flight promise — dedupes concurrent first-callers
 let AUTH_READY = null; // Promise<User|null>
-async function getFirebase() {
-  if (FIREBASE) return FIREBASE;
-  if (!firebaseEnabled()) return null;
-  try {
-    const [appMod, fsMod, authMod, storageMod] = await Promise.all([
-      import("https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"),
-      import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"),
-      import("https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"),
-      import("https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js"),
-    ]);
-    const app = appMod.initializeApp(FIREBASE_CONFIG);
-    const db = fsMod.getFirestore(app);
-    const auth = authMod.getAuth(app);
-    const storage = storageMod.getStorage(app);
-    FIREBASE = { db, auth, storage, fs: fsMod, authMod, storageMod };
-    // Kick off anonymous sign-in eagerly; commenting/editing waits on it.
-    // Resolve via the first of: observer fires with a user, signInAnonymously
-    // resolves, signInAnonymously rejects, or a 10-second timeout — so the
-    // promise can never hang forever and lock out the comment UI.
-    AUTH_READY = new Promise(resolve => {
-      let settled = false;
-      const done = u => { if (!settled) { settled = true; resolve(u); } };
-      authMod.onAuthStateChanged(auth, u => { if (u) done(u); });
-      authMod.signInAnonymously(auth)
-        .then(cred => done(cred.user))
-        .catch(e => { console.warn("Anonymous sign-in failed:", e); done(null); });
-      setTimeout(() => done(null), 10000);
-    });
-    return FIREBASE;
-  } catch (e) {
-    console.warn("Firebase init failed:", e);
-    return null;
-  }
+function getFirebase() {
+  if (FIREBASE) return Promise.resolve(FIREBASE);
+  if (!firebaseEnabled()) return Promise.resolve(null);
+  // Cache the in-flight init promise so two simultaneous getFirebase() calls
+  // share one initializeApp() — otherwise the second throws "Firebase App
+  // already exists" and its catch silently returns null.
+  if (FIREBASE_INIT) return FIREBASE_INIT;
+  FIREBASE_INIT = (async () => {
+    try {
+      const [appMod, fsMod, authMod, storageMod] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"),
+        import("https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"),
+        import("https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js"),
+      ]);
+      const app = appMod.initializeApp(FIREBASE_CONFIG);
+      const db = fsMod.getFirestore(app);
+      const auth = authMod.getAuth(app);
+      const storage = storageMod.getStorage(app);
+      FIREBASE = { db, auth, storage, fs: fsMod, authMod, storageMod };
+      // Kick off anonymous sign-in eagerly; commenting/editing waits on it.
+      // Resolve via the first of: observer fires with a user, signInAnonymously
+      // resolves, signInAnonymously rejects, or a 10-second timeout — so the
+      // promise can never hang forever and lock out the comment UI.
+      AUTH_READY = new Promise(resolve => {
+        let settled = false;
+        const done = u => { if (!settled) { settled = true; resolve(u); } };
+        authMod.onAuthStateChanged(auth, u => { if (u) done(u); });
+        authMod.signInAnonymously(auth)
+          .then(cred => done(cred.user))
+          .catch(e => { console.warn("Anonymous sign-in failed:", e); done(null); });
+        setTimeout(() => done(null), 10000);
+      });
+      return FIREBASE;
+    } catch (e) {
+      console.warn("Firebase init failed:", e);
+      FIREBASE_INIT = null;     // allow retry on next call
+      return null;
+    }
+  })();
+  return FIREBASE_INIT;
 }
 
 async function getCurrentUser() {
@@ -825,6 +831,52 @@ async function findUsersRatingFor(item) {
     if (typeof data.rating === "number") return { id: d.id, ...data };
   }
   return undefined;
+}
+
+// Batch-fetch ratings for many menu items in one or two queries so we can
+// decorate the menu with per-item chips without N round-trips. Firestore
+// "in" allows up to 30 values; we chunk by that.
+async function fetchItemRatings(items) {
+  const fb = await getFirebase();
+  if (!fb || !items.length) return {};
+  const { collection, query, where, getDocs } = fb.fs;
+  const acc = {};
+  const unique = [...new Set(items)];
+  for (let i = 0; i < unique.length; i += 30) {
+    const batch = unique.slice(i, i + 30);
+    const snap = await getDocs(query(collection(fb.db, "comments"), where("item", "in", batch)));
+    for (const d of snap.docs) {
+      const data = d.data();
+      if (data.moderationStatus === "blocked") continue;
+      if (typeof data.rating !== "number") continue;
+      const it = data.item;
+      if (!acc[it]) acc[it] = { sum: 0, count: 0 };
+      acc[it].sum += data.rating;
+      acc[it].count++;
+    }
+  }
+  const out = {};
+  for (const k of Object.keys(acc)) {
+    out[k] = { avg: acc[k].sum / acc[k].count, count: acc[k].count };
+  }
+  return out;
+}
+
+// Fill any `.item-rating[data-rating-for]` chips inside the given container
+// with the Google-Maps-style rating for that item. Chips for items with no
+// ratings stay empty (CSS `.item-rating:empty { display:none }` hides them).
+async function decorateItemRatings(containerEl) {
+  if (!firebaseEnabled() || !containerEl) return;
+  const chips = containerEl.querySelectorAll("[data-rating-for]");
+  if (!chips.length) return;
+  const items = [...new Set([...chips].map(c => c.dataset.ratingFor))];
+  let ratings;
+  try { ratings = await fetchItemRatings(items); }
+  catch { return; }
+  for (const chip of chips) {
+    const r = ratings[chip.dataset.ratingFor];
+    if (r) chip.innerHTML = `${r.avg.toFixed(1)} <span class="gold-star">★</span> (${r.count})`;
+  }
 }
 
 async function fetchAverageRating(itemKeys) {
@@ -1381,6 +1433,12 @@ function renderItem(entry) {
     text.appendChild(a);
   }
   row.appendChild(text);
+  // Per-item rating chip — filled in asynchronously by decorateItemRatings()
+  // after the menu DOM is in place. Stays empty (CSS hides) until then.
+  const ratingChip = document.createElement("span");
+  ratingChip.className = "item-rating";
+  ratingChip.dataset.ratingFor = entry.item;
+  row.appendChild(ratingChip);
   const btn = document.createElement("button");
   btn.className = "img-toggle";
   btn.type = "button";
@@ -1934,6 +1992,9 @@ async function loadHouse(day) {
       el.innerHTML = '<div class="empty">No menu posted for ' + day + ' yet.</div>';
     } else {
       el.appendChild(renderGroupedEntries(entries));
+      // Async decorate per-item rating chips; safe if token has moved on
+      // since chips for the previous render are gone from the DOM.
+      decorateItemRatings(el);
     }
   } catch (err) {
     if (token !== loadTokens.house) return;
@@ -1971,61 +2032,52 @@ function formatGoogleRating(avg, count) {
 //     __OVERALL__ keys only). Show as a gray track with an orange fill bar.
 //   - Card-head "day-rating" chip: today's day-level rating only. Shown as
 //     a small pill with text in Google Maps format.
+let footerToken = 0;
 async function refreshFooterRatings() {
   if (!firebaseEnabled() || !currentDay) return;
   const day = currentDay;
   const isWeekend = day === "Saturday" || day === "Sunday";
+  const token = ++footerToken;
 
-  // Footer: overall (lifetime) rating per menu.
+  // Footer: overall (lifetime) rating per menu — just text now, no bar.
   for (const [kind, keys] of Object.entries({
     house:  [ITEM_OVERALL_HOUSE],
     browne: [ITEM_OVERALL_BROWNE],
   })) {
     const el = document.getElementById(`${kind}-avg`);
     if (!el) continue;
-    const bar = el.closest(".rating-item");
-    const fill = bar ? ensureRatingFill(bar) : null;
     try {
       const { avg, count } = await fetchAverageRating(keys);
+      if (token !== footerToken) return;
       el.innerHTML = formatGoogleRating(avg, count);
       el.title = `${count || 0} overall ratings for ${kind === "house" ? "House" : "Browne"}`;
-      if (fill) fill.style.width = avg ? `${(avg / 5) * 100}%` : "0%";
     } catch {
+      if (token !== footerToken) return;
       el.textContent = "—";
-      if (fill) fill.style.width = "0%";
     }
   }
 
-  // Card head: today's day-level rating per menu.
+  // Card head: today's day-level rating per menu — hide the chip entirely
+  // when there are 0 ratings (no ugly "Today: No ratings yet" pill).
   for (const [kind, key] of Object.entries({
     house:  ITEM_DAY_HOUSE(isoDate(day, currentWeek)),
     browne: ITEM_DAY_BROWNE(isoDate(day, currentWeek)),
   })) {
     const el = document.getElementById(`${kind}-day-rating`);
     if (!el) continue;
-    // House isn't served on weekends — keep its chip hidden.
-    if (kind === "house" && isWeekend) { el.hidden = true; continue; }
-    el.hidden = false;
+    if (kind === "house" && isWeekend) { el.hidden = true; el.textContent = ""; continue; }
     try {
       const { avg, count } = await fetchAverageRating([key]);
-      el.innerHTML = `Today: ${formatGoogleRating(avg, count)}`;
-      el.title = `${count || 0} ratings today for ${kind === "house" ? "House Dinner" : "Browne Menu"}`;
+      if (token !== footerToken) return;
+      if (!count) { el.hidden = true; el.textContent = ""; continue; }
+      el.hidden = false;
+      el.innerHTML = `Today: ${avg.toFixed(1)} <span class="gold-star">★</span> (${count})`;
+      el.title = `${count} ratings today for ${kind === "house" ? "House Dinner" : "Browne Menu"}`;
     } catch {
-      el.textContent = "—";
+      if (token !== footerToken) return;
+      el.hidden = true;
     }
   }
-}
-
-// The .rating-fill div is created lazily on first render so existing
-// .rating-item markup doesn't need to ship the child node.
-function ensureRatingFill(bar) {
-  let fill = bar.querySelector(".rating-fill");
-  if (!fill) {
-    fill = document.createElement("div");
-    fill.className = "rating-fill";
-    bar.insertBefore(fill, bar.firstChild);
-  }
-  return fill;
 }
 
 async function loadBrowne(day) {
@@ -2088,6 +2140,8 @@ async function loadBrowne(day) {
   }
   if (!anyRendered) {
     el.innerHTML = '<div class="empty">No Browne menu posted for ' + day + ' yet.</div>';
+  } else {
+    decorateItemRatings(el);
   }
 }
 
@@ -2402,26 +2456,19 @@ async function updateMenuCommentRating(itemKey) {
   const wrap = document.getElementById("menu-comment-rating");
   if (!wrap) return;
   const value = document.getElementById("menu-comment-rating-value");
-  const fill  = wrap.querySelector(".rating-fill");
-  let keys = [itemKey];
-  if (itemKey === ITEM_OVERALL_HOUSE  && currentDay) keys.push(ITEM_DAY_HOUSE(isoDate(currentDay, currentWeek)));
-  if (itemKey === ITEM_OVERALL_BROWNE && currentDay) keys.push(ITEM_DAY_BROWNE(isoDate(currentDay, currentWeek)));
-  if (itemKey.startsWith("__DAY__HOUSE__"))   keys.push(ITEM_OVERALL_HOUSE);
-  if (itemKey.startsWith("__DAY__BROWNE__"))  keys.push(ITEM_OVERALL_BROWNE);
-  // Only show the bar for menu-wide targets — individual dishes don't need it
-  // (the user's already in the per-item comment thread).
-  const isMenuWide = keys.some(k =>
-    k === ITEM_OVERALL_HOUSE || k === ITEM_OVERALL_BROWNE ||
-    k.startsWith("__DAY__HOUSE__") || k.startsWith("__DAY__BROWNE__"));
+  const isMenuWide =
+    itemKey === ITEM_OVERALL_HOUSE || itemKey === ITEM_OVERALL_BROWNE ||
+    itemKey.startsWith("__DAY__HOUSE__") || itemKey.startsWith("__DAY__BROWNE__");
   if (!isMenuWide) { wrap.style.display = "none"; return; }
   wrap.style.display = "";
   try {
-    const { avg, count } = await fetchAverageRating(keys);
+    // Just this item — pairing it with a sibling would give a different
+    // number than what the footer / card-head chips show, which confused
+    // users in testing.
+    const { avg, count } = await fetchAverageRating([itemKey]);
     value.innerHTML = formatGoogleRating(avg, count);
-    if (fill) fill.style.width = avg ? `${(avg / 5) * 100}%` : "0%";
   } catch {
     value.textContent = "—";
-    if (fill) fill.style.width = "0%";
   }
 }
 
@@ -2439,7 +2486,6 @@ async function openSummary() {
     const when = j.generatedAt ? new Date(j.generatedAt) : null;
     const counts = [];
     if (j.commentCount != null) counts.push(`${j.commentCount} comments`);
-    if (j.requestCount != null) counts.push(`${j.requestCount} feature requests`);
     meta.textContent = (when ? `Generated ${when.toLocaleString()}  ·  ` : "") + counts.join("  ·  ");
   } catch (e) {
     body.textContent = "No summary yet — the daily refresh action generates it once feedback is collected.";

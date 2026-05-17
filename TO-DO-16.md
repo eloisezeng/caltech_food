@@ -1,6 +1,0 @@
-- remove redundant text e.g. Your current rating: ★★★★☆ — click a different star to change it.
-- website feature requests shouldn't be in weekly summary
-- replace "Average ratings" with "Overall ratings"
-- Display the average rating for the day next to house dinner menu and to the right of browne menu.
-- Display the ratings (for the day and overall as) the average number of stars, an icon of a gold star, then the number of reviews in parenthesis (just like how google maps shows reviews)
-- spawn multiple agents to try to play around the website and find bugs, then fix

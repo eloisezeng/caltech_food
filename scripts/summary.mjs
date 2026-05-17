@@ -121,7 +121,6 @@ mkdirSync("data", { recursive: true });
 writeFileSync("data/summary.json", JSON.stringify({
   generatedAt: new Date().toISOString(),
   commentCount: comments.length,
-  requestCount: requests.length,
   summary,
 }, null, 2) + "\n");
 console.log("Wrote data/summary.json");
