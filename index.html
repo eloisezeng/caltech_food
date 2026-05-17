@@ -161,14 +161,11 @@
     cursor: pointer;
   }
   .menu-card .today-comments:hover { background: var(--accent); color: white; }
-  /* Today's-rating chip in the card head (Google Maps style: "4.2 ★ (12)") */
+  /* Today's-rating chip in the card head — flat text, Google-Maps style. */
   .day-rating {
     font-size: 14px;
     font-weight: 600;
     color: var(--text);
-    padding: 4px 10px;
-    background: var(--section);
-    border-radius: 999px;
     white-space: nowrap;
   }
   .gold-star { color: #ffb300; }
@@ -428,20 +425,18 @@
     text-transform: uppercase;
     letter-spacing: 0.6px;
   }
-  .footer-ratings { display: flex; flex-direction: column; gap: 8px; }
+  .footer-ratings { display: flex; flex-direction: column; gap: 6px; }
   .rating-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 14px;
-    background: var(--source-bg);
-    border-radius: 6px;
+    padding: 4px 0;
     font-size: 14px;
   }
-  .rating-item .rating-label { color: var(--source); }
+  .rating-item .rating-label { color: var(--text); }
   .rating-item .rating-value {
     font-weight: 700;
-    color: var(--source);
+    color: var(--text);
   }
   .footer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .footer-actions button {
