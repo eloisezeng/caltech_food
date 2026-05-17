@@ -568,9 +568,10 @@
 <div class="modal-backdrop" id="summary-modal">
   <div class="modal">
     <button class="close" data-close="summary-modal" aria-label="Close">×</button>
-    <h3>This week's feedback</h3>
+    <h3 id="summary-title">This week's feedback</h3>
     <div class="summary-meta" id="summary-meta"></div>
     <div class="summary-body" id="summary-body">Loading…</div>
+    <div id="summary-archives" style="margin-top: 16px; font-size: 12px; color: var(--muted);"></div>
   </div>
 </div>
 
@@ -2602,23 +2603,65 @@ async function openRecentComments() {
 }
 
 async function openSummary() {
-  const body = document.getElementById("summary-body");
-  const meta = document.getElementById("summary-meta");
+  await loadSummaryFromUrl("data/summary.json", "This week's feedback");
+  // Archived-weeks list is independent of which summary the user just loaded.
+  loadSummaryArchives();
+}
+
+async function loadSummaryFromUrl(url, titleText) {
+  const title = document.getElementById("summary-title");
+  const body  = document.getElementById("summary-body");
+  const meta  = document.getElementById("summary-meta");
   openModal("summary-modal");
+  if (title) title.textContent = titleText;
   body.textContent = "Loading…";
   meta.textContent = "";
   try {
-    const r = await fetch("data/summary.json", { cache: "no-cache" });
+    const r = await fetch(url, { cache: "no-cache" });
     if (!r.ok) throw new Error("not generated yet");
     const j = await r.json();
     body.innerHTML = renderSummaryMarkdown(j.summary || "(no summary text)");
     const when = j.generatedAt ? new Date(j.generatedAt) : null;
-    const counts = [];
-    if (j.commentCount != null) counts.push(`${j.commentCount} comments`);
-    meta.textContent = (when ? `Generated ${when.toLocaleString()}  ·  ` : "") + counts.join("  ·  ");
+    const parts = [];
+    if (j.dateRange)             parts.push(j.dateRange);
+    if (j.commentCount != null)  parts.push(`${j.commentCount} comment${j.commentCount === 1 ? "" : "s"}`);
+    if (when)                    parts.push(`generated ${when.toLocaleString()}`);
+    meta.textContent = parts.join("  ·  ");
   } catch (e) {
-    body.textContent = "No summary yet — the daily refresh action generates it once feedback is collected.";
+    body.textContent = "No summary at " + url + " yet.";
     meta.textContent = "";
+  }
+}
+
+// Render the "Past weeks: May 10–16 · May 3–9 · …" list at the bottom of the
+// summary modal. Reads data/summaries/index.json which summary.mjs maintains.
+async function loadSummaryArchives() {
+  const host = document.getElementById("summary-archives");
+  if (!host) return;
+  host.textContent = "";
+  try {
+    const r = await fetch("data/summaries/index.json", { cache: "no-cache" });
+    if (!r.ok) return;
+    const j = await r.json();
+    const weeks = (j.weeks || []).slice().reverse(); // most recent first
+    if (!weeks.length) return;
+    const label = document.createElement("strong");
+    label.textContent = "Past weeks: ";
+    host.appendChild(label);
+    weeks.slice(0, 12).forEach((w, i) => {
+      if (i > 0) host.appendChild(document.createTextNode(" · "));
+      const a = document.createElement("a");
+      a.href = "#";
+      a.textContent = w.dateRange || w.weekId;
+      a.style.color = "var(--accent)";
+      a.addEventListener("click", e => {
+        e.preventDefault();
+        loadSummaryFromUrl(`data/summaries/${w.weekId}.json`, `Feedback for ${w.dateRange || w.weekId}`);
+      });
+      host.appendChild(a);
+    });
+  } catch {
+    /* no archives yet, fine */
   }
 }
 

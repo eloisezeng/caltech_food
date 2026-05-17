@@ -41,15 +41,19 @@ jobs:
           set -e
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Stage our freshly-generated file outside the working tree so we
-          # can safely reset-hard between push attempts. The summary is the
-          # only file this workflow touches.
-          mv data/summary.json /tmp/summary.json.new
+          # Stage everything we wrote outside the working tree so we can
+          # safely reset-hard between push attempts. The script may write
+          # data/summary.json AND (when a Sun-Sat boundary rolls over) one
+          # or more files under data/summaries/.
+          mkdir -p /tmp/staged
+          cp -r data/summary.json data/summaries /tmp/staged/ 2>/dev/null || true
           for i in 1 2 3; do
             git fetch origin main
             git reset --hard origin/main
-            cp /tmp/summary.json.new data/summary.json
-            git add data/summary.json
+            cp /tmp/staged/summary.json data/summary.json 2>/dev/null || true
+            mkdir -p data/summaries
+            cp -r /tmp/staged/summaries/. data/summaries/ 2>/dev/null || true
+            git add data/summary.json data/summaries 2>/dev/null || true
             if git diff --cached --quiet; then
               echo "Summary unchanged vs main."
               exit 0

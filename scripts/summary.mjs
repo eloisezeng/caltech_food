@@ -7,7 +7,7 @@
 //   FIREBASE_SERVICE_ACCOUNT  - JSON of a Firebase service account key
 //   GEMINI_API_KEY            - Google AI Studio API key (https://aistudio.google.com)
 
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from "node:fs";
 
 const SA = process.env.FIREBASE_SERVICE_ACCOUNT;
 const GEMINI = process.env.GEMINI_API_KEY;
@@ -29,11 +29,63 @@ const { getFirestore, Timestamp } = await import("firebase-admin/firestore");
 initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
-const sevenDaysAgo = Timestamp.fromMillis(Date.now() - 7 * 24 * 60 * 60 * 1000);
+// The week our report covers runs Sun 00:00 UTC → Sat 23:59:59 UTC. Today's
+// summary is for the week containing today (so on a Tuesday, the report
+// covers Sun-Tue, growing as the week progresses; on the final Saturday it
+// covers Sun-Sat).
+function currentWeekUTC() {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - now.getUTCDay()));
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 6);
+  end.setUTCHours(23, 59, 59, 999);
+  return { start, end };
+}
+
+function fmtShort(d) {
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+const { start: weekStart, end: weekEnd } = currentWeekUTC();
+const weekId = weekStart.toISOString().slice(0, 10); // e.g. "2026-05-17"
+const dateRange = `${fmtShort(weekStart)}–${fmtShort(weekEnd)}, ${weekEnd.getUTCFullYear()}`;
+console.log(`Report week: ${weekId} (${dateRange})`);
+
+// If the existing data/summary.json is from a previous week, archive it to
+// data/summaries/<weekId>.json and update the archive index — so each
+// completed Sun-Sat week ends up preserved instead of being overwritten.
+function archivePreviousIfDifferent() {
+  if (!existsSync("data/summary.json")) return;
+  let prev;
+  try { prev = JSON.parse(readFileSync("data/summary.json", "utf8")); }
+  catch { return; }
+  if (!prev.weekId || prev.weekId === weekId) return;
+  mkdirSync("data/summaries", { recursive: true });
+  const archivePath = `data/summaries/${prev.weekId}.json`;
+  writeFileSync(archivePath, JSON.stringify(prev, null, 2) + "\n");
+  console.log(`Archived previous summary to ${archivePath}`);
+  // Maintain a small index so the frontend can enumerate available weeks
+  // without listing the directory (GitHub Pages serves no directory index).
+  const indexPath = "data/summaries/index.json";
+  let index = { weeks: [] };
+  if (existsSync(indexPath)) {
+    try { index = JSON.parse(readFileSync(indexPath, "utf8")); } catch {}
+  }
+  if (!index.weeks.find(w => w.weekId === prev.weekId)) {
+    index.weeks.push({
+      weekId:       prev.weekId,
+      dateRange:    prev.dateRange    || prev.weekId,
+      commentCount: prev.commentCount || 0,
+    });
+    index.weeks.sort((a, b) => a.weekId.localeCompare(b.weekId));
+    writeFileSync(indexPath, JSON.stringify(index, null, 2) + "\n");
+  }
+}
+archivePreviousIfDifferent();
 
 async function loadRecent(collection) {
   const snap = await db.collection(collection)
-    .where("createdAt", ">=", sevenDaysAgo)
+    .where("createdAt", ">=", Timestamp.fromDate(weekStart))
     .orderBy("createdAt", "desc")
     .limit(500)
     .get();
@@ -58,15 +110,31 @@ const commentLines = comments.map(fmtComment).filter(Boolean);
 
 let summary = "";
 if (!commentLines.length) {
-  summary = "No feedback collected this week yet.";
+  summary = `No feedback collected for the week of ${dateRange} yet.`;
+} else if (commentLines.length < 3) {
+  // With only one or two comments, asking Gemini for a "detailed report"
+  // tempts it to invent dishes that aren't in the data. Skip the model
+  // and surface the raw comments instead.
+  summary = [
+    `## Week of ${dateRange}`,
+    "",
+    `Only ${commentLines.length} comment${commentLines.length === 1 ? "" : "s"}`
+      + " collected so far this week — too little for a structured report."
+      + " Raw feedback below:",
+    "",
+    ...commentLines.map(l => "- " + l),
+  ].join("\n");
 } else {
   const prompt = [
-    "You are writing a DETAILED weekly report on student feedback for Caltech",
-    "Dining Services. The audience is dining staff who need enough specificity",
-    "to act: which dishes were liked, which were disliked, why, and what to",
-    "change next week.",
+    `You are writing a DETAILED weekly report on student feedback for Caltech`,
+    `Dining Services covering ${dateRange}.`,
+    `The audience is dining staff who need enough specificity to act: which`,
+    `dishes were liked, which were disliked, why, and what to change next week.`,
     "",
     "Structure the report with these Markdown headings, in this order:",
+    "",
+    `## Week of ${dateRange}`,
+    "  One sentence stating the date range and the number of comments analyzed.",
     "",
     "## Overview",
     "  Two to four sentences summarizing the week's overall sentiment and the",
@@ -87,13 +155,16 @@ if (!commentLines.length) {
     "  with ⚠.",
     "",
     "Rules:",
-    "  - Use real dish / station names that appear in the data — do not invent.",
+    "  - **NEVER invent dishes, themes, or trends that aren't in the comments.**",
+    "    If you don't have evidence for a claim, omit it. It is better to write",
+    "    a short report than to hallucinate praise or complaints.",
+    "  - Use real dish / station names that appear in the data verbatim.",
     "  - Include short verbatim quotes where they sharpen the point.",
     "  - If a section has no relevant feedback, write \"No feedback this week\".",
     "  - Comment-target prefixes that begin with `__OVERALL__` or `__DAY__`",
     "    are menu-wide ratings; treat them as the overall House/Browne signal.",
     "",
-    "=== Comments and ratings (this week) ===",
+    `=== Comments and ratings for the week of ${dateRange} ===`,
     commentLines.join("\n"),
   ].join("\n");
 
@@ -120,6 +191,10 @@ if (!commentLines.length) {
 mkdirSync("data", { recursive: true });
 writeFileSync("data/summary.json", JSON.stringify({
   generatedAt: new Date().toISOString(),
+  weekId,
+  weekStart: weekStart.toISOString(),
+  weekEnd:   weekEnd.toISOString(),
+  dateRange,
   commentCount: comments.length,
   summary,
 }, null, 2) + "\n");
