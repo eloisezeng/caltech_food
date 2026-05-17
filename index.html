@@ -640,7 +640,15 @@
 </footer>
 
 <script>
+// Names in Date.getDay() order (0=Sun..6=Sat) — used wherever we need to
+// look up "today" via getDay(). Don't reorder this; use DAY_BUTTON_ORDER
+// for visual ordering instead.
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+// Visual order of the day buttons. Mon-Sun matches the calendar week the
+// dining team publishes against — picking "Sunday" while it's still
+// Saturday shows the UPCOMING Sunday's menu, which is what the dining
+// team's `Sunday` tab actually contains.
+const DAY_BUTTON_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 // These are the defaults; `loadConfig()` will override them at startup from
 // `data/sheets.json` (refreshed daily by the GitHub Action). The defaults exist
@@ -2153,9 +2161,14 @@ async function loadBrowne(day) {
 // week 0 = current week (Sun-Sat containing today), week 1 = next week.
 function dateForDay(day, week) {
   const now = new Date();
-  const todayIdx = now.getDay(); // 0=Sun..6=Sat
-  const targetIdx = DAYS.indexOf(day);
-  const diff = (targetIdx - todayIdx) + week * 7;
+  // Convert from Date.getDay()'s Sun=0 convention to a Mon=0 ordering so
+  // the "current week" is Mon-Sun. Without this, picking "Sunday" while
+  // it's still Saturday returns LAST Sunday — but the dining team's Sunday
+  // sheet publishes the UPCOMING Sunday's menu, so users saw a date
+  // mismatch (button said 5/10 but menu was 5/17).
+  const todayMon  = (now.getDay() + 6) % 7;
+  const targetMon = (DAYS.indexOf(day) + 6) % 7;
+  const diff = (targetMon - todayMon) + week * 7;
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff);
   return d;
 }
@@ -2517,7 +2530,7 @@ async function init() {
   const configReady = Promise.all([loadConfig(), loadImageCache()]);
   const today = DAYS[new Date().getDay()];
   const btnContainer = document.getElementById("day-buttons");
-  for (const day of DAYS) {
+  for (const day of DAY_BUTTON_ORDER) {
     const btn = document.createElement("button");
     btn.className = "day-btn";
     btn.dataset.day = day;
