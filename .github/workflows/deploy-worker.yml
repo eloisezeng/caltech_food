@@ -1,0 +1,79 @@
+name: Deploy feature-request Worker
+
+# Runs whenever the Worker code changes (or when triggered manually). It
+# uses cloudflare/wrangler-action to (a) push the Worker, (b) sync the
+# GITHUB_TOKEN + GEMINI_API_KEY secrets into the Worker, and (c) patch
+# index.html with the deployment URL on first publish so the frontend
+# starts using the Worker without a manual edit.
+#
+# One-time setup (do these once, then push as normal):
+#   Repo Settings → Secrets and variables → Actions
+#     Secrets:
+#       CLOUDFLARE_API_TOKEN  — https://dash.cloudflare.com/profile/api-tokens
+#                               → "Edit Cloudflare Workers" template
+#       WORKER_GITHUB_TOKEN   — https://github.com/settings/tokens?type=beta
+#                               → fine-grained, Repo = caltech_food,
+#                                 Permissions → Issues: Read and write
+#       GEMINI_API_KEY        — already added for the menu summary
+#     Variables:
+#       (none required — URL is auto-extracted from wrangler's deploy output)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "worker/**"
+      - ".github/workflows/deploy-worker.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write       # so we can commit the URL back to index.html on first deploy
+
+concurrency:
+  group: deploy-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Worker and sync secrets
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: worker
+          command: deploy
+          # These names map to the Worker's `env.<NAME>` lookups in
+          # feature-request.js. The values come from the workflow `env:` block.
+          secrets: |
+            GITHUB_TOKEN
+            GEMINI_API_KEY
+        env:
+          GITHUB_TOKEN:   ${{ secrets.WORKER_GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Patch FEATURE_REQUEST_WORKER URL on first deploy
+        run: |
+          set -e
+          OUT="${{ steps.deploy.outputs.command-output }}"
+          URL=$(echo "$OUT" | grep -oE 'https://[A-Za-z0-9._-]+\.workers\.dev' | head -1 || true)
+          if [ -z "$URL" ]; then
+            echo "Couldn't find a workers.dev URL in the deploy output — skipping."
+            exit 0
+          fi
+          echo "Worker URL: $URL"
+          # Only patch when the constant is still empty; we don't want to keep
+          # overwriting it on every Worker re-deploy.
+          if grep -q 'const FEATURE_REQUEST_WORKER = "";' index.html; then
+            sed -i "s|const FEATURE_REQUEST_WORKER = \"\";|const FEATURE_REQUEST_WORKER = \"$URL\";|" index.html
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html
+            git commit -m "Wire FEATURE_REQUEST_WORKER URL ($URL) after first deploy"
+            git push
+          else
+            echo "FEATURE_REQUEST_WORKER already set — leaving it alone."
+          fi
