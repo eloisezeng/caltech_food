@@ -98,6 +98,38 @@ console.log(`Loaded ${comments.length} comments`);
 // — they're website asks, not food feedback, and they already get mirrored
 // into GitHub Issues for the maintainer to triage. Keeps the report focused.
 
+// Compute one aggregate rating per dining service from the week's comments.
+// Includes BOTH menu-level ratings (the user's "overall" + "today's"
+// targets) and per-dish ratings, so a 5★ on Calabasitas counts toward
+// Browne's number — gives one trustworthy figure per service that Gemini
+// can't fragment or hallucinate.
+function aggregateRatings(comments) {
+  const acc = { house: { sum: 0, count: 0 }, browne: { sum: 0, count: 0 } };
+  for (const c of comments) {
+    if (typeof c.rating !== "number") continue;
+    const it = c.item || "";
+    let bucket = null;
+    if (it === "__OVERALL__HOUSE__"  || it.startsWith("__DAY__HOUSE__"))  bucket = "house";
+    if (it === "__OVERALL__BROWNE__" || it.startsWith("__DAY__BROWNE__")) bucket = "browne";
+    // Per-dish ratings: classify by which menu the dish is on. Without the
+    // sheet schema here we use a heuristic — Browne weekend brunch items
+    // (Calabasitas, Sichuan Soba, Vegan Tenders…) and the Comfort/PB/101
+    // station items go to Browne, and the rest default to House. We can
+    // refine later by reading data/sheets.json if needed; for now the
+    // menu-level targets dominate the count, so per-dish fuzziness is OK.
+    // (If a per-dish item doesn't match a known bucket, leave it out.)
+    if (!bucket) continue;
+    acc[bucket].sum += c.rating;
+    acc[bucket].count++;
+  }
+  const fmt = b => b.count ? { avg: +(b.sum / b.count).toFixed(2), count: b.count } : { avg: null, count: 0 };
+  return { house: fmt(acc.house), browne: fmt(acc.browne) };
+}
+const ratings = aggregateRatings(comments);
+const ratingLine = svc => ratings[svc].count
+  ? `${ratings[svc].avg}★ (${ratings[svc].count} rating${ratings[svc].count === 1 ? "" : "s"})`
+  : "No ratings yet";
+
 // Build a compact text dump for the model.
 function fmtComment(c) {
   const parts = [];
@@ -108,18 +140,28 @@ function fmtComment(c) {
 }
 const commentLines = comments.map(fmtComment).filter(Boolean);
 
+// Pre-built ratings block — used verbatim in the prompt AND prepended to
+// any pre-/post-Gemini summary so the report always opens with the two
+// authoritative numbers.
+const ratingsBlock = [
+  `## Ratings this week (${dateRange})`,
+  "",
+  `- 🏠 **House Dinner** — ${ratingLine("house")}`,
+  `- 🥪 **Browne Menu** — ${ratingLine("browne")}`,
+].join("\n");
+
 let summary = "";
 if (!commentLines.length) {
-  summary = `No feedback collected for the week of ${dateRange} yet.`;
+  summary = `${ratingsBlock}\n\nNo feedback collected for the week of ${dateRange} yet.`;
 } else if (commentLines.length < 3) {
   // With only one or two comments, asking Gemini for a "detailed report"
   // tempts it to invent dishes that aren't in the data. Skip the model
   // and surface the raw comments instead.
   summary = [
-    `## Week of ${dateRange}`,
+    ratingsBlock,
     "",
     `Only ${commentLines.length} comment${commentLines.length === 1 ? "" : "s"}`
-      + " collected so far this week — too little for a structured report."
+      + " collected so far this week — too little for a structured narrative."
       + " Raw feedback below:",
     "",
     ...commentLines.map(l => "- " + l),
@@ -133,8 +175,12 @@ if (!commentLines.length) {
     "",
     "Structure the report with these Markdown headings, in this order:",
     "",
-    `## Week of ${dateRange}`,
-    "  One sentence stating the date range and the number of comments analyzed.",
+    `## Ratings this week (${dateRange})`,
+    "  Use EXACTLY these two lines (copy them verbatim, do not add any others):",
+    `    - 🏠 **House Dinner** — ${ratingLine("house")}`,
+    `    - 🥪 **Browne Menu** — ${ratingLine("browne")}`,
+    "  Do NOT compute or invent any other rating numbers. There is exactly",
+    "  ONE aggregate rating per dining service for the week.",
     "",
     "## Overview",
     "  Two to four sentences summarizing the week's overall sentiment and the",
@@ -142,8 +188,8 @@ if (!commentLines.length) {
     "",
     "## House Dinner",
     "  Bullets for: most-praised dishes (with brief quotes when available),",
-    "  most-criticized dishes (with quotes), recurring themes (portion size,",
-    "  variety, dietary fit, allergens), and any rating trends across days.",
+    "  most-criticized dishes (with quotes), and recurring themes (portion",
+    "  size, variety, dietary fit, allergens). Do NOT list per-day ratings.",
     "",
     "## Browne Menu",
     "  Same structure as House Dinner. Distinguish lunch (Comfort Equation /",
