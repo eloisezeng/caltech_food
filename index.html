@@ -450,6 +450,27 @@
     cursor: pointer;
   }
   .rate-btn:hover { background: var(--accent); color: white; }
+  /* Floating "Suggest a feature" pinned to the bottom-right of the viewport
+     so it's always one click away regardless of where you've scrolled. */
+  .float-feature-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    z-index: 999;
+  }
+  .float-feature-btn:hover { background: var(--accent-hover); }
+  @media (max-width: 600px) {
+    .float-feature-btn { bottom: 14px; right: 14px; padding: 10px 18px; font-size: 13px; }
+  }
   .footer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .footer-actions button {
     background: var(--surface);
@@ -535,6 +556,8 @@
 </style>
 </head>
 <body>
+
+<button type="button" class="float-feature-btn" id="float-feature-btn" hidden>💡 Suggest a feature</button>
 
 <header>
   <h1>Caltech House Dinner and Browne Menus</h1>
@@ -2407,16 +2430,18 @@ function wireFooterActions() {
   // Firebase-gated buttons
   // Feature-request button is gated on the Worker being configured;
   // Firebase is no longer required for that flow.
+  // "Suggest a feature" lives in a fixed floating button (#float-feature-btn)
+  // instead of inline in the footer actions row — see the body markup.
   if (FEATURE_REQUEST_WORKER) {
-    const frBtn = document.createElement("button");
-    frBtn.type = "button";
-    frBtn.textContent = "💡 Suggest a feature";
-    frBtn.addEventListener("click", () => {
-      document.getElementById("feature-text").value = "";
-      document.getElementById("feature-msg").textContent = "";
-      openModal("feature-modal");
-    });
-    host.appendChild(frBtn);
+    const floatBtn = document.getElementById("float-feature-btn");
+    if (floatBtn) {
+      floatBtn.hidden = false;
+      floatBtn.addEventListener("click", () => {
+        document.getElementById("feature-text").value = "";
+        document.getElementById("feature-msg").textContent = "";
+        openModal("feature-modal");
+      });
+    }
   }
   if (firebaseEnabled()) {
     // Inline "Rate" buttons live on each rating row in the footer-ratings
