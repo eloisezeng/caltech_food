@@ -450,27 +450,6 @@
     cursor: pointer;
   }
   .rate-btn:hover { background: var(--accent); color: white; }
-  /* Floating "Suggest a feature" pinned to the bottom-right of the viewport
-     so it's always one click away regardless of where you've scrolled. */
-  .float-feature-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 999px;
-    padding: 12px 22px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-    z-index: 999;
-  }
-  .float-feature-btn:hover { background: var(--accent-hover); }
-  @media (max-width: 600px) {
-    .float-feature-btn { bottom: 14px; right: 14px; padding: 10px 18px; font-size: 13px; }
-  }
   .footer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .footer-actions button {
     background: var(--surface);
@@ -557,8 +536,6 @@
 </head>
 <body>
 
-<button type="button" class="float-feature-btn" id="float-feature-btn" hidden>💡 Suggest a feature</button>
-
 <header>
   <h1>Caltech House Dinner and Browne Menus</h1>
   <div class="week-toggle" id="week-toggle">
@@ -575,12 +552,12 @@
 <div class="modal-backdrop" id="feature-modal">
   <div class="modal">
     <button class="close" data-close="feature-modal" aria-label="Close">×</button>
-    <h3>Suggest a feature</h3>
+    <h3>Report a bug or feature</h3>
     <p style="font-size: 13px; color: var(--muted); margin: 0 0 12px;">
-      Got an idea for this site? Send it here. The site maintainer reviews
-      requests and implements popular ones.
+      Spotted a bug or have an idea for this site? Send it here. The site
+      maintainer reviews each one and implements popular requests.
     </p>
-    <textarea id="feature-text" placeholder="e.g., Add a dark mode toggle…"></textarea>
+    <textarea id="feature-text" placeholder="e.g., Sunday's menu is wrong / Add a dark mode toggle…"></textarea>
     <div class="actions">
       <span class="form-msg" id="feature-msg" style="color: var(--muted); font-size: 12px; margin-right: 12px;"></span>
       <button type="button" id="feature-submit">Submit</button>
@@ -2430,18 +2407,16 @@ function wireFooterActions() {
   // Firebase-gated buttons
   // Feature-request button is gated on the Worker being configured;
   // Firebase is no longer required for that flow.
-  // "Suggest a feature" lives in a fixed floating button (#float-feature-btn)
-  // instead of inline in the footer actions row — see the body markup.
   if (FEATURE_REQUEST_WORKER) {
-    const floatBtn = document.getElementById("float-feature-btn");
-    if (floatBtn) {
-      floatBtn.hidden = false;
-      floatBtn.addEventListener("click", () => {
-        document.getElementById("feature-text").value = "";
-        document.getElementById("feature-msg").textContent = "";
-        openModal("feature-modal");
-      });
-    }
+    const frBtn = document.createElement("button");
+    frBtn.type = "button";
+    frBtn.textContent = "💡 Report bug or feature";
+    frBtn.addEventListener("click", () => {
+      document.getElementById("feature-text").value = "";
+      document.getElementById("feature-msg").textContent = "";
+      openModal("feature-modal");
+    });
+    host.appendChild(frBtn);
   }
   if (firebaseEnabled()) {
     // Inline "Rate" buttons live on each rating row in the footer-ratings
