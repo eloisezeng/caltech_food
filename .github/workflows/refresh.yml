@@ -33,11 +33,11 @@ jobs:
           node-version: "20"
       - run: node scripts/refresh.mjs
       - name: Install firebase-admin for summary script
+        # Always install — the script early-exits when the secrets are
+        # missing, so it's cheaper to install unconditionally than to gate
+        # on env vars that GitHub Actions evaluates before the step env
+        # block is wired up (the previous `if:` here never matched).
         run: npm install firebase-admin --no-save --silent
-        if: ${{ env.FIREBASE_SERVICE_ACCOUNT != '' && env.GEMINI_API_KEY != '' }}
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Generate weekly feedback summary
         run: node scripts/summary.mjs
         env:

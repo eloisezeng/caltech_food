@@ -577,6 +577,11 @@
   <div class="modal">
     <button class="close" data-close="menu-comment-modal" aria-label="Close">×</button>
     <h3 id="menu-comment-title">Comment</h3>
+    <div id="menu-comment-rating" class="rating-item" style="margin-bottom:14px; display:none;">
+      <div class="rating-fill"></div>
+      <span class="rating-label">Overall rating</span>
+      <span class="rating-value" id="menu-comment-rating-value">—</span>
+    </div>
     <div id="menu-comment-host"></div>
   </div>
 </div>
@@ -829,12 +834,22 @@ async function postComment({ item, rating, text, imageUrl }) {
   if (!fb) throw new Error("Comments aren't configured for this site yet.");
   const user = await AUTH_READY;
   if (!user) throw new Error("Couldn't sign in anonymously — try refreshing.");
-  // One rating per user per item — they can still post text-only comments,
-  // and they can edit the existing rating instead.
+  const hasText  = !!(text && text.trim());
+  const hasImage = !!imageUrl;
+  // Upsert behaviour: if the user already has a rating-bearing doc for this
+  // item and they're submitting a new rating, update the existing doc
+  // instead of erroring. Preserves their existing text/image when no new
+  // ones are provided, so "rate again with a different number of stars"
+  // just works without a separate Edit step.
   if (rating) {
     const existing = await findUsersRatingFor(item);
     if (existing) {
-      throw new Error("You've already rated this. Edit your previous comment to change your rating.");
+      await updateComment(existing.id, {
+        rating,
+        text:     hasText  ? text     : (existing.text     || ""),
+        imageUrl: hasImage ? imageUrl : (existing.imageUrl || ""),
+      });
+      return;
     }
   }
   const { collection, addDoc, serverTimestamp } = fb.fs;
@@ -848,9 +863,9 @@ async function postComment({ item, rating, text, imageUrl }) {
     // "blocked" within ~15 min. Until then comments display normally.
     moderationStatus: "pending",
   };
-  if (rating)               doc.rating   = Math.max(1, Math.min(5, Number(rating)));
-  if (text && text.trim())  doc.text     = String(text).slice(0, 2000);
-  if (imageUrl)             doc.imageUrl = String(imageUrl).slice(0, 500);
+  if (rating)  doc.rating   = Math.round(Math.max(1, Math.min(5, Number(rating))));
+  if (hasText) doc.text     = String(text).slice(0, 2000);
+  if (hasImage) doc.imageUrl = String(imageUrl).slice(0, 500);
   await addDoc(collection(fb.db, "comments"), doc);
 }
 
@@ -1399,13 +1414,24 @@ async function toggleComments(item, container, btn) {
 }
 
 async function refreshComments(item, container, btn) {
+  // Per-container token: a rapid double-click on the 💬 button can fire two
+  // refreshComments at once; we want the later one to win so the earlier
+  // one drops its results when it sees its token is stale.
+  const token = Math.random().toString(36).slice(2);
+  container.dataset.loadToken = token;
   container.innerHTML = '<div class="form-msg">Loading…</div>';
   let comments = [];
   try { comments = await fetchCommentsFor(item); }
-  catch (e) { container.innerHTML = '<div class="form-msg error">Could not load comments: ' + e.message + '</div>'; return; }
+  catch (e) {
+    if (container.dataset.loadToken !== token) return;
+    container.innerHTML = '<div class="form-msg error">Could not load comments: ' + e.message + '</div>';
+    return;
+  }
+  if (container.dataset.loadToken !== token) return;
   // Identify the current user's existing rating-comment for this item so
-  // the form can hide the star widget and steer them to Edit instead.
+  // the form can pre-fill the star widget (and upsert on Post).
   const user = await getCurrentUser();
+  if (container.dataset.loadToken !== token) return;
   const userRating = user ? comments.find(c => c.authorId === user.uid && typeof c.rating === "number") : undefined;
   container.innerHTML = "";
   container.appendChild(buildCommentForm({ item, container, btn, userRating }));
@@ -1414,7 +1440,7 @@ async function refreshComments(item, container, btn) {
   await renderCommentsInto(listEl, comments, { item, container, btn });
   container.appendChild(listEl);
   if (btn) updateCommentCount(btn, comments.length);
-  // If this was a menu-level target (overall/day), bump the card's avg rating.
+  // If this was a menu-level target (overall/day), bump the footer rating.
   refreshCardHeadForItem(item);
 }
 
@@ -1434,13 +1460,16 @@ function refreshCardHeadForItem(itemKey) {
 function buildCommentForm({ item, container, btn, existing, onDone, userRating }) {
   const form = document.createElement("div");
   form.className = "comment-form";
-  // Star rating — only shown when (a) editing the rated comment itself, or
-  // (b) the user hasn't yet rated this item. Text-only adds always allowed.
+  // Star widget. Always shown — postComment will upsert into the user's
+  // existing rating-doc when they re-submit, so picking a new number always
+  // "just works" without an explicit edit step. Pre-fill from the comment
+  // being edited (existing) or the user's current rating (userRating).
   const stars = document.createElement("div");
   stars.className = "star-row";
   stars.setAttribute("role", "radiogroup");
   stars.setAttribute("aria-label", "Rating");
-  stars.dataset.rating = existing?.rating ? String(existing.rating) : "";
+  const preset = existing?.rating ?? userRating?.rating ?? "";
+  stars.dataset.rating = preset ? String(preset) : "";
   for (let i = 1; i <= 5; i++) {
     const s = document.createElement("span");
     s.className = "star";
@@ -1449,26 +1478,11 @@ function buildCommentForm({ item, container, btn, existing, onDone, userRating }
     s.addEventListener("click", () => { stars.dataset.rating = String(i); });
     stars.appendChild(s);
   }
-  const hideStars = userRating && !existing;
-  if (!hideStars) form.appendChild(stars);
-  else {
+  form.appendChild(stars);
+  if (userRating && !existing) {
     const note = document.createElement("div");
     note.className = "form-msg";
-    note.innerHTML = `You rated this ${"★".repeat(userRating.rating)}${"☆".repeat(5 - userRating.rating)}. ` +
-                     `<a href="#" data-edit-mine="1">Edit your rating</a> instead.`;
-    note.querySelector("[data-edit-mine]").addEventListener("click", e => {
-      e.preventDefault();
-      // Replace the "you already rated" form with a real edit form bound to
-      // their existing rating, so they can change it in place.
-      const editForm = buildCommentForm({
-        item,
-        container,
-        btn,
-        existing: userRating,
-        onDone: () => refreshComments(item, container, btn),
-      });
-      form.replaceWith(editForm);
-    });
+    note.textContent = `Your current rating: ${"★".repeat(userRating.rating)}${"☆".repeat(5 - userRating.rating)} — click a different star to change it.`;
     form.appendChild(note);
   }
   // Textarea
@@ -1577,7 +1591,12 @@ function buildCommentForm({ item, container, btn, existing, onDone, userRating }
 }
 
 async function renderCommentsInto(listEl, comments, ctx) {
-  if (!comments.length) {
+  // Hide rating-only docs (no text, no image) from the comment list — they
+  // exist purely to drive the average rating, not as comments. The user's
+  // own rating is still surfaced via the form pre-fill / "your rating"
+  // hint, so they can still see and change it.
+  const visible = comments.filter(c => (c.text && c.text.trim()) || c.imageUrl);
+  if (!visible.length) {
     const empty = document.createElement("div");
     empty.className = "form-msg";
     empty.textContent = "No comments yet — be the first.";
@@ -1586,7 +1605,7 @@ async function renderCommentsInto(listEl, comments, ctx) {
   }
   const user = await getCurrentUser();
   const myUid = user?.uid;
-  for (const c of comments) {
+  for (const c of visible) {
     listEl.appendChild(renderComment(c, ctx, myUid));
   }
 }
@@ -1878,7 +1897,14 @@ function extract101ForDay(rows, day) {
   return entries;
 }
 
+// Token bumped on every load* call. If the user clicks several days in
+// rapid succession, a later fetch's response is dropped on arrival when
+// its token doesn't match the most-recently-started one. Prevents the
+// "I clicked Tuesday but I'm seeing Monday's menu" race.
+const loadTokens = { house: 0, browne: 0 };
+
 async function loadHouse(day) {
+  const token = ++loadTokens.house;
   const el = document.getElementById("house-menu");
   el.innerHTML = '<div class="loading">Loading…</div>';
   const sheet = currentWeek === 0 ? HOUSE_SHEET : HOUSE_SHEET_NEXT;
@@ -1890,6 +1916,7 @@ async function loadHouse(day) {
   }
   try {
     const rows = await fetchCsv(sheet, gid);
+    if (token !== loadTokens.house) return; // a newer load won
     const entries = extractAllEntries(rows);
     el.innerHTML = "";
     if (!entries.length) {
@@ -1898,6 +1925,7 @@ async function loadHouse(day) {
       el.appendChild(renderGroupedEntries(entries));
     }
   } catch (err) {
+    if (token !== loadTokens.house) return;
     el.innerHTML = '<div class="error">Could not load menu: ' + err.message + '</div>';
   }
 }
@@ -1962,6 +1990,7 @@ function ensureRatingFill(bar) {
 }
 
 async function loadBrowne(day) {
+  const token = ++loadTokens.browne;
   const el = document.getElementById("browne-menu");
   el.innerHTML = '<div class="loading">Loading…</div>';
   const map = currentWeek === 0 ? BROWNE_DAY_GIDS : BROWNE_DAY_GIDS_NEXT;
@@ -2079,9 +2108,13 @@ function selectDay(day) {
     setupTodayCommentsButton("house", day);
   } else {
     // Hide the stale House "Today's comments" button so a leftover click
-    // doesn't open the previous weekday's thread.
+    // doesn't open the previous weekday's thread, and clear any in-flight
+    // House render so a slow earlier-week response can't show up later.
     const houseTodayBtn = document.getElementById("house-today");
     if (houseTodayBtn) { houseTodayBtn.hidden = true; houseTodayBtn.onclick = null; }
+    ++loadTokens.house; // invalidates any pending loadHouse fetch
+    const houseMenu = document.getElementById("house-menu");
+    if (houseMenu) houseMenu.innerHTML = "";
   }
   loadBrowne(day);
   setupTodayCommentsButton("browne", day);
@@ -2089,6 +2122,10 @@ function selectDay(day) {
 }
 
 function selectView(view) {
+  // On weekends only Browne is visible — picking "House" would hide it and
+  // leave a blank page. Quietly refuse and keep the user on Browne.
+  const isWeekend = currentDay === "Saturday" || currentDay === "Sunday";
+  if (isWeekend && view === "house") return;
   currentView = view;
   const mainEl = document.querySelector("main");
   mainEl.classList.toggle("show-house",  view === "house");
@@ -2287,6 +2324,10 @@ async function openMenuComment(itemKey, title) {
   const host = document.getElementById("menu-comment-host");
   host.innerHTML = '<div class="form-msg">Loading…</div>';
   openModal("menu-comment-modal");
+  // Show the running average rating at the top of the modal — combines the
+  // menu's overall target with the per-day target so it lines up with what
+  // the footer bars show.
+  updateMenuCommentRating(itemKey);
   try {
     const comments = await fetchCommentsFor(itemKey);
     const user = await getCurrentUser();
@@ -2306,10 +2347,41 @@ async function openMenuComment(itemKey, title) {
     list.className = "comment-list";
     await renderCommentsInto(list, comments, ctx);
     host.appendChild(list);
-    // Re-fetch the card-head rating in case a comment was just posted/edited.
+    // Re-fetch the rating bars in case a comment was just posted/edited.
     refreshCardHeadForItem(itemKey);
+    updateMenuCommentRating(itemKey);
   } catch (e) {
     host.innerHTML = '<div class="form-msg error">Could not load: ' + e.message + '</div>';
+  }
+}
+
+// Fetch and render the rating bar at the top of the menu-comment modal.
+// For day-level / overall items, pairs the clicked item with its sibling so
+// the average matches what the footer shows.
+async function updateMenuCommentRating(itemKey) {
+  const wrap = document.getElementById("menu-comment-rating");
+  if (!wrap) return;
+  const value = document.getElementById("menu-comment-rating-value");
+  const fill  = wrap.querySelector(".rating-fill");
+  let keys = [itemKey];
+  if (itemKey === ITEM_OVERALL_HOUSE  && currentDay) keys.push(ITEM_DAY_HOUSE(isoDate(currentDay, currentWeek)));
+  if (itemKey === ITEM_OVERALL_BROWNE && currentDay) keys.push(ITEM_DAY_BROWNE(isoDate(currentDay, currentWeek)));
+  if (itemKey.startsWith("__DAY__HOUSE__"))   keys.push(ITEM_OVERALL_HOUSE);
+  if (itemKey.startsWith("__DAY__BROWNE__"))  keys.push(ITEM_OVERALL_BROWNE);
+  // Only show the bar for menu-wide targets — individual dishes don't need it
+  // (the user's already in the per-item comment thread).
+  const isMenuWide = keys.some(k =>
+    k === ITEM_OVERALL_HOUSE || k === ITEM_OVERALL_BROWNE ||
+    k.startsWith("__DAY__HOUSE__") || k.startsWith("__DAY__BROWNE__"));
+  if (!isMenuWide) { wrap.style.display = "none"; return; }
+  wrap.style.display = "";
+  try {
+    const { avg, count } = await fetchAverageRating(keys);
+    value.textContent = count ? `★ ${avg.toFixed(1)} (${count})` : "No ratings yet";
+    if (fill) fill.style.width = avg ? `${(avg / 5) * 100}%` : "0%";
+  } catch {
+    value.textContent = "—";
+    if (fill) fill.style.width = "0%";
   }
 }
 

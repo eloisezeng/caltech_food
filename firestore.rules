@@ -36,8 +36,13 @@ service cloud.firestore {
         && (!('text'     in request.resource.data) || (request.resource.data.text     is string  && request.resource.data.text.size()     <= 2000))
         && (!('rating'   in request.resource.data) || (request.resource.data.rating   is int     && request.resource.data.rating >= 1 && request.resource.data.rating <= 5))
         && (!('imageUrl' in request.resource.data) || (request.resource.data.imageUrl is string  && request.resource.data.imageUrl.size() <= 500))
-        // Edits reset moderation to "pending" so the Action re-checks.
-        && (!('moderationStatus' in request.resource.data) || request.resource.data.moderationStatus == "pending");
+        // Caps on optional fields the client can include.
+        && (!('username' in request.resource.data) || (request.resource.data.username is string  && request.resource.data.username.size() <= 40))
+        && (!('week'     in request.resource.data) || (request.resource.data.week     is string  && request.resource.data.week.size()     <= 16))
+        // REQUIRE moderation reset on every edit — otherwise a user could
+        // sneak banned text into a previously-approved doc by omitting the
+        // field and relying on the old "ok" status sticking.
+        && request.resource.data.moderationStatus == "pending";
 
       allow delete: if
         request.auth != null
