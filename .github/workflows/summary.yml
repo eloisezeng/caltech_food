@@ -38,19 +38,25 @@ jobs:
           GEMINI_API_KEY:           ${{ secrets.GEMINI_API_KEY }}
       - name: Commit
         run: |
+          set -e
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/summary.json
-          if git diff --staged --quiet; then
-            echo "No change."
-          else
+          # Stage our freshly-generated file outside the working tree so we
+          # can safely reset-hard between push attempts. The summary is the
+          # only file this workflow touches.
+          mv data/summary.json /tmp/summary.json.new
+          for i in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/summary.json.new data/summary.json
+            git add data/summary.json
+            if git diff --cached --quiet; then
+              echo "Summary unchanged vs main."
+              exit 0
+            fi
             git commit -m "Refresh weekly summary"
-            # Two concurrent workflows can land commits while we're working;
-            # rebase before pushing so we don't fail with a non-fast-forward.
-            for i in 1 2 3; do
-              git pull --rebase origin main && git push && exit 0
-              echo "Push attempt $i lost the race; retrying…"
-              sleep 3
-            done
-            echo "Push still failed after 3 retries." && exit 1
-          fi
+            git push && exit 0
+            echo "Push attempt $i lost the race; retrying…"
+            sleep 3
+          done
+          echo "Push failed after 3 retries." && exit 1
