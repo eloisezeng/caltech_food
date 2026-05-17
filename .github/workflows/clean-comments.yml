@@ -1,0 +1,43 @@
+name: Clean comments (maintenance)
+
+# Manual workflow_dispatch only — never runs on its own. Use it to wipe
+# test data or remove abusive comments that the model missed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      usernames:
+        description: 'Comma-separated usernames whose comments to delete (e.g. "ds, Anonymous, "). Empty token matches empty/missing username.'
+        required: false
+        default: ""
+      items:
+        description: 'Comma-separated `item` field values to delete (e.g. "__OVERALL__HOUSE__,Beef Stroganoff").'
+        required: false
+        default: ""
+      delete_all:
+        description: 'DANGEROUS: delete ALL comments. Only set when you really mean it.'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: clean-comments
+  cancel-in-progress: false
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install firebase-admin --no-save --silent
+      - run: node scripts/clean-comments.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          CLEAN_USERNAMES: ${{ inputs.usernames }}
+          CLEAN_ITEMS:     ${{ inputs.items }}
+          CLEAN_ALL:       ${{ inputs.delete_all }}

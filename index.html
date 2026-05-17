@@ -428,16 +428,28 @@
   .footer-ratings { display: flex; flex-direction: column; gap: 6px; }
   .rating-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 12px;
     padding: 4px 0;
     font-size: 14px;
+    flex-wrap: wrap;
   }
   .rating-item .rating-label { color: var(--text); }
   .rating-item .rating-value {
     font-weight: 700;
     color: var(--text);
   }
+  .rate-btn {
+    background: var(--surface);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .rate-btn:hover { background: var(--accent); color: white; }
   .footer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .footer-actions button {
     background: var(--surface);
@@ -626,10 +638,12 @@
       <div class="rating-item">
         <span class="rating-label">🏠 House Dinner</span>
         <span class="rating-value" id="house-avg">—</span>
+        <button type="button" class="rate-btn" id="house-rate" hidden>Rate</button>
       </div>
       <div class="rating-item">
         <span class="rating-label">🥪 Browne Menu</span>
         <span class="rating-value" id="browne-avg">—</span>
+        <button type="button" class="rate-btn" id="browne-rate" hidden>Rate</button>
       </div>
     </div>
   </div>
@@ -2364,17 +2378,18 @@ function wireFooterActions() {
     host.appendChild(frBtn);
   }
   if (firebaseEnabled()) {
-    const houseOverall = document.createElement("button");
-    houseOverall.type = "button";
-    houseOverall.textContent = "⭐ Rate House (overall)";
-    houseOverall.addEventListener("click", () => openMenuComment(ITEM_OVERALL_HOUSE, "House dining in general"));
-    host.appendChild(houseOverall);
-
-    const browneOverall = document.createElement("button");
-    browneOverall.type = "button";
-    browneOverall.textContent = "⭐ Rate Browne (overall)";
-    browneOverall.addEventListener("click", () => openMenuComment(ITEM_OVERALL_BROWNE, "Browne dining in general"));
-    host.appendChild(browneOverall);
+    // Inline "Rate" buttons live on each rating row in the footer-ratings
+    // block — see the #house-rate / #browne-rate elements in the HTML.
+    const houseRate = document.getElementById("house-rate");
+    if (houseRate) {
+      houseRate.hidden = false;
+      houseRate.onclick = () => openMenuComment(ITEM_OVERALL_HOUSE, "House dining in general");
+    }
+    const browneRate = document.getElementById("browne-rate");
+    if (browneRate) {
+      browneRate.hidden = false;
+      browneRate.onclick = () => openMenuComment(ITEM_OVERALL_BROWNE, "Browne dining in general");
+    }
 
     const nameBtn = document.createElement("button");
     nameBtn.type = "button";
