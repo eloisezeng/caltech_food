@@ -684,7 +684,7 @@ const IMAGES_ENABLED = false;
 // Cloudflare Worker that receives "💡 Suggest a feature" submissions and
 // creates a triaged GitHub issue directly (see /worker/README.md for setup).
 // Leave empty to hide the feature-request button.
-const FEATURE_REQUEST_WORKER = "";
+const FEATURE_REQUEST_WORKER = "https://caltech-food-feature-request.eloise-zeng.workers.dev";
 
 function firebaseEnabled() {
   return FIREBASE_CONFIG && typeof FIREBASE_CONFIG.apiKey === "string"
