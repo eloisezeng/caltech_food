@@ -39,6 +39,10 @@ jobs:
         # block is wired up (the previous `if:` here never matched).
         run: npm install firebase-admin --no-save --silent
       - name: Generate weekly feedback summary
+        # A Gemini outage / quota issue here shouldn't block the menu-data
+        # commit step below; the old summary keeps serving until the next
+        # successful run.
+        continue-on-error: true
         run: node scripts/summary.mjs
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

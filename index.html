@@ -161,6 +161,17 @@
     cursor: pointer;
   }
   .menu-card .today-comments:hover { background: var(--accent); color: white; }
+  /* Today's-rating chip in the card head (Google Maps style: "4.2 ★ (12)") */
+  .day-rating {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    padding: 4px 10px;
+    background: var(--section);
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .gold-star { color: #ffb300; }
   .source-label {
     background: var(--source-bg);
     color: var(--source);
@@ -591,6 +602,7 @@
     <div class="card-head">
       <h2>House Dinner Menu</h2>
       <div class="head-meta">
+        <span class="day-rating" id="house-day-rating" hidden></span>
         <button type="button" class="today-comments" id="house-today" hidden>💬 Today's comments</button>
       </div>
     </div>
@@ -604,6 +616,7 @@
     <div class="card-head">
       <h2>Browne Menu</h2>
       <div class="head-meta">
+        <span class="day-rating" id="browne-day-rating" hidden></span>
         <button type="button" class="today-comments" id="browne-today" hidden>💬 Today's comments</button>
       </div>
     </div>
@@ -616,7 +629,7 @@
 
 <footer class="page-footer">
   <div class="footer-block">
-    <h3>Average ratings</h3>
+    <h3>Overall ratings</h3>
     <div class="footer-ratings">
       <div class="rating-item">
         <span class="rating-label">🏠 House Dinner</span>
@@ -727,7 +740,11 @@ async function getFirebase() {
 async function getCurrentUser() {
   const fb = await getFirebase();
   if (!fb) return null;
-  return AUTH_READY;
+  // If AUTH_READY resolved to null (e.g. slow boot timeout) but the auth
+  // observer has since received a user, surface that user instead of
+  // permanently locking the comment UI.
+  const ready = await AUTH_READY;
+  return ready || fb.auth.currentUser || null;
 }
 
 function isoWeekKey(d) {
@@ -791,7 +808,7 @@ async function fetchCommentsFor(item) {
 async function findUsersRatingFor(item) {
   const fb = await getFirebase();
   if (!fb) return undefined;
-  const user = await AUTH_READY;
+  const user = await getCurrentUser();
   if (!user) return undefined;
   const { collection, query, where, limit, getDocsFromServer, getDocs } = fb.fs;
   const q = query(
@@ -832,7 +849,7 @@ async function postComment({ item, rating, text, imageUrl }) {
   checkClientWordlist(text, getUsername());
   const fb = await getFirebase();
   if (!fb) throw new Error("Comments aren't configured for this site yet.");
-  const user = await AUTH_READY;
+  const user = await getCurrentUser();
   if (!user) throw new Error("Couldn't sign in anonymously — try refreshing.");
   const hasText  = !!(text && text.trim());
   const hasImage = !!imageUrl;
@@ -873,7 +890,7 @@ async function updateComment(id, { rating, text, imageUrl }) {
   checkClientWordlist(text, getUsername());
   const fb = await getFirebase();
   if (!fb) throw new Error("Not configured.");
-  const user = await AUTH_READY;
+  const user = await getCurrentUser();
   if (!user) throw new Error("Not signed in.");
   // Only check uniqueness when the user is ADDING a rating to a comment that
   // didn't have one before. Editing the rating on a comment that already had
@@ -898,7 +915,7 @@ async function updateComment(id, { rating, text, imageUrl }) {
     // Re-classify after an edit since the text might have changed.
     moderationStatus: "pending",
   };
-  patch.rating   = rating ? Math.max(1, Math.min(5, Number(rating))) : deleteField();
+  patch.rating   = rating ? Math.round(Math.max(1, Math.min(5, Number(rating)))) : deleteField();
   patch.text     = text && text.trim() ? String(text).slice(0, 2000) : deleteField();
   patch.imageUrl = imageUrl ? String(imageUrl).slice(0, 500) : deleteField();
   await updateDoc(doc(fb.db, "comments", id), patch);
@@ -914,7 +931,7 @@ async function deleteCommentDoc(id) {
 async function uploadCommentImage(file) {
   const fb = await getFirebase();
   if (!fb) throw new Error("Not configured.");
-  const user = await AUTH_READY;
+  const user = await getCurrentUser();
   if (!user) throw new Error("Not signed in.");
   // Resize to max 800px on the longest edge to keep uploads small.
   const resized = await resizeImage(file, 800, 0.85);
@@ -939,7 +956,7 @@ async function resizeImage(file, maxEdge, quality) {
 async function postFeatureRequest(text) {
   const fb = await getFirebase();
   if (!fb) throw new Error("Feature requests aren't configured for this site yet.");
-  const user = await AUTH_READY;
+  const user = await getCurrentUser();
   if (!user) throw new Error("Couldn't sign in anonymously — try refreshing.");
   const { collection, addDoc, serverTimestamp } = fb.fs;
   await addDoc(collection(fb.db, "feature_requests"), {
@@ -1479,12 +1496,6 @@ function buildCommentForm({ item, container, btn, existing, onDone, userRating }
     stars.appendChild(s);
   }
   form.appendChild(stars);
-  if (userRating && !existing) {
-    const note = document.createElement("div");
-    note.className = "form-msg";
-    note.textContent = `Your current rating: ${"★".repeat(userRating.rating)}${"☆".repeat(5 - userRating.rating)} — click a different star to change it.`;
-    form.appendChild(note);
-  }
   // Textarea
   const ta = document.createElement("textarea");
   ta.placeholder = existing
@@ -1949,30 +1960,58 @@ function setupTodayCommentsButton(kind, day) {
   btn.onclick = () => openMenuComment(dayItem, label);
 }
 
-// Fetch average ratings for both menus (overall + currently-selected day's
-// day-level target) and update the footer rating bars. Each bar is rendered
-// as a gray track with an orange .rating-fill child whose width is set to
-// (avg / 5) — empty when no ratings, fully filled at 5 stars.
+// Format "4.2 ★ (12)" with a gold star, Google Maps style. Returns HTML.
+function formatGoogleRating(avg, count) {
+  if (!count) return '<span style="color: var(--muted); font-weight: normal;">No ratings yet</span>';
+  return `${avg.toFixed(1)} <span class="gold-star">★</span> (${count})`;
+}
+
+// Two distinct rating displays:
+//   - Footer "Overall ratings": lifetime overall ratings per menu (the
+//     __OVERALL__ keys only). Show as a gray track with an orange fill bar.
+//   - Card-head "day-rating" chip: today's day-level rating only. Shown as
+//     a small pill with text in Google Maps format.
 async function refreshFooterRatings() {
   if (!firebaseEnabled() || !currentDay) return;
   const day = currentDay;
-  const targets = {
-    house:  [ITEM_OVERALL_HOUSE,  ITEM_DAY_HOUSE(isoDate(day, currentWeek))],
-    browne: [ITEM_OVERALL_BROWNE, ITEM_DAY_BROWNE(isoDate(day, currentWeek))],
-  };
-  for (const [kind, keys] of Object.entries(targets)) {
+  const isWeekend = day === "Saturday" || day === "Sunday";
+
+  // Footer: overall (lifetime) rating per menu.
+  for (const [kind, keys] of Object.entries({
+    house:  [ITEM_OVERALL_HOUSE],
+    browne: [ITEM_OVERALL_BROWNE],
+  })) {
     const el = document.getElementById(`${kind}-avg`);
     if (!el) continue;
     const bar = el.closest(".rating-item");
     const fill = bar ? ensureRatingFill(bar) : null;
     try {
       const { avg, count } = await fetchAverageRating(keys);
-      el.textContent = count ? `★ ${avg.toFixed(1)} (${count})` : "No ratings yet";
-      el.title = `Average across "overall" + today's day-level ratings for ${kind === "house" ? "House" : "Browne"}`;
+      el.innerHTML = formatGoogleRating(avg, count);
+      el.title = `${count || 0} overall ratings for ${kind === "house" ? "House" : "Browne"}`;
       if (fill) fill.style.width = avg ? `${(avg / 5) * 100}%` : "0%";
     } catch {
       el.textContent = "—";
       if (fill) fill.style.width = "0%";
+    }
+  }
+
+  // Card head: today's day-level rating per menu.
+  for (const [kind, key] of Object.entries({
+    house:  ITEM_DAY_HOUSE(isoDate(day, currentWeek)),
+    browne: ITEM_DAY_BROWNE(isoDate(day, currentWeek)),
+  })) {
+    const el = document.getElementById(`${kind}-day-rating`);
+    if (!el) continue;
+    // House isn't served on weekends — keep its chip hidden.
+    if (kind === "house" && isWeekend) { el.hidden = true; continue; }
+    el.hidden = false;
+    try {
+      const { avg, count } = await fetchAverageRating([key]);
+      el.innerHTML = `Today: ${formatGoogleRating(avg, count)}`;
+      el.title = `${count || 0} ratings today for ${kind === "house" ? "House Dinner" : "Browne Menu"}`;
+    } catch {
+      el.textContent = "—";
     }
   }
 }
@@ -2359,6 +2398,7 @@ async function openMenuComment(itemKey, title) {
 // For day-level / overall items, pairs the clicked item with its sibling so
 // the average matches what the footer shows.
 async function updateMenuCommentRating(itemKey) {
+  if (typeof itemKey !== "string") return;
   const wrap = document.getElementById("menu-comment-rating");
   if (!wrap) return;
   const value = document.getElementById("menu-comment-rating-value");
@@ -2377,7 +2417,7 @@ async function updateMenuCommentRating(itemKey) {
   wrap.style.display = "";
   try {
     const { avg, count } = await fetchAverageRating(keys);
-    value.textContent = count ? `★ ${avg.toFixed(1)} (${count})` : "No ratings yet";
+    value.innerHTML = formatGoogleRating(avg, count);
     if (fill) fill.style.width = avg ? `${(avg / 5) * 100}%` : "0%";
   } catch {
     value.textContent = "—";

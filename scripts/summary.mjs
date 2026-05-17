@@ -41,8 +41,10 @@ async function loadRecent(collection) {
 }
 
 const comments = await loadRecent("comments");
-const requests = await loadRecent("feature_requests");
-console.log(`Loaded ${comments.length} comments, ${requests.length} feature requests`);
+console.log(`Loaded ${comments.length} comments`);
+// Feature requests are intentionally NOT part of the dining-services summary
+// — they're website asks, not food feedback, and they already get mirrored
+// into GitHub Issues for the maintainer to triage. Keeps the report focused.
 
 // Build a compact text dump for the model.
 function fmtComment(c) {
@@ -53,10 +55,9 @@ function fmtComment(c) {
   return parts.join(" ");
 }
 const commentLines = comments.map(fmtComment).filter(Boolean);
-const requestLines = requests.map(r => r.text).filter(Boolean);
 
 let summary = "";
-if (!commentLines.length && !requestLines.length) {
+if (!commentLines.length) {
   summary = "No feedback collected this week yet.";
 } else {
   const prompt = [
@@ -85,9 +86,6 @@ if (!commentLines.length && !requestLines.length) {
     "  in the comments. Prefix urgent items (allergen / safety / sanitation)",
     "  with ⚠.",
     "",
-    "## Website feature requests",
-    "  Grouped by theme; mark the most-requested items.",
-    "",
     "Rules:",
     "  - Use real dish / station names that appear in the data — do not invent.",
     "  - Include short verbatim quotes where they sharpen the point.",
@@ -96,10 +94,7 @@ if (!commentLines.length && !requestLines.length) {
     "    are menu-wide ratings; treat them as the overall House/Browne signal.",
     "",
     "=== Comments and ratings (this week) ===",
-    commentLines.length ? commentLines.join("\n") : "(none)",
-    "",
-    "=== Feature requests for the website (this week) ===",
-    requestLines.length ? requestLines.join("\n") : "(none)",
+    commentLines.join("\n"),
   ].join("\n");
 
   const model = "gemini-2.5-flash";
