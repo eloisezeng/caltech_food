@@ -1,1 +1,0 @@
-- change average ratings so the bar is gray when there are 0 stars. partially filled with orange bar when there are 3 stars. and completely filled with 5 stars.

@@ -6,6 +6,15 @@ on:
     # chance to update the sheets for the day).
     - cron: "0 14 * * *"
   workflow_dispatch: {}
+  push:
+    branches: [main]
+    # Don't re-trigger on the bot's own data commits or on TO-DO scratch
+    # files; only run when the actual code/config changes.
+    paths-ignore:
+      - "data/**"
+      - "TO-DO-*.md"
+      - "README.md"
+      - "image.png"
 
 permissions:
   contents: write

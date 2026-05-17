@@ -700,14 +700,17 @@ async function getFirebase() {
     const storage = storageMod.getStorage(app);
     FIREBASE = { db, auth, storage, fs: fsMod, authMod, storageMod };
     // Kick off anonymous sign-in eagerly; commenting/editing waits on it.
+    // Resolve via the first of: observer fires with a user, signInAnonymously
+    // resolves, signInAnonymously rejects, or a 10-second timeout — so the
+    // promise can never hang forever and lock out the comment UI.
     AUTH_READY = new Promise(resolve => {
-      authMod.onAuthStateChanged(auth, user => {
-        if (user) resolve(user);
-      });
-      authMod.signInAnonymously(auth).catch(e => {
-        console.warn("Anonymous sign-in failed:", e);
-        resolve(null);
-      });
+      let settled = false;
+      const done = u => { if (!settled) { settled = true; resolve(u); } };
+      authMod.onAuthStateChanged(auth, u => { if (u) done(u); });
+      authMod.signInAnonymously(auth)
+        .then(cred => done(cred.user))
+        .catch(e => { console.warn("Anonymous sign-in failed:", e); done(null); });
+      setTimeout(() => done(null), 10000);
     });
     return FIREBASE;
   } catch (e) {
@@ -777,20 +780,24 @@ async function fetchCommentsFor(item) {
 // when nothing's been posted.
 // Returns the current user's existing rating-bearing comment for an item,
 // or undefined if they haven't rated it. Used to enforce one-rating-per-user.
+// Forces a server-side read (bypassing Firestore's local cache) so it
+// reflects deletes immediately — otherwise users who rate, delete, then try
+// to re-rate get a stale "you already rated this" error.
 async function findUsersRatingFor(item) {
   const fb = await getFirebase();
   if (!fb) return undefined;
   const user = await AUTH_READY;
   if (!user) return undefined;
-  const { collection, query, where, getDocs, limit } = fb.fs;
-  // Equality on (item, authorId) only — no composite index needed.
+  const { collection, query, where, limit, getDocsFromServer, getDocs } = fb.fs;
   const q = query(
     collection(fb.db, "comments"),
     where("item", "==", item),
     where("authorId", "==", user.uid),
     limit(20),
   );
-  const snap = await getDocs(q);
+  // Prefer server read; fall back to cache+server if the server-only variant
+  // isn't available in the loaded SDK version.
+  const snap = await (getDocsFromServer ? getDocsFromServer(q) : getDocs(q));
   for (const d of snap.docs) {
     const data = d.data();
     if (typeof data.rating === "number") return { id: d.id, ...data };
@@ -853,16 +860,17 @@ async function updateComment(id, { rating, text, imageUrl }) {
   if (!fb) throw new Error("Not configured.");
   const user = await AUTH_READY;
   if (!user) throw new Error("Not signed in.");
-  // If they're adding a rating to a previously text-only comment, make sure
-  // they don't already have a different rating-bearing comment on this item.
+  // Only check uniqueness when the user is ADDING a rating to a comment that
+  // didn't have one before. Editing the rating on a comment that already had
+  // one is always allowed — otherwise a race in findUsersRatingFor (or a
+  // legacy duplicate rated doc) would lock the user out of changing their
+  // own rating.
   if (rating) {
-    const itemSnap = await (async () => {
-      const { doc, getDoc } = fb.fs;
-      return getDoc(doc(fb.db, "comments", id));
-    })();
-    const item = itemSnap.data()?.item;
-    if (item) {
-      const existing = await findUsersRatingFor(item);
+    const { doc, getDoc } = fb.fs;
+    const editingDoc = (await getDoc(doc(fb.db, "comments", id))).data();
+    const wasUnrated = editingDoc && typeof editingDoc.rating !== "number";
+    if (wasUnrated && editingDoc.item) {
+      const existing = await findUsersRatingFor(editingDoc.item);
       if (existing && existing.id !== id) {
         throw new Error("You've already rated this in another comment. Edit that one instead.");
       }
@@ -989,6 +997,7 @@ const GROUP_ORDER = ["entree", "vegetarian", "vegan", "pasta", "soup", "side", "
 
 let currentWeek = 0; // 0 = this week, 1 = next week
 let currentDay = null;
+let currentView = "house"; // mobile toggle state — preserved across day changes
 
 function csvUrl(sheet, gid) {
   return `https://docs.google.com/spreadsheets/d/e/${sheet}/pub?output=csv&gid=${gid}`;
@@ -1449,9 +1458,16 @@ function buildCommentForm({ item, container, btn, existing, onDone, userRating }
                      `<a href="#" data-edit-mine="1">Edit your rating</a> instead.`;
     note.querySelector("[data-edit-mine]").addEventListener("click", e => {
       e.preventDefault();
-      // Scroll to the user's own comment and trigger Edit on it.
-      const myEl = container.querySelector(".comment .comment-actions button");
-      if (myEl) myEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      // Replace the "you already rated" form with a real edit form bound to
+      // their existing rating, so they can change it in place.
+      const editForm = buildCommentForm({
+        item,
+        container,
+        btn,
+        existing: userRating,
+        onDone: () => refreshComments(item, container, btn),
+      });
+      form.replaceWith(editForm);
     });
     form.appendChild(note);
   }
@@ -1635,7 +1651,6 @@ function beginEdit(c, commentEl, ctx) {
 }
 
 async function beginDelete(c, ctx) {
-  if (!confirm("Delete this comment?")) return;
   try {
     await deleteCommentDoc(c.id);
     if (ctx) await refreshComments(ctx.item, ctx.container, ctx.btn);
@@ -1981,7 +1996,8 @@ async function loadBrowne(day) {
     }
     entries = entries.filter(e => {
       const k = dedupeKey(e);
-      if (!k || seen.has(k)) return !k;
+      if (!k) return false;          // garbage (empty item) — drop
+      if (seen.has(k)) return false; // already rendered — drop
       seen.add(k);
       return true;
     });
@@ -2047,21 +2063,33 @@ function selectDay(day) {
   // Mobile view toggle: hidden on weekends (only Browne is shown anyway).
   const toggle = document.getElementById("view-toggle");
   if (toggle) toggle.style.display = isWeekend ? "none" : "";
-  // On weekends, force the mobile layout to show Browne — otherwise the
-  // .show-house mobile CSS rule would hide both cards (house via inline
-  // style, browne via the show-house class). On weekdays we honour whatever
-  // the user picked (default "house").
+  // Mobile layout: on weekends only Browne exists, so force show-browne.
+  // On weekdays, re-apply whatever toggle the user last picked so that
+  // returning from Saturday → Friday doesn't leave the layout stuck on
+  // Browne while the toggle says "House".
   if (isWeekend) {
     mainEl.classList.remove("show-house");
     mainEl.classList.add("show-browne");
+  } else {
+    mainEl.classList.toggle("show-house",  currentView === "house");
+    mainEl.classList.toggle("show-browne", currentView === "browne");
   }
-  if (!isWeekend) { loadHouse(day); setupTodayCommentsButton("house", day); }
+  if (!isWeekend) {
+    loadHouse(day);
+    setupTodayCommentsButton("house", day);
+  } else {
+    // Hide the stale House "Today's comments" button so a leftover click
+    // doesn't open the previous weekday's thread.
+    const houseTodayBtn = document.getElementById("house-today");
+    if (houseTodayBtn) { houseTodayBtn.hidden = true; houseTodayBtn.onclick = null; }
+  }
   loadBrowne(day);
   setupTodayCommentsButton("browne", day);
   refreshFooterRatings();
 }
 
 function selectView(view) {
+  currentView = view;
   const mainEl = document.querySelector("main");
   mainEl.classList.toggle("show-house",  view === "house");
   mainEl.classList.toggle("show-browne", view === "browne");
@@ -2075,6 +2103,8 @@ function selectWeek(week) {
   for (const btn of document.querySelectorAll("#week-toggle button")) {
     btn.classList.toggle("active", Number(btn.dataset.week) === week);
   }
+  // Guard against an early click before init's `currentDay = today` runs.
+  if (!currentDay) currentDay = DAYS[new Date().getDay()];
   selectDay(currentDay);
 }
 
@@ -2293,7 +2323,7 @@ async function openSummary() {
     const r = await fetch("data/summary.json", { cache: "no-cache" });
     if (!r.ok) throw new Error("not generated yet");
     const j = await r.json();
-    body.textContent = j.summary || "(no summary text)";
+    body.innerHTML = renderSummaryMarkdown(j.summary || "(no summary text)");
     const when = j.generatedAt ? new Date(j.generatedAt) : null;
     const counts = [];
     if (j.commentCount != null) counts.push(`${j.commentCount} comments`);
@@ -2303,6 +2333,18 @@ async function openSummary() {
     body.textContent = "No summary yet — the daily refresh action generates it once feedback is collected.";
     meta.textContent = "";
   }
+}
+
+// Minimal Markdown renderer for the summary modal: handles ## / # headings,
+// **bold**, and *italic*. Everything else passes through as escaped text,
+// and the modal's `white-space: pre-wrap` preserves line breaks.
+function renderSummaryMarkdown(text) {
+  const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return esc(text)
+    .replace(/^## (.+)$/gm, '<strong style="display:block; margin:14px 0 4px; color: var(--accent); font-size:15px;">$1</strong>')
+    .replace(/^# (.+)$/gm,  '<strong style="display:block; margin:14px 0 4px; font-size:16px;">$1</strong>')
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|\W)\*([^*]+?)\*(?=\W|$)/g, "$1<em>$2</em>");
 }
 
 async function init() {
