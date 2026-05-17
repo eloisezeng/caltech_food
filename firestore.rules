@@ -49,21 +49,9 @@ service cloud.firestore {
         && resource.data.authorId == request.auth.uid;
     }
 
-    match /feature_requests/{id} {
-      allow read: if true;
-
-      allow create: if
-        request.auth != null
-        && request.resource.data.authorId == request.auth.uid
-        && request.resource.data.text is string
-        && request.resource.data.text.size() > 0
-        && request.resource.data.text.size() <= 5000
-        && request.resource.data.status == "pending"
-        && request.resource.data.createdAt == request.time;
-
-      // Server-side script (firebase-admin) bypasses these rules to mark
-      // requests as "issued", so we don't allow client edits.
-      allow update, delete: if false;
-    }
+    // The feature_requests collection is no longer written by the site —
+    // submissions now flow Browser → Cloudflare Worker → GitHub Issues
+    // directly. The default deny-all rule applies. (Old documents from the
+    // previous flow stay readable from the Firebase console.)
   }
 }

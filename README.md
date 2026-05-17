@@ -170,11 +170,12 @@ The `moderationReason` field tells you why something was flagged.
 - If you ever want to take comments offline temporarily, set
   `FIREBASE_CONFIG.apiKey` back to `"REPLACE_ME"` and redeploy. The buttons
   vanish; existing comments stay in Firestore.
-- For "AI implements a feature" — the chat box is **submit-only**. Requests
-  go to the `feature_requests` Firestore collection, are mirrored to GitHub
-  Issues by the `sync-requests.yml` workflow (every 15 min), and also
-  surface in the weekly summary. To approve a request, close the GitHub
-  issue as completed; to decline, close as not planned.
+- For "AI implements a feature" — the chat box is **submit-only**. Submissions
+  go through a Cloudflare Worker (`worker/feature-request.js`) that asks
+  Gemini for a one-paragraph triage, then opens a `feature-request`-labelled
+  GitHub issue with the triage already in the body — in ~1 second, no
+  Firestore involved. To approve a request, close the issue as completed;
+  to decline, close as not planned. Setup steps live in `worker/README.md`.
 
 ## File layout
 
@@ -182,18 +183,22 @@ The `moderationReason` field tells you why something was flagged.
 .
 ├── index.html                  # the page (HTML + CSS + JS, one file)
 ├── image.png                   # icon used by the per-item image button
-├── firestore.rules             # public-write rules for comments/feature_requests
+├── firestore.rules             # public-write rules for the comments collection
 ├── data/
 │   ├── sheets.json             # spreadsheet IDs + per-day gids (Action-managed)
 │   ├── images.json             # cached Google-quality image URLs (Action-managed)
 │   └── summary.json            # AI-generated weekly feedback summary (Action-managed)
 ├── scripts/
-│   ├── refresh.mjs                  # nightly menu data + image cache refresh
-│   ├── summary.mjs                  # weekly feedback summary via Gemini
-│   └── sync-feature-requests.mjs    # turns pending Firestore requests into issues
+│   ├── refresh.mjs             # nightly menu data + image cache refresh
+│   ├── summary.mjs             # weekly feedback summary via Gemini
+│   └── moderate.mjs            # NSFW / spam filter for comments (every 15 min)
+├── worker/                     # Cloudflare Worker for feature requests
+│   ├── feature-request.js      # POST handler → Gemini triage → GitHub issue
+│   ├── wrangler.toml           # Worker config (deploy + secrets)
+│   └── README.md               # setup steps
 ├── .github/workflows/
-│   ├── refresh.yml             # nightly cron + manual trigger
-│   ├── sync-requests.yml       # every 15 min, mirror requests → GitHub issues
+│   ├── refresh.yml             # nightly cron + on-push (menu data + summary)
+│   ├── moderate.yml            # every 15 min — moderate pending comments
 │   └── pages.yml               # deploy index.html + data to GitHub Pages
 ├── README.md
 └── TO-DO-*.md                  # rolling list of asks

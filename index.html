@@ -681,6 +681,11 @@ const FIREBASE_CONFIG = {
 // later, set this to true and publish storage.rules.
 const IMAGES_ENABLED = false;
 
+// Cloudflare Worker that receives "💡 Suggest a feature" submissions and
+// creates a triaged GitHub issue directly (see /worker/README.md for setup).
+// Leave empty to hide the feature-request button.
+const FEATURE_REQUEST_WORKER = "";
+
 function firebaseEnabled() {
   return FIREBASE_CONFIG && typeof FIREBASE_CONFIG.apiKey === "string"
       && !FIREBASE_CONFIG.apiKey.startsWith("REPLACE");
@@ -1000,19 +1005,23 @@ async function resizeImage(file, maxEdge, quality) {
   return await new Promise(res => canvas.toBlob(res, "image/jpeg", quality));
 }
 
+// POSTs the request directly to the Cloudflare Worker, which runs an AI
+// triage pass and creates a GitHub issue in one round-trip. No Firestore
+// involved any more — see /worker/feature-request.js.
 async function postFeatureRequest(text) {
-  const fb = await getFirebase();
-  if (!fb) throw new Error("Feature requests aren't configured for this site yet.");
-  const user = await getCurrentUser();
-  if (!user) throw new Error("Couldn't sign in anonymously — try refreshing.");
-  const { collection, addDoc, serverTimestamp } = fb.fs;
-  await addDoc(collection(fb.db, "feature_requests"), {
-    text: String(text).slice(0, 5000),
-    authorId: user.uid,
-    username: getUsername(),
-    status: "pending",
-    createdAt: serverTimestamp(),
+  if (!FEATURE_REQUEST_WORKER) {
+    throw new Error("Feature requests aren't configured for this site yet.");
+  }
+  const res = await fetch(FEATURE_REQUEST_WORKER, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, username: getUsername() }),
   });
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`;
+    try { detail = (await res.json()).error || detail; } catch {}
+    throw new Error(detail);
+  }
 }
 
 // ---------- end Firebase ----------
@@ -2328,7 +2337,9 @@ function wireFooterActions() {
   sumBtn.addEventListener("click", openSummary);
   host.appendChild(sumBtn);
   // Firebase-gated buttons
-  if (firebaseEnabled()) {
+  // Feature-request button is gated on the Worker being configured;
+  // Firebase is no longer required for that flow.
+  if (FEATURE_REQUEST_WORKER) {
     const frBtn = document.createElement("button");
     frBtn.type = "button";
     frBtn.textContent = "💡 Suggest a feature";
@@ -2338,7 +2349,8 @@ function wireFooterActions() {
       openModal("feature-modal");
     });
     host.appendChild(frBtn);
-
+  }
+  if (firebaseEnabled()) {
     const houseOverall = document.createElement("button");
     houseOverall.type = "button";
     houseOverall.textContent = "⭐ Rate House (overall)";
