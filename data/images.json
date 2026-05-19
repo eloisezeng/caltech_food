@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-18T16:50:25.959Z",
+  "lastUpdated": "2026-05-19T16:52:19.270Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Chicken Noodle": "https://tse1.mm.bing.net/th/id/OIP.yGLFCiDT8kLAwpo4n-10MQHaJQ?pid=Api",
@@ -32,16 +32,6 @@
     "Garlic Bread": "https://tse4.mm.bing.net/th/id/OIP.hvQpFwbd1cU-CmLuws4gCAHaLH?r=0&pid=Api",
     "Cookies": "https://tse1.mm.bing.net/th/id/OIP.plvdM9YV6UF_qc6Gc2SYgwHaI9?pid=Api",
     "Novelties": "https://tse3.mm.bing.net/th/id/OIP.XjaJ4wCXF_33VYpPiCG6jwHaEK?r=0&pid=Api",
-    "Chicken Fajita Rice Bowl": "https://tse1.mm.bing.net/th/id/OIP.HkGgHQqYAs55v5qOjSBGfAHaHa?pid=Api",
-    "Chicken Gardein Fajita Rice Bowl": "https://tse4.mm.bing.net/th/id/OIP.E5X_chsoHwjrDobTKSM5ZQHaHa?pid=Api",
-    "Pulled Pork Sandwich": "https://tse2.mm.bing.net/th/id/OIP.d87z6y8yQlv4jHW9nxq9RwHaHa?pid=Api",
-    "Pulled Jackfruit Sandwich": "https://tse4.mm.bing.net/th/id/OIP.qjVXNUW2zviYuEZkBteU0AHaHa?pid=Api",
-    "Beef Vindaloo Rice Bowl with naan bread": "https://tse4.mm.bing.net/th/id/OIP.u1m8YCZG6oM_zs3tvPKNrwHaNK?pid=Api",
-    "Palak Paneer Rice Bowl with naan bread": "https://tse3.mm.bing.net/th/id/OIP.c-r2MAvoajEwEURJO6I2ngHaE7?r=0&pid=Api",
-    "Creamy Penne Pomodoro   with Beef": "https://tse4.mm.bing.net/th/id/OIP.UEaTPisNBW8nKca6yHvT2AHaJQ?r=0&pid=Api",
-    "Creamy Penne Pomodoro with Tofu": "https://tse3.mm.bing.net/th/id/OIP.VGNOT81AaMw2ssqcPymEgAHaHa?pid=Api",
-    "Chicken Stir Fry": "https://tse4.mm.bing.net/th/id/OIP.1a1GA3fKCT1N3qfBh60pNQHaLH?pid=Api",
-    "chicken gardein Stir Fry": "https://tse4.mm.bing.net/th/id/OIP.txGwZcgl3BuMZwgNWX22lAHaHa?pid=Api",
     "Entree One": "https://tse2.mm.bing.net/th/id/OIP.Dibj30cGGug6jdp0LFiMbQHaLH?r=0&pid=Api",
     "Entree Two": "https://tse3.mm.bing.net/th/id/OIP.PpFsn5WHTuWmEB9VUmERDwHaHa?pid=Api",
     "Vegetarian Entree": "https://tse2.mm.bing.net/th/id/OIP.PdCSGZ9VXkO_EdwqAiwpZgHaEo?pid=Api",
@@ -171,6 +161,15 @@
     "Impossible Beef Picadillo": "https://tse1.mm.bing.net/th/id/OIP.3HUrRor22Gb_NFkwf9rWOAHaNJ?pid=Api",
     "Braised Eggplant with Basil, served with Brown Rice": "https://tse2.mm.bing.net/th/id/OIP.H-JSS2BoDMiGfSeIcIsAfwHaE8?pid=Api",
     "Home-style Braised Tofu with Brown Rice": "https://thfvnext.bing.com/th/id/OIP.ES4XRRQcvniZjm1yE6j_uQHaGt?cb=thfvnextfalcon&pid=Api",
-    "Creamy Vegan Polenta with Mushroom and Kale": "https://thfvnext.bing.com/th/id/OIP.-q15_APmwMaXIUYFQ9Y9gwHaJN?cb=thfvnextfalcon&pid=Api"
+    "Creamy Vegan Polenta with Mushroom and Kale": "https://thfvnext.bing.com/th/id/OIP.-q15_APmwMaXIUYFQ9Y9gwHaJN?cb=thfvnextfalcon&pid=Api",
+    "Beef Lasagna": "https://tse2.mm.bing.net/th/id/OIP.UliX243aEohjUQHirSxkEQHaHa?pid=Api",
+    "Vegetarian Lasagna": "https://tse2.mm.bing.net/th/id/OIP.fGb1h5fqhkVTDNlC6J0e-AHaHa?pid=Api",
+    "Chicken Masala": "https://tse2.mm.bing.net/th/id/OIP.kTWcYvfN-nputSsXxeDnugHaHa?pid=Api",
+    "Char Siu Bowl": "https://tse2.mm.bing.net/th/id/OIP.OIFh00B3NKywsFIlWHJmZgHaHa?r=0&pid=Api",
+    "gluten soy sesame contains pork": "https://thf.bing.com/th/id/OIP.HBTxxYq7yl4g_SSMwfh-BgHaO0?r=0&cb=thfc1falcon&pid=Api",
+    "Char Siu Tofu Bowl": "https://tse3.mm.bing.net/th/id/OIP.fPtF9BxzGeu3RTzCEb4SFgHaLH?r=0&pid=Api",
+    "Beef Teriyaki Bowl": "https://thfvnext.bing.com/th/id/OIP.wuxEeQO4CvKx0sWd6kzFrAHaLH?cb=thfvnextfalcon&pid=Api",
+    "Tofu Teriyaki Bowl": "https://tse4.mm.bing.net/th/id/OIP.fiBJ22Wxjz9fS0VDoRz43wHaHa?pid=Api",
+    "Mongolian": "https://tse3.mm.bing.net/th/id/OIP.dz7Byd4u15T_D3rpYLoBiAHaFH?pid=Api"
   }
 }
