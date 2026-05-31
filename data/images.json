@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-30T15:13:49.655Z",
+  "lastUpdated": "2026-05-31T15:20:57.203Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Chicken Noodle": "https://tse1.mm.bing.net/th/id/OIP.yGLFCiDT8kLAwpo4n-10MQHaJQ?pid=Api",
@@ -106,14 +106,6 @@
     "Broccoli Cheddar": "https://tse4.mm.bing.net/th/id/OIP.7nRR-NB2caZ9Kvm9ZCSMYwHaHa?pid=Api",
     "Ciabatta Bread": "https://thf.bing.com/th/id/OIP.0JVaKHUJjv6yKuvQp9N5_AHaHa?cb=thfc1falcon&pid=Api",
     "Biscuits": "https://thfvnext.bing.com/th/id/OIP.SDB0y1oKkgKXLDk1FpMNEgHaHa?cb=thfvnextfalcon&pid=Api",
-    "Tuna Melt": "https://thfvnext.bing.com/th/id/OIP.wNmrHho8_l1oChOHjwMlGgHaHa?cb=thfvnextfalcon&pid=Api",
-    "Guacamole Burger": "https://thf.bing.com/th/id/OIP.53ZvLaUSakh767VdGlFQUgHaLG?cb=thfc1falcon&pid=Api",
-    "Roasted Lemon Pepper Shrimp": "https://tse4.mm.bing.net/th/id/OIP.Lzz-eGkuUG9LZuaE1TwHtwHaLH?pid=Api",
-    "Fried Lemon Pepper Tofu": "https://tse2.mm.bing.net/th/id/OIP.tmgJMJac6CHMEZmDJUUbAQHaLG?pid=Api",
-    "Red Chilaquiles": "https://thf.bing.com/th/id/OIP.ChiKQUsciYiFiPsiFay0dQHaLH?cb=thfc1falcon&pid=Api",
-    "Vegan Green Tofu Scramble Chilaquiles": "https://thfvnext.bing.com/th/id/OIP.DuZITSug2rKetg87Mp8TnAHaE7?cb=thfvnextfalcon&pid=Api",
-    "Garlic Brussels": "https://tse2.mm.bing.net/th/id/OIP.Sq7g1VtjHmkfgfzPamRYNQHaLH?pid=Api",
-    "Cilantro Lime Rice": "https://tse1.mm.bing.net/th/id/OIP.jLKCbUTUb-wrmI4n45R0ywHaLH?pid=Api",
     "Kalua Pork": "https://tse1.mm.bing.net/th/id/OIP.pDb8foZVl8wziiGPdSMBWAHaLH?pid=Api",
     "Beef Pot Roast": "https://thf.bing.com/th/id/OIP.7rGyWOgdh4YtXOkE4Bof1AHaLG?r=0&cb=thfc1falcon&pid=Api",
     "Tilapia with Beurre Blanc Sauce": "https://tse4.mm.bing.net/th/id/OIP.XGhjo50bycwE38Db4QE9zgHaEe?r=0&pid=Api",
@@ -155,6 +147,17 @@
     "Chicken Gardein Stir Fry": "https://tse4.mm.bing.net/th/id/OIP.1a1GA3fKCT1N3qfBh60pNQHaLH?pid=Api",
     "Assorted Pies": "https://tse3.mm.bing.net/th/id/OIP.EQKsJzXvODGIXJ0SfRHsyQHaE7?pid=Api",
     "Peppermint Brownies": "https://tse3.mm.bing.net/th/id/OIP.vlBYqMjhDvsZjvIriiVXjgHaJQ?pid=Api",
-    "Tofu Cacciatore": "https://thfvnext.bing.com/th/id/OIP.TuetxtSLr0s8mTT0YYhkQgHaJ1?r=0&cb=thfvnextfalcon&pid=Api"
+    "Tofu Cacciatore": "https://thfvnext.bing.com/th/id/OIP.TuetxtSLr0s8mTT0YYhkQgHaJ1?r=0&cb=thfvnextfalcon&pid=Api",
+    "Meatlovers Calzone": "https://tse3.mm.bing.net/th/id/OIP.mmRgrUA9kwJHS4jtDUEKdQHaJ8?pid=Api",
+    "Chicken Tinga Sandwich": "https://tse3.mm.bing.net/th/id/OIP.CRrilnpxqqgRx6jL96OaoQHaHa?r=0&pid=Api",
+    "Bang Bang Chicken Rice Bowl": "https://thfvnext.bing.com/th/id/OIP.5PAjhOacWvbfRsBBSaS4mQHaHa?r=0&cb=thfvnextfalcon&pid=Api",
+    "Bang Bang Tofu Rice Bowl": "https://tse4.mm.bing.net/th/id/OIP.aBfoyZiy2su48c2vYRtbQwHaJQ?r=0&pid=Api",
+    "Chicken Primavera": "https://tse1.mm.bing.net/th/id/OIP.reKCSw5Z9Wezds3evshNOgHaLH?pid=Api",
+    "Veggie Primavera": "https://tse3.mm.bing.net/th/id/OIP.NcJ6zNARiRRegzVmIcW3NAHaLH?pid=Api",
+    "Roasted Zucchini": "https://tse4.mm.bing.net/th/id/OIP.C48fwQ68uDDK6v9RwnRkuwHaLH?r=0&pid=Api",
+    "Sweet Potato Tots": "https://tse1.mm.bing.net/th/id/OIP.vlxyQvTRexys439psqTUCwHaHa?pid=Api",
+    "Flank steak": "https://thf.bing.com/th/id/OIP.rhE44R8uvndPhL8aqdUh6wHaLH?r=0&cb=thfc1falcon&pid=Api",
+    "Stuff Portobello Mushroom": "https://thfvnext.bing.com/th/id/OIP.mU6cG-34k43UgIiipIce0AHaLH?r=0&cb=thfvnextfalcon&pid=Api",
+    "Green Beans": "https://thf.bing.com/th/id/OIP.GSFBPb2SLWiTjNZdOYvHXQHaHa?cb=thfc1falcon&pid=Api"
   }
 }
