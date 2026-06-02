@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-01T19:25:09.047Z",
+  "lastUpdated": "2026-06-02T18:07:45.725Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Chicken Noodle": "https://tse1.mm.bing.net/th/id/OIP.yGLFCiDT8kLAwpo4n-10MQHaJQ?pid=Api",
@@ -63,9 +63,6 @@
     "See Label": "https://thfvnext.bing.com/th/id/OIP.0OWabQtZyhU3negl3vAXPQHaLH?cb=thfvnextfalcon&pid=Api",
     "Build Your Own Mediterranean Grain Bowl": "https://tse1.mm.bing.net/th/id/OIP.Nsbvyem5R-BsKH2e3WuVUwHaLG?pid=Api",
     "Monday Memorial Day": "https://thf.bing.com/th/id/OIP.lBUXH9Cvw4GLg1T5btATAgHaLH?cb=thfc1falcon&pid=Api",
-    "Pork Bratwurst": "https://tse1.mm.bing.net/th/id/OIP.N1xTcTsoGr9uWn8GVoXyngHaHa?pid=Api",
-    "Vegan Bratwurst": "https://tse1.mm.bing.net/th/id/OIP.wX-yRm5BC_sT9DFnDAao0QHaLH?r=0&pid=Api",
-    "Chicken Cacciatore": "https://tse4.mm.bing.net/th/id/OIP.ehqmevHq71YPYEv_OlZtMgHaLH?pid=Api",
     "Seasonal Vegetables": "https://tse3.mm.bing.net/th/id/OIP.PWj4SiSSF0XbxzDquuJfugHaKl?r=0&pid=Api",
     "Roasted Potatoes": "https://thf.bing.com/th/id/OIP.EPzw33xIC-6IMc-HjQg08AHaLH?r=0&cb=thfc1falcon&pid=Api",
     "Roasted Pepper Cream": "https://thfvnext.bing.com/th/id/OIP.AB5J5YguV7QrSIuE54buDAHaMi?r=0&cb=thfvnextfalcon&pid=Api",
@@ -75,14 +72,6 @@
     "Broccoli Cheddar": "https://tse4.mm.bing.net/th/id/OIP.7nRR-NB2caZ9Kvm9ZCSMYwHaHa?pid=Api",
     "GF, Vegan Entree": "https://tse1.mm.bing.net/th/id/OIP.ylXFLRPD62AMZMA4KVdPYAHaHa?pid=Api",
     "GF, Vegan Special": "https://tse2.mm.bing.net/th/id/OIP.huF_IU660NoSaVlaxzmNwwHaLc?pid=Api",
-    "Seared Pork Belly with Pad See Ew": "https://tse3.mm.bing.net/th/id/OIP.sxk7_1Tk7kf_L_rkgxMH3QHaLH?r=0&pid=Api",
-    "Seared Tofu with Pad see Ew": "https://tse3.mm.bing.net/th/id/OIP.5OhVk2KKvjX19aq0UtMAqgHaHa?pid=Api",
-    "soy sesame contains pork": "https://tse4.mm.bing.net/th/id/OIP.2QxJ1ckVGkWA9du54r06GAHaHa?pid=Api",
-    "Creamy Penne Pomodoro with Beef": "https://tse1.mm.bing.net/th/id/OIP.48ASxguuYdm-OLZlKQZCowHaHa?pid=Api",
-    "Creamy Penne Pomodoro with Tofu": "https://tse3.mm.bing.net/th/id/OIP.VGNOT81AaMw2ssqcPymEgAHaHa?r=0&pid=Api",
-    "Chicken Stir Fry": "https://tse4.mm.bing.net/th/id/OIP.1a1GA3fKCT1N3qfBh60pNQHaLH?pid=Api",
-    "Chicken Gardein Stir Fry": "https://tse4.mm.bing.net/th/id/OIP.1a1GA3fKCT1N3qfBh60pNQHaLH?pid=Api",
-    "Tofu Cacciatore": "https://thfvnext.bing.com/th/id/OIP.TuetxtSLr0s8mTT0YYhkQgHaJ1?r=0&cb=thfvnextfalcon&pid=Api",
     "Meatlovers Calzone": "https://tse3.mm.bing.net/th/id/OIP.mmRgrUA9kwJHS4jtDUEKdQHaJ8?pid=Api",
     "Bang Bang Chicken Rice Bowl": "https://thfvnext.bing.com/th/id/OIP.5PAjhOacWvbfRsBBSaS4mQHaHa?r=0&cb=thfvnextfalcon&pid=Api",
     "Bang Bang Tofu Rice Bowl": "https://tse4.mm.bing.net/th/id/OIP.aBfoyZiy2su48c2vYRtbQwHaJQ?r=0&pid=Api",
@@ -106,7 +95,6 @@
     "Chicken Piccata": "https://thf.bing.com/th/id/OIP.44XgVRoH9tATHgTrHbbvFQHaLH?r=0&cb=thfc1falcon&pid=Api",
     "Gluten, Dairy Optional": "https://thf.bing.com/th/id/OIP.Hn6uLheHXQ5aCZArYy701gHaLH?cb=thfc1falcon&pid=Api",
     "Contains Alcohol": "https://tse2.mm.bing.net/th/id/OIP.zTddQTMmFKacopAFyPdOkwHaJ0?pid=Api",
-    "Chicken Marsala": "https://thf.bing.com/th/id/OIP.tdLTVkgERY5TefSL4IeVZQHaLH?cb=thfc1falcon&pid=Api",
     "Chicken Chile Verde": "https://thfvnext.bing.com/th/id/OIP.rHq2H2TgHRr8w8q9Xv6GrAHaLH?r=0&cb=thfvnextfalcon&pid=Api",
     "Shrimp Chow Mein": "https://tse3.mm.bing.net/th/id/OIP.S6LLjJnWvpNJuO6mBJkGyQHaLH?pid=Api",
     "All Beef Hot Dogs": "https://thfvnext.bing.com/th/id/OIP.VsKqejppYlwKJSx3_GREVgHaE8?cb=thfvnextfalcon&pid=Api",
@@ -123,7 +111,6 @@
     "Vegan Lasagna": "https://thf.bing.com/th/id/OIP.tlU9ZJhQFkeLventMd5LMQHaJQ?cb=thfc1falcon&pid=Api",
     "Gluten Free , Vegan": "https://thf.bing.com/th/id/OIP.GCp2Huq6PwD3Fgzv_MUFSgHaQj?r=0&cb=thfc1falcon&pid=Api",
     "Roasted Seasonal Vegetables": "https://tse4.mm.bing.net/th/id/OIP.xdJBXuTmcs2NKORPg3NaJgHaJ4?pid=Api",
-    "Peas and Carrots with Citrus Gremolata": "https://tse4.mm.bing.net/th/id/OIP.WG0gcng4f-Sq8UUPEYwk4wHaHa?r=0&pid=Api",
     "Roasted Cabbage with Chimichurri": "https://tse4.mm.bing.net/th/id/OIP.cwZdLTzgwZeswRj7hbPYYAHaHa?pid=Api",
     "Spicy Bechamel Baked Pasta": "https://thfvnext.bing.com/th/id/OIP.1rNtPs6qmmb8df_xfosDpwHaLI?r=0&cb=thfvnextfalcon&pid=Api",
     "Green Chile Chilaquiles": "https://tse3.mm.bing.net/th/id/OIP.2jkieIegY8QI-Cy0g-H38QHaHa?pid=Api",
@@ -176,6 +163,8 @@
     "Mushroom Kalbi with Brown Rice": "https://thfvnext.bing.com/th/id/OIP.oJIwJnxMxEIW1BPN2t-EGQHaGL?cb=thfvnextfalcon&pid=Api",
     "Soy Bulgogi with Forbidden Rice": "https://tse1.mm.bing.net/th/id/OIP.mhVuILKXw7k7t3uRdKWF4AHaKe?pid=Api",
     "BBQ Pulled Pork Bowl": "https://tse2.mm.bing.net/th/id/OIP.OfSK0uKFcxZu0X36qhx0FwHaLH?r=0&pid=Api",
-    "BBQ Pulled Jack Fruit Bowl": "https://thfvnext.bing.com/th/id/OIP.Vj4Zqmle0YA6IWftCIaMhQHaE8?cb=thfvnextfalcon&pid=Api"
+    "BBQ Pulled Jack Fruit Bowl": "https://thfvnext.bing.com/th/id/OIP.Vj4Zqmle0YA6IWftCIaMhQHaE8?cb=thfvnextfalcon&pid=Api",
+    "Tuscan Chicken": "https://tse3.mm.bing.net/th/id/OIP._nWr3T46KrDh_SWAm9bCsQHaJ4?r=0&pid=Api",
+    "Peas and Carrots": "https://tse2.mm.bing.net/th/id/OIP.Aw28gjSYjSO1r0jFSTLcyAHaJf?r=0&pid=Api"
   }
 }
