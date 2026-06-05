@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-04T16:56:48.096Z",
+  "lastUpdated": "2026-06-05T16:32:24.875Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Chicken Noodle": "https://tse1.mm.bing.net/th/id/OIP.yGLFCiDT8kLAwpo4n-10MQHaJQ?pid=Api",
@@ -98,7 +98,6 @@
     "Chicken Chile Verde": "https://thfvnext.bing.com/th/id/OIP.rHq2H2TgHRr8w8q9Xv6GrAHaLH?r=0&cb=thfvnextfalcon&pid=Api",
     "Shrimp Chow Mein": "https://tse3.mm.bing.net/th/id/OIP.S6LLjJnWvpNJuO6mBJkGyQHaLH?pid=Api",
     "All Beef Hot Dogs": "https://thfvnext.bing.com/th/id/OIP.VsKqejppYlwKJSx3_GREVgHaE8?cb=thfvnextfalcon&pid=Api",
-    "Beef Lasagna": "https://tse2.mm.bing.net/th/id/OIP.UliX243aEohjUQHirSxkEQHaHa?pid=Api",
     "Mushroom Stroganoff                   with Egg Noodles": "https://thfvnext.bing.com/th/id/OIP.31tG78nxi2Zjq9177XOLoAHaJQ?cb=thfvnextfalcon&pid=Api",
     "Chile Relleno Casserole": "https://tse1.mm.bing.net/th/id/OIP.LPmqV5vO2zLZ3zGXdAOYFAHaLG?r=0&pid=Api",
     "Mapo Tofu": "https://thfvnext.bing.com/th/id/OIP.OFP9CVRXWBHmam_HtvkGKgHaLH?r=0&cb=thfvnextfalcon&pid=Api",
@@ -106,9 +105,7 @@
     "Roasted Cauliflower Baked Ziti": "https://tse2.mm.bing.net/th/id/OIP.R8CgOvHjyQD2w6Gz1Qf0AwHaJ1?r=0&pid=Api",
     "Chickpea Casserole                                 with Vegetables": "https://thfvnext.bing.com/th/id/OIP.gTGB27MdV3ALUYiRfuBAfgHaJ1?cb=thfvnextfalcon&pid=Api",
     "Tacos de Papa con Soyrizo                 (Soyrizo & Potato Tacos)": "https://thfvnext.bing.com/th/id/OIP.r9Js1dDppbwDmHe5MfL5CQHaLH?cb=thfvnextfalcon&pid=Api",
-    "Tofu Pad se ew": "https://thfvnext.bing.com/th/id/OIP.uDvb2OUNcA1D8_woqgIeMgHaHa?r=0&cb=thfvnextfalcon&pid=Api",
     "Black Bean Burgers": "https://tse3.mm.bing.net/th/id/OIP.Nv6lOmVz5C-CCr6AXXM-JQHaLH?r=0&pid=Api",
-    "Vegan Lasagna": "https://thf.bing.com/th/id/OIP.tlU9ZJhQFkeLventMd5LMQHaJQ?cb=thfc1falcon&pid=Api",
     "Gluten Free , Vegan": "https://thf.bing.com/th/id/OIP.GCp2Huq6PwD3Fgzv_MUFSgHaQj?r=0&cb=thfc1falcon&pid=Api",
     "Roasted Seasonal Vegetables": "https://tse4.mm.bing.net/th/id/OIP.xdJBXuTmcs2NKORPg3NaJgHaJ4?pid=Api",
     "Roasted Cabbage with Chimichurri": "https://tse4.mm.bing.net/th/id/OIP.cwZdLTzgwZeswRj7hbPYYAHaHa?pid=Api",
@@ -166,6 +163,10 @@
     "BBQ Pulled Jack Fruit Bowl": "https://thfvnext.bing.com/th/id/OIP.Vj4Zqmle0YA6IWftCIaMhQHaE8?cb=thfvnextfalcon&pid=Api",
     "Tuscan Chicken": "https://tse3.mm.bing.net/th/id/OIP._nWr3T46KrDh_SWAm9bCsQHaJ4?r=0&pid=Api",
     "Peas and Carrots": "https://tse2.mm.bing.net/th/id/OIP.Aw28gjSYjSO1r0jFSTLcyAHaJf?r=0&pid=Api",
-    "Braised Beef Melt": "https://thf.bing.com/th/id/OIP.UI_fjznVwjFZoPBSZpcb5gHaO0?cb=thfc1falcon&pid=Api"
+    "Braised Beef Melt": "https://thf.bing.com/th/id/OIP.UI_fjznVwjFZoPBSZpcb5gHaO0?cb=thfc1falcon&pid=Api",
+    "Beef Baked ziti": "https://tse1.mm.bing.net/th/id/OIP.TzTMomla9UrERW7kfqqTAQHaLG?pid=Api",
+    "Eggplant alla Parm": "https://tse1.mm.bing.net/th/id/OIP.3VKzNKDo_SehCxax2ELvCQHaHa?pid=Api",
+    "Tofu Pad see ew": "https://tse3.mm.bing.net/th/id/OIP.5OhVk2KKvjX19aq0UtMAqgHaHa?r=0&pid=Api",
+    "Chicken Chile Verde Burrito": "https://tse4.mm.bing.net/th/id/OIP.F-7DQjenhBNWNZyZvv4zUgHaHL?r=0&pid=Api"
   }
 }
