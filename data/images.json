@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-16T18:30:06.520Z",
+  "lastUpdated": "2026-06-17T16:56:58.456Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -43,13 +43,6 @@
     "Udon Noodle": "https://tse2.mm.bing.net/th/id/OIP.xUehRJzHGAB8_u8pnvHoZwHaLH?pid=Api",
     "Special One": "https://tse2.mm.bing.net/th/id/OIP.hPD07KbkobZbfA3x1J3KMgHaEj?pid=Api",
     "Special Two": "https://tse1.mm.bing.net/th/id/OIP.AGkURYWrIB-eu9V2WdPnAAHaHa?pid=Api",
-    "Shrimp Pomodoro Pasta": "https://thf.bing.com/th/id/OIP.zPy5W2oKqQG61cTfYPyNsAHaLH?r=0&cb=thfc1falcon2&pid=Api",
-    "Tofu Pomodoro Pasta": "https://thf.bing.com/th/id/OIP.70UwCtnZrns6BhbpC-Sn3wHaLH?r=0&cb=thfc1falcon2&pid=Api",
-    "Beef or Chicken Taco Bowl": "https://tse3.mm.bing.net/th/id/OIP.PY8jMay96q478n-pHnkxHQHaKz?r=0&pid=Api",
-    "Tofu Taco Bowl": "https://thfvnext.bing.com/th/id/OIP.VlQmsPgANMwbNF9R41cKewHaLH?r=0&cb=thfvnextfalcon2&pid=Api",
-    "Pork Chifrijo": "https://thfvnext.bing.com/th/id/OIP.0fJ2edYmHuhzWMlKqHdNJgHaE8?cb=thfvnextfalcon2&pid=Api",
-    "Tofu Chifrijo": "https://tse1.mm.bing.net/th/id/OIP.KexE7PL1ZR0bsjz_PA72zQHaHa?pid=Api",
-    "Mongolian": "https://tse4.mm.bing.net/th/id/OIP.rRvGi6T42GuKB2PPz-3_XwHaHa?r=0&pid=Api",
     "Old Bay Roasted Chicken": "https://tse1.explicit.bing.net/th/id/OIP.NWnC-PQJaI7iNeuqKhkvxwHaJ3?pid=Api",
     "Pasta Primavera with Vegan Pesto": "https://thf.bing.com/th/id/OIP.cfDTl2A7FGmC3mAYkRDSWAHaLH?cb=thfc1falcon2&pid=Api",
     "Steam Broccoli": "https://tse4.mm.bing.net/th/id/OIP.GbG-J6CMzWscmy16GKDaugHaLH?pid=Api",
@@ -88,6 +81,13 @@
     "Coconut Caramel Braised Tofu with Jasmine Rice": "https://tse4.mm.bing.net/th/id/OIP.o74x-CLAXqEhP9TELQ67YwHaE8?r=0&pid=Api",
     "Doo boo Jorim with Forbidden Rice (Garlic, Chili, Soy, Braised Tofu)": "https://tse2.mm.bing.net/th/id/OIP.ZuIyUtlvnojKyLw1RGccswHaE7?pid=Api",
     "- Special": "https://thfvnext.bing.com/th/id/OIP.U1jWws3g0Atrk7UDNA4s-gHaIc?r=0&cb=thfvnextfalcon2&pid=Api",
-    "On Summer Break": "https://tse1.mm.bing.net/th/id/OIP.EhnIYzXuVVcYmy93HQ__PgHaLG?r=0&pid=Api"
+    "On Summer Break": "https://tse1.mm.bing.net/th/id/OIP.EhnIYzXuVVcYmy93HQ__PgHaLG?r=0&pid=Api",
+    "Beef Kofta": "https://thfvnext.bing.com/th/id/OIP.Lz3vqJDbB0A5POjiXw-nCwHaE7?r=0&cb=thfvnextfalcon2&pid=Api",
+    "Roasted Vegetables": "https://tse3.mm.bing.net/th/id/OIP.fPbp1grjkSsvbF_RtZhmOwHaLH?r=0&pid=Api",
+    "Chicken Stir Fry": "https://tse1.mm.bing.net/th/id/OIP.JXM0J8GzgqsrHPnRR2mxlwHaLJ?pid=Api",
+    "Tofu Stir Fry": "https://tse1.mm.bing.net/th/id/OIP.N1BKQwbfODx2svrY0rXjzAHaJQ?pid=Api",
+    "Mongolian Grill": "https://thfvnext.bing.com/th/id/OIP.ZCKnxPTGGkwFrxtABwVbEQHaEy?r=0&cb=thfvnextfalcon2&pid=Api",
+    "Chicken Alla Parm": "https://tse3.mm.bing.net/th/id/OIP.bHNnDmNrd6fSDGB8ABKEFAHaLH?pid=Api",
+    "Fried Tofu": "https://thf.bing.com/th/id/OIP.vNPlRpEApXhjExDDKNOnBAHaEJ?r=0&cb=thfc1falcon2&pid=Api"
   }
 }
