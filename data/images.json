@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-22T18:15:07.332Z",
+  "lastUpdated": "2026-06-23T16:28:56.791Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -46,13 +46,6 @@
     "Vegan Special": "https://thfvnext.bing.com/th/id/OIP.rGetX8jM45KklgymT-gGuQHaEK?cb=thfvnextfalcon2&pid=Api",
     "Price: -": "https://thfvnext.bing.com/th/id/OIP.0GuqDUwhDxJqdh_qOyyqpQHaHa?cb=thfvnextfalcon2&pid=Api",
     "On Summer Break": "https://tse1.mm.bing.net/th/id/OIP.EhnIYzXuVVcYmy93HQ__PgHaLG?r=0&pid=Api",
-    "Beef Kofta": "https://thfvnext.bing.com/th/id/OIP.Lz3vqJDbB0A5POjiXw-nCwHaE7?r=0&cb=thfvnextfalcon2&pid=Api",
-    "Roasted Vegetables": "https://tse3.mm.bing.net/th/id/OIP.fPbp1grjkSsvbF_RtZhmOwHaLH?r=0&pid=Api",
-    "Chicken Stir Fry": "https://tse1.mm.bing.net/th/id/OIP.JXM0J8GzgqsrHPnRR2mxlwHaLJ?pid=Api",
-    "Tofu Stir Fry": "https://tse1.mm.bing.net/th/id/OIP.N1BKQwbfODx2svrY0rXjzAHaJQ?pid=Api",
-    "Mongolian Grill": "https://thfvnext.bing.com/th/id/OIP.ZCKnxPTGGkwFrxtABwVbEQHaEy?r=0&cb=thfvnextfalcon2&pid=Api",
-    "Chicken Alla Parm": "https://tse3.mm.bing.net/th/id/OIP.bHNnDmNrd6fSDGB8ABKEFAHaLH?pid=Api",
-    "Fried Tofu": "https://thf.bing.com/th/id/OIP.vNPlRpEApXhjExDDKNOnBAHaEJ?r=0&cb=thfc1falcon2&pid=Api",
     "Chicken Tikka Masala": "https://thfvnext.bing.com/th/id/OIP.zviMBVRM2Yl06J4zbHwOtAHaJL?cb=thfvnextfalcon2&pid=Api",
     "Grilled South West Chicken": "https://tse4.mm.bing.net/th/id/OIP.K4-ih7Bl2GFhPT9HIIpsrAHaLH?r=0&pid=Api",
     "Chicken Parmesan": "https://tse1.mm.bing.net/th/id/OIP.o_L0DHnCMILiCkWAAkGb3QHaLH?pid=Api",
@@ -92,6 +85,15 @@
     "Impossible Beef Picadillo": "https://thf.bing.com/th/id/OIP.xiRyGwc8JcxjK35x6QZeoQHaHa?cb=thfc1falcon2&pid=Api",
     "Braised Eggplant with Basil, served with Brown Rice": "https://tse1.mm.bing.net/th/id/OIP.n0Q2RGln9RXUnmb5PyM5xwHaHa?r=0&pid=Api",
     "Home-style Braised Tofu with Brown Rice": "https://tse1.mm.bing.net/th/id/OIP.sS-do6jnw5uu8LRQld1A2gHaNK?pid=Api",
-    "Creamy Vegan Polenta with Mushroom and Kale": "https://tse3.mm.bing.net/th/id/OIP.5sKzygLkkn8sYNL7vYrz3wHaLH?pid=Api"
+    "Creamy Vegan Polenta with Mushroom and Kale": "https://tse3.mm.bing.net/th/id/OIP.5sKzygLkkn8sYNL7vYrz3wHaLH?pid=Api",
+    "BBQ Chicken": "https://thf.bing.com/th/id/OIP.76IurapoeI4jXGMRfxQLoQHaJ4?r=0&cb=thfc1falcon2&pid=Api",
+    "BBQ Tofu": "https://thf.bing.com/th/id/OIP.7Y6ieUfl4iukjeCOQlcURQAAAA?r=0&cb=thfc1falcon2&pid=Api",
+    "LA Street Dogs": "https://tse4.mm.bing.net/th/id/OIP.JAVrRvLq5_4fJTngKlXHuQHaHZ?r=0&pid=Api",
+    "Plant-Based Hot Dogs": "https://thf.bing.com/th/id/OIP.rtlzUbKwMR-GN158UA-rRAHaHa?cb=thfc1falcon2&pid=Api",
+    "Pad See Ew": "https://thf.bing.com/th/id/OIP.g8e3TeT1UPiidPOJv0R9ngHaKX?cb=thfc1falcon2&pid=Api",
+    "Sweet Chili Chicken Bento": "https://thf.bing.com/th/id/OIP.hGEi3s1IYMNUXtraBZMN-AHaHa?cb=thfc1falcon2&pid=Api",
+    "Sweet Chili Tofu Bento": "https://thfvnext.bing.com/th/id/OIP.CKtVAWwE2hCvJrFO1ui0dwHaHa?cb=thfvnextfalcon2&pid=Api",
+    "Pork Chifrijo Rice Bowl": "https://tse3.mm.bing.net/th/id/OIP.EruSeAtUjAGUhLYCNoELagHaL4?pid=Api",
+    "Tofu Chifrijo Rice Bowl": "https://thf.bing.com/th/id/OIP.KexE7PL1ZR0bsjz_PA72zQHaHa?cb=thfc1falcon2&pid=Api"
   }
 }
