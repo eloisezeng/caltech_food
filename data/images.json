@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-02T16:07:31.813Z",
+  "lastUpdated": "2026-07-03T15:54:31.654Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -56,7 +56,6 @@
     "Hungarian Beef Goulash": "https://tse4.mm.bing.net/th/id/OIP.rzgJ2QORRS0blwtLrXIaCAHaLG?pid=Api",
     "Roast Pork with Chimichurri": "https://tse2.mm.bing.net/th/id/OIP.SP6nzQzX1WxN_PA5kw-yzwHaLH?pid=Api",
     "Roasted Chicken with Caper and Lemon Sauce": "https://thf.bing.com/th/id/OIP.uMssiQnaWJc-cEYNQgECJQHaJQ?cb=thfc1falcon3&pid=Api",
-    "Beef Vindaloo": "https://tse4.mm.bing.net/th/id/OIP.aR8EKh8RGbe9FoLWXzXDDQHaJQ?r=0&pid=Api",
     "Gardein Goulash": "https://thf.bing.com/th/id/OIP.WTU-WKEM3qIxmR0LwcUGGAHaJz?r=0&cb=thfc1falcon3&pid=Api",
     "Crumbled Tempeh with Sweet, Potato Onion, Peppers and Vegan Cheese": "https://tse3.mm.bing.net/th/id/OIP.kq3wEgJnHzBW7OSTZPm1sQHaKD?pid=Api",
     "Pasta Primavera with Basil Pesto": "https://thfvnext.bing.com/th/id/OIP.O_EBXgdyRpZ_YB6kYig0KgHaLC?cb=thfvnextfalcon3&pid=Api",
@@ -120,6 +119,7 @@
     "Sweet and Sour Tofu and Vegetables": "https://thfvnext.bing.com/th/id/OIP.TpwjJRXSw4tyO-kaY0ExbAHaHa?r=0&cb=thfvnextfalcon4&pid=Api",
     "TGIF Special": "https://tse3.mm.bing.net/th/id/OIP.kUNURgG0xirSsi0l1QqP-gHaHa?pid=Api",
     "Turmeric Rice": "https://thfvnext.bing.com/th/id/OIP.3BpgsNHilA3PpSa2qKo67gHaHa?r=0&cb=thfvnextfalcon4&pid=Api",
-    "GF Vegan Special": "https://thf.bing.com/th/id/OIP.huF_IU660NoSaVlaxzmNwwHaLc?cb=thfc1falcon4&pid=Api"
+    "GF Vegan Special": "https://thf.bing.com/th/id/OIP.huF_IU660NoSaVlaxzmNwwHaLc?cb=thfc1falcon4&pid=Api",
+    "Spiced Beef Stew": "https://thfvnext.bing.com/th/id/OIP.-e_vAAdB9X6BcJ1TMUjtYAHaJ1?cb=thfvnextfalcon4&pid=Api"
   }
 }
