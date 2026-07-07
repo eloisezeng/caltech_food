@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-06T16:54:09.614Z",
+  "lastUpdated": "2026-07-07T16:35:08.798Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -46,16 +46,7 @@
     "Vegan Special": "https://thfvnext.bing.com/th/id/OIP.rGetX8jM45KklgymT-gGuQHaEK?cb=thfvnextfalcon2&pid=Api",
     "Price: -": "https://thfvnext.bing.com/th/id/OIP.0GuqDUwhDxJqdh_qOyyqpQHaHa?cb=thfvnextfalcon2&pid=Api",
     "On Summer Break": "https://tse1.mm.bing.net/th/id/OIP.EhnIYzXuVVcYmy93HQ__PgHaLG?r=0&pid=Api",
-    "Pork Chifrijo Rice Bowl": "https://tse3.mm.bing.net/th/id/OIP.EruSeAtUjAGUhLYCNoELagHaL4?pid=Api",
-    "Tofu Chifrijo Rice Bowl": "https://thf.bing.com/th/id/OIP.KexE7PL1ZR0bsjz_PA72zQHaHa?cb=thfc1falcon2&pid=Api",
     "Vegetarian Special": "https://thf.bing.com/th/id/OIP._Lpele1Fw_kdedHe8zW8RwHaG0?cb=thfc1falcon3&pid=Api",
-    "Asada Beef Tacos": "https://tse4.mm.bing.net/th/id/OIP.UF8Hs9qzzlwBuwg4uEiE9gHaLH?pid=Api",
-    "Black Bean Hardshell Tacos": "https://tse1.mm.bing.net/th/id/OIP.urzuBi90F4HxH4QpKKGpzwHaLH?r=0&pid=Api",
-    "Chicken Caesar Piadini": "https://thfvnext.bing.com/th/id/OIP.IJaiMUnlXeYgaARPWcFj1wHaE8?cb=thfvnextfalcon4&pid=Api",
-    "Classic Caesar Piadini": "https://thf.bing.com/th/id/OIP.EtK9in05usVpE-Jpq7vtGAHaEU?r=0&cb=thfc1falcon4&pid=Api",
-    "Creamy Pomodoro Pasta with Chicken": "https://thfvnext.bing.com/th/id/OIP.sofCJrKuTylD57JW1OuxRgHaHa?cb=thfvnextfalcon4&pid=Api",
-    "Creamy Pomodoro Pasta with Gardein": "https://tse1.mm.bing.net/th/id/OIP.r2VhPy6cOQqG5yx25i0wXAHaE8?pid=Api",
-    "Happy 4th of July": "https://tse2.mm.bing.net/th/id/OIP.ozGNz1lVKyTLC-pXgfzzMwHaE7?r=0&pid=Api",
     "Pork Loin with Bruschetta": "https://tse2.mm.bing.net/th/id/OIP.x7XvXa_kXIAJV4gultHq4wHaLH?pid=Api",
     "Citrus Roasted Chicken": "https://thfvnext.bing.com/th/id/OIP.Pn0x5uxy8TTJtX3D4XPmwAHaHa?r=0&cb=thfvnextfalcon4&pid=Api",
     "Thai Grilled Pork Chop": "https://thf.bing.com/th/id/OIP.M2Fi7wnyxBGNgwzg77tAgQHaLG?r=0&cb=thfc1falcon4&pid=Api",
@@ -96,6 +87,16 @@
     "Tofu Stir Fry with Brown Rice": "https://tse4.mm.bing.net/th/id/OIP.9uj43MRRenDhIcQJ7VFBuAHaHa?pid=Api",
     "Vegan Creamy Chickpea Pasta with Spinach": "https://thfvnext.bing.com/th/id/OIP.hscjmxUzMqYm1q02QbwmGQHaLH?cb=thfvnextfalcon4&pid=Api",
     "Whole Roasted Cauliflower, Caramelized Onion & Pepita Pesto": "https://tse3.mm.bing.net/th/id/OIP.-MxJ-xvVZq-KE6ME_Iz7OwHaE8?pid=Api",
-    "Thai Curry, Vegetables with Brown Rice": "https://thfvnext.bing.com/th/id/OIP.rHLZTA0bow62Whvxwe6HOwHaLH?r=0&cb=thfvnextfalcon4&pid=Api"
+    "Thai Curry, Vegetables with Brown Rice": "https://thfvnext.bing.com/th/id/OIP.rHLZTA0bow62Whvxwe6HOwHaLH?r=0&cb=thfvnextfalcon4&pid=Api",
+    "Beef Baked Ziti": "https://thf.bing.com/th/id/OIP._QF668WK-4xTpU3qIb6iQgHaJQ?cb=thfc1falcon4&pid=Api",
+    "Vegan Baked Ziti": "https://tse2.mm.bing.net/th/id/OIP.dxUBJT9MZ2ghAF__IbvuDQHaIG?r=0&pid=Api",
+    "Chicken Creamy Pomodoro": "https://tse4.mm.bing.net/th/id/OIP.ZmxKTwF28ibDB_yar4RVIwHaHa?pid=Api",
+    "Gardein Creamy Pomodoro": "https://thfvnext.bing.com/th/id/OIP.r2VhPy6cOQqG5yx25i0wXAHaE8?cb=thfvnextfalcon4&pid=Api",
+    "Pad See Ew with Fried Egg": "https://thf.bing.com/th/id/OIP.XKihYieD08n2EhXzVLSb5wHaEC?r=0&cb=thfc1falcon4&pid=Api",
+    "Vegan Pad See Ew": "https://thf.bing.com/th/id/OIP.HS8p887f0vOwgKdFEauYYwHaJ4?r=0&cb=thfc1falcon4&pid=Api",
+    "Cobb Salad w/ Bacon": "https://tse2.mm.bing.net/th/id/OIP.eDRwGfcdNzvpAf4iXnFcLgHaLH?pid=Api",
+    "Cobb Salad": "https://tse1.mm.bing.net/th/id/OIP.ge-x5TME2pEZIduoHq610QHaLH?pid=Api",
+    "Chicken Alla Parm": "https://thfvnext.bing.com/th/id/OIP.DqaOgAjnQzyLM2VQbdFbDQHaKe?cb=thfvnextfalcon4&pid=Api",
+    "Eggplant Alla Parm": "https://tse4.mm.bing.net/th/id/OIP.bxdP9Kru8LvbFImMRnkV_gHaLG?r=0&pid=Api"
   }
 }
