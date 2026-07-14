@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-13T16:37:44.176Z",
+  "lastUpdated": "2026-07-14T15:26:51.138Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -96,6 +96,33 @@
     "Vegan Eutoffee with Brow Rice": "https://tse3.mm.bing.net/th/id/OIP.UzTdYkXOf73lGM35Wa0qegHaLH?r=0&pid=Api",
     "Creamy Vegan Polenta with Mushroom and Kale": "https://tse3.mm.bing.net/th/id/OIP.rAw4S7XSozg48t_woxO3DgHaJN?r=0&pid=Api",
     "Mushroom Galbi with Brown Rice": "https://tse2.mm.bing.net/th/id/OIP.v0kp5qoWYmS73Ekuy7YOsgHaHa?r=0&pid=Api",
-    "Jack Fruit  Tinga tostadas with Black Beans": "https://tse3.mm.bing.net/th/id/OIP.0CBfqh58SdGlc7X2_5fXqQHaLD?r=0&pid=Api"
+    "Jack Fruit  Tinga tostadas with Black Beans": "https://tse3.mm.bing.net/th/id/OIP.0CBfqh58SdGlc7X2_5fXqQHaLD?r=0&pid=Api",
+    "Mongolian": "https://tse1.mm.bing.net/th/id/OIP._URWQnMjVZxMye__-OXevAHaEx?r=0&pid=Api",
+    "Dumplings and Eggrolls": "https://tse1.mm.bing.net/th/id/OIP.nsqTYQhUo5nSvRw4rx9tkgHaJQ?r=0&pid=Api",
+    "Bacon Wrapped Hot Dogs": "https://tse2.mm.bing.net/th/id/OIP._0RcU2neXdlE7YssP3Y2UQHaJQ?r=0&pid=Api",
+    "Classic Chicken Caesar Salad": "https://tse1.mm.bing.net/th/id/OIP.aeHQsKCsD82FXNhTTW2nGwHaHa?r=0&pid=Api",
+    "Chicken Stir Fry": "https://tse4.mm.bing.net/th/id/OIP.VmnyfVuV9NLwp5OFlN1ZiAHaLH?r=0&pid=Api",
+    "all beef": "https://tse2.explicit.bing.net/th/id/OIP.QTzsQz_hs_7KT0IUa6x2gwHaJQ?r=0&pid=Api",
+    "Classic Caesar Salad": "https://tse3.mm.bing.net/th/id/OIP.8UagT3WWGxruvIOqJTCPeQHaE8?r=0&pid=Api",
+    "Tofu Teriyaki": "https://tse2.mm.bing.net/th/id/OIP.lp62Dlvda0mJFZv1l2muLgHaLH?r=0&pid=Api",
+    "Gardein Stir Fry": "https://tse3.mm.bing.net/th/id/OIP.4NsrFUXPU26uRfpbSJb_3gHaLM?r=0&pid=Api",
+    "side of lay's": "https://tse3.mm.bing.net/th/id/OIP.R3RfodHgHXlV1HzCeVL6WgHaHa?r=0&pid=Api",
+    "Seasonal Vegetables": "https://tse3.mm.bing.net/th/id/OIP.c_oEgGcmTiEp8Z9K8Eil_QHaLU?r=0&pid=Api",
+    "Gluten free Vegan": "https://tse2.mm.bing.net/th/id/OIP.ZU-B-1-yCx8gB2iEbu38tAHaLc?r=0&pid=Api",
+    "Gluten Free Vegan": "https://tse2.mm.bing.net/th/id/OIP.ZU-B-1-yCx8gB2iEbu38tAHaLc?r=0&pid=Api",
+    "toppings": "https://tse3.mm.bing.net/th/id/OIP.4TTqsHZoex2A2Xdyfi8k1wHaEJ?r=0&pid=Api",
+    "mayo ketchup mustard": "https://thfvnext.bing.com/th/id/OIP.5UG4qnd9TsouFjvpM8nM5AHaHa?r=0&cb=thumbexpctl1&pid=Api",
+    "chicken thigs 1cs": "https://tse3.mm.bing.net/th/id/OIP.1TJZr3tAnCIojDc62L860AHaKX?r=0&pid=Api",
+    "fried rice  2/400": "https://tse4.mm.bing.net/th/id/OIP.BmLdOcHXF4HvSz5GiEc7MgHaEI?r=0&pid=Api",
+    "2/400 rice": "https://tse2.mm.bing.net/th/id/OIP.QRMEJXvRejyAkt6RbqIc4AHaHa?r=0&pid=Api",
+    "chicken breast 20#": "https://tse1.mm.bing.net/th/id/OIP.1y8G7lshDxr7PdIY1pKUWAHaJN?r=0&pid=Api",
+    "tofu 10#": "https://tse2.mm.bing.net/th/id/OIP.-UoieOon7ePGvCGyw0viiwHaNK?r=0&pid=Api",
+    "chicken thighs 1cs": "https://tse3.mm.bing.net/th/id/OIP.tCZgAppJh2K07SDdd4VoYgHaLH?r=0&pid=Api",
+    "deeping sauce 1/6 pan": "https://tse1.mm.bing.net/th/id/OIP.tT0u811UQDMOg2-aVYL4RQHaO0?r=0&pid=Api",
+    "romaine.5cs": "https://tse3.mm.bing.net/th/id/OIP.Hd3LfbfXCqyx_4uoNfMLAQHaLG?r=0&pid=Api",
+    "gardein .5cs": "https://tse3.mm.bing.net/th/id/OIP.BYTuDUy8tqGaZsEt8CUHpQHaEn?r=0&pid=Api",
+    "bell peppers 1/400": "https://tse2.mm.bing.net/th/id/OIP.I8Iav9CIH0G_gZmd1KvcSAHaHa?r=0&pid=Api",
+    "white onions 1/400": "https://tse2.mm.bing.net/th/id/OIP.PnWcaoZEcY1-zznnrq8S5AHaFE?r=0&pid=Api",
+    "stir fry sauce": "https://tse4.mm.bing.net/th/id/OIP.Rjh83QoprQRp2CQ0MxaGcAHaKR?r=0&pid=Api"
   }
 }
