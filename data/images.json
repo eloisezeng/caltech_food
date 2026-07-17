@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-16T15:42:03.016Z",
+  "lastUpdated": "2026-07-17T15:17:13.950Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -43,13 +43,10 @@
     "Udon Noodle": "https://tse2.mm.bing.net/th/id/OIP.xUehRJzHGAB8_u8pnvHoZwHaLH?pid=Api",
     "Special One": "https://tse2.mm.bing.net/th/id/OIP.hPD07KbkobZbfA3x1J3KMgHaEj?pid=Api",
     "Special Two": "https://tse1.mm.bing.net/th/id/OIP.AGkURYWrIB-eu9V2WdPnAAHaHa?pid=Api",
-    "Vegan Special": "https://thfvnext.bing.com/th/id/OIP.rGetX8jM45KklgymT-gGuQHaEK?cb=thfvnextfalcon2&pid=Api",
     "Price: -": "https://thfvnext.bing.com/th/id/OIP.0GuqDUwhDxJqdh_qOyyqpQHaHa?cb=thfvnextfalcon2&pid=Api",
     "On Summer Break": "https://tse1.mm.bing.net/th/id/OIP.EhnIYzXuVVcYmy93HQ__PgHaLG?r=0&pid=Api",
-    "GF Vegan Entree": "https://tse2.mm.bing.net/th/id/OIP.TXMb_LMdLmiDybVm39uzzgHaHa?r=0&pid=Api",
     "Jasmine Rice": "https://thfvnext.bing.com/th/id/OIP.jWBfTYg-Gd9wqMeEvOkSQAHaHa?cb=thfvnextfalcon4&pid=Api",
     "Beef and Broccoli": "https://thfvnext.bing.com/th/id/OIP.h7X2lT1rw8-9TDsdfuGq5QHaLH?cb=thfvnextfalcon4&pid=Api",
-    "GF Vegan Special": "https://thf.bing.com/th/id/OIP.huF_IU660NoSaVlaxzmNwwHaLc?cb=thfc1falcon4&pid=Api",
     "Classic Beef Goulash": "https://tse4.mm.bing.net/th/id/OIP.7kZPmVcLlh_ES1UU4rzWggHaJQ?r=0&pid=Api",
     "Chicken Za'atar": "https://tse1.mm.bing.net/th/id/OIP.F6Js-8XpIpivB0VM7Le-yAHaLI?r=0&pid=Api",
     "Herbed Tilapia with Caper Sauce": "https://tse3.mm.bing.net/th/id/OIP.z6CjBpBKZNpn47JJ1TQW2wHaKY?r=0&pid=Api",
@@ -79,7 +76,6 @@
     "Khichuri Lentil and Brown Rice": "https://tse1.mm.bing.net/th/id/OIP.N-M5kdFfZcevk_x2w6gLPAHaJ4?r=0&pid=Api",
     "Salt and Pepper Tofu w Brown Rice": "https://tse1.explicit.bing.net/th/id/OIP.m2T4Ngwz73dZmeO7azdd0wHaJR?r=0&pid=Api",
     "Vegan Stew": "https://tse4.mm.bing.net/th/id/OIP.suN978yujAMKkYIS0EsGDgHaJQ?r=0&pid=Api",
-    "GF, Vegan Special": "https://tse2.mm.bing.net/th/id/OIP.huF_IU660NoSaVlaxzmNwwHaLc?r=0&pid=Api",
     "Vegan Eutoffee with Brow Rice": "https://tse3.mm.bing.net/th/id/OIP.UzTdYkXOf73lGM35Wa0qegHaLH?r=0&pid=Api",
     "Creamy Vegan Polenta with Mushroom and Kale": "https://tse3.mm.bing.net/th/id/OIP.rAw4S7XSozg48t_woxO3DgHaJN?r=0&pid=Api",
     "Mushroom Galbi with Brown Rice": "https://tse2.mm.bing.net/th/id/OIP.v0kp5qoWYmS73Ekuy7YOsgHaHa?r=0&pid=Api",
@@ -89,7 +85,6 @@
     "Bacon Wrapped Hot Dogs": "https://tse2.mm.bing.net/th/id/OIP._0RcU2neXdlE7YssP3Y2UQHaJQ?r=0&pid=Api",
     "Classic Chicken Caesar Salad": "https://tse1.mm.bing.net/th/id/OIP.aeHQsKCsD82FXNhTTW2nGwHaHa?r=0&pid=Api",
     "Chicken Stir Fry": "https://tse4.mm.bing.net/th/id/OIP.VmnyfVuV9NLwp5OFlN1ZiAHaLH?r=0&pid=Api",
-    "Tofu Teriyaki": "https://tse2.mm.bing.net/th/id/OIP.lp62Dlvda0mJFZv1l2muLgHaLH?r=0&pid=Api",
     "Gardein Stir Fry": "https://tse3.mm.bing.net/th/id/OIP.4NsrFUXPU26uRfpbSJb_3gHaLM?r=0&pid=Api",
     "Classic Ranch Salad": "https://tse1.mm.bing.net/th/id/OIP.n_BJJQJftOveq_dpgiMVIQHaLH?r=0&pid=Api",
     "Updated Test": "https://tse1.mm.bing.net/th/id/OIP.h-AtmkX-Og8_bDP3dp7o5QHaJl?r=0&pid=Api",
@@ -122,8 +117,8 @@
     "Szechuan Chicken Stir - Fry": "https://tse4.mm.bing.net/th/id/OIP.8FU8HNUy_CiW5Oi48eqH7AHaJ4?r=0&pid=Api",
     "Sweet & Sour tofu": "https://tse4.mm.bing.net/th/id/OIP.f4267YXFvkQtcBlTy112RwHaJQ?r=0&pid=Api",
     "Tonkatsu Chicken": "https://tse4.mm.bing.net/th/id/OIP.VzSVQwDG_ITlf75hUP0qXwHaHa?r=0&pid=Api",
-    "GF, Contains Coconut Special": "https://thfvnext.bing.com/th/id/OIP.qxwP_CuZNnhNYuDszVylSQHaLH?r=0&cb=thumbexptrt1&urlcheck=1&pid=Api",
     "Vegetarian Special": "https://tse3.mm.bing.net/th/id/OIP.Y69NntyIz-y3OQgybuUASAHaHa?r=0&pid=Api",
-    "Roasted Sweet Yams": "https://tse2.explicit.bing.net/th/id/OIP.DxSPfodjfKrD4Dq0ahX6rQHaLH?r=0&pid=Api"
+    "Roasted Sweet Yams": "https://tse2.explicit.bing.net/th/id/OIP.DxSPfodjfKrD4Dq0ahX6rQHaLH?r=0&pid=Api",
+    "#REF!": "https://tse4.mm.bing.net/th/id/OIP.AWTIQCw1efcT0eHFvVF0dAHaE8?r=0&pid=Api"
   }
 }
