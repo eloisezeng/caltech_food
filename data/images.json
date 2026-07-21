@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-20T15:54:20.479Z",
+  "lastUpdated": "2026-07-21T15:47:21.835Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -49,10 +49,6 @@
     "Basmati rice": "https://tse4.mm.bing.net/th/id/OIP.Fz3ecGF54uMJnfiwThG2dgHaHa?r=0&pid=Api",
     "Vegan Stew": "https://tse4.mm.bing.net/th/id/OIP.suN978yujAMKkYIS0EsGDgHaJQ?r=0&pid=Api",
     "Jack Fruit  Tinga tostadas with Black Beans": "https://tse3.mm.bing.net/th/id/OIP.0CBfqh58SdGlc7X2_5fXqQHaLD?r=0&pid=Api",
-    "Classic Chicken Caesar Salad": "https://tse1.mm.bing.net/th/id/OIP.aeHQsKCsD82FXNhTTW2nGwHaHa?r=0&pid=Api",
-    "Chicken Stir Fry": "https://tse4.mm.bing.net/th/id/OIP.VmnyfVuV9NLwp5OFlN1ZiAHaLH?r=0&pid=Api",
-    "Gardein Stir Fry": "https://tse3.mm.bing.net/th/id/OIP.4NsrFUXPU26uRfpbSJb_3gHaLM?r=0&pid=Api",
-    "Classic Ranch Salad": "https://tse1.mm.bing.net/th/id/OIP.n_BJJQJftOveq_dpgiMVIQHaLH?r=0&pid=Api",
     "BBQ Beef Brisket": "https://tse1.mm.bing.net/th/id/OIP.XvZi2ERZv9wsRohrc9BpMQHaHa?r=0&pid=Api",
     "Pork Tenderloin with apples & Onions": "https://tse4.mm.bing.net/th/id/OIP.o4vELG5BJW_ie4ChdGupewHaHa?r=0&pid=Api",
     "Jamaican Chicken Curry": "https://tse4.mm.bing.net/th/id/OIP.fjXO7gDGtXIMe8W9QGrqbgHaJQ?r=0&pid=Api",
@@ -78,7 +74,6 @@
     "Tonkatsu Chicken": "https://tse4.mm.bing.net/th/id/OIP.VzSVQwDG_ITlf75hUP0qXwHaHa?r=0&pid=Api",
     "Vegetarian Special": "https://tse3.mm.bing.net/th/id/OIP.Y69NntyIz-y3OQgybuUASAHaHa?r=0&pid=Api",
     "Roasted Sweet Yams": "https://tse2.explicit.bing.net/th/id/OIP.DxSPfodjfKrD4Dq0ahX6rQHaLH?r=0&pid=Api",
-    "#REF!": "https://tse4.mm.bing.net/th/id/OIP.AWTIQCw1efcT0eHFvVF0dAHaE8?r=0&pid=Api",
     "Baharat Beef Grilled Flank Steak": "https://tse1.mm.bing.net/th/id/OIP.3zHPRh1hulwYblf7tO38pgHaKG?r=0&pid=Api",
     "Coconut Chana Masala with Brown Rice": "https://tse1.mm.bing.net/th/id/OIP.CjzEe7hq3rmNMaj82HCDDQHaLH?r=0&pid=Api",
     "Vegan Rehtaeh": "https://tse2.mm.bing.net/th/id/OIP.d11Cl7oAv62sjdEgXn7xEAHaKG?r=0&pid=Api",
@@ -89,6 +84,20 @@
     "Soy Bulgogi with Forbidden Rice": "https://tse1.mm.bing.net/th/id/OIP.mhVuILKXw7k7t3uRdKWF4AHaKe?r=0&pid=Api",
     "Chicken Lasagna": "https://tse2.mm.bing.net/th/id/OIP.i_zGTwjwytnzgyloHyJHtgHaHa?r=0&pid=Api",
     "Build Your Own Mediterranean Grain Bowl": "https://tse1.mm.bing.net/th/id/OIP.Nsbvyem5R-BsKH2e3WuVUwHaLG?r=0&pid=Api",
-    "Menu Coming Soon!": "https://tse1.mm.bing.net/th/id/OIP.SglX9taofxnYyBR7K__Y5QHaKd?r=0&pid=Api"
+    "Menu Coming Soon!": "https://tse1.mm.bing.net/th/id/OIP.SglX9taofxnYyBR7K__Y5QHaKd?r=0&pid=Api",
+    "Salmon Poke": "https://tse3.mm.bing.net/th/id/OIP.J2UQkmEAiuhqk2I-Mji6fgHaLH?r=0&pid=Api",
+    "Tofu Poke": "https://tse2.mm.bing.net/th/id/OIP.FiPnHs8SU2ZN-dBPn90auwHaLG?r=0&pid=Api",
+    "Mongolian Noodles with Chicken": "https://tse3.mm.bing.net/th/id/OIP.BQYmbCL-jFLxTr2PIniq_gHaLG?r=0&pid=Api",
+    "Mongolian Noodles with Gardein": "https://tse3.mm.bing.net/th/id/OIP.hSJwZqP6y0Puf7xmT47NUgHaHa?r=0&pid=Api",
+    "Chicken Wings w/ Toppings": "https://tse3.mm.bing.net/th/id/OIP.8B3xTVvpczSDO6gnt9hfJQHaFL?r=0&pid=Api",
+    "Tofu Nuggets w/ Toppings": "https://tse4.mm.bing.net/th/id/OIP.-WEw99Neqq22bq41RcBxYwHaJ4?r=0&pid=Api",
+    "Cobb Salad Piadine": "https://tse1.mm.bing.net/th/id/OIP.ge-x5TME2pEZIduoHq610QHaLH?r=0&pid=Api",
+    "Gluten, Dairy, Contains Pork": "https://tse2.mm.bing.net/th/id/OIP.pwwYK2Bdw2Cp1P-TH9241AHaH-?r=0&pid=Api",
+    "Beef Fajitas": "https://tse4.mm.bing.net/th/id/OIP.axiHO4HwKXIEYzskmue8qwHaHa?r=0&pid=Api",
+    "Beef Gardein Fajitas": "https://tse2.mm.bing.net/th/id/OIP.xNOqcYjqnev4oToB008cCQHaHa?r=0&pid=Api",
+    "Dinner Specials": "https://tse3.mm.bing.net/th/id/OIP.UARkbgcuEpbH_0-Tzf6tSQHaKe?r=0&pid=Api",
+    "$11.65": "https://tse2.mm.bing.net/th/id/OIP.gLPJgF8yoziE1RhbgQJqjQAAAA?r=0&pid=Api",
+    "$9.35": "https://tse2.mm.bing.net/th/id/OIP.2gRPmLY3UKTD8GE0DQ-uywHaNK?r=0&pid=Api",
+    "$10.35": "https://tse2.mm.bing.net/th/id/OIP.Z5kRBAcUd5C9jyy6j8LBuAHaFj?r=0&pid=Api"
   }
 }
