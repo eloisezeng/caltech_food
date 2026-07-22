@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-21T15:47:21.835Z",
+  "lastUpdated": "2026-07-22T15:45:14.688Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -65,7 +65,6 @@
     "Basmati Rice": "https://tse4.mm.bing.net/th/id/OIP.Fz3ecGF54uMJnfiwThG2dgHaHa?r=0&pid=Api",
     "Parsley, Garlic, Roasted Potatoes": "https://tse4.mm.bing.net/th/id/OIP.3JleG0HPnPlbyvHJql14DAAAAA?r=0&pid=Api",
     "Tilapia with Lemon Caper sauce": "https://tse1.mm.bing.net/th/id/OIP.jvluBuKEPlqsB_T0fWOJbgHaHa?r=0&pid=Api",
-    "Bistec Ranchero, (Ranch Style steak)": "https://tse1.mm.bing.net/th/id/OIP.RLFHwbdLoZ2VJaU5NLe7PwHaHa?r=0&pid=Api",
     "Chicken & Cheese Chimichangas": "https://tse3.mm.bing.net/th/id/OIP.lRLeMrv5snj1ibjnEJCyCwHaLH?r=0&pid=Api",
     "Soy Rizo and Potatoes Tacos": "https://tse2.mm.bing.net/th/id/OIP.Ntv8oEHYNhMxa1dTppY1BwHaO0?r=0&pid=Api",
     "Beef Stir-fry": "https://tse3.mm.bing.net/th/id/OIP.6u9f0hg75IQmfOQMalHaXwHaKX?r=0&pid=Api",
@@ -98,6 +97,8 @@
     "Dinner Specials": "https://tse3.mm.bing.net/th/id/OIP.UARkbgcuEpbH_0-Tzf6tSQHaKe?r=0&pid=Api",
     "$11.65": "https://tse2.mm.bing.net/th/id/OIP.gLPJgF8yoziE1RhbgQJqjQAAAA?r=0&pid=Api",
     "$9.35": "https://tse2.mm.bing.net/th/id/OIP.2gRPmLY3UKTD8GE0DQ-uywHaNK?r=0&pid=Api",
-    "$10.35": "https://tse2.mm.bing.net/th/id/OIP.Z5kRBAcUd5C9jyy6j8LBuAHaFj?r=0&pid=Api"
+    "$10.35": "https://tse2.mm.bing.net/th/id/OIP.Z5kRBAcUd5C9jyy6j8LBuAHaFj?r=0&pid=Api",
+    "Beef Bistec Ranchero, (Ranch Style steak)": "https://tse3.mm.bing.net/th/id/OIP.W-0oKsTHp1B_H9GPZAYjwAHaLH?r=0&pid=Api",
+    "Chili Cheese Beef Dogs or Plant Based Dogs": "https://tse2.mm.bing.net/th/id/OIP.Mkw0cb9iWk5rFJjz2fQfTAHaHa?r=0&pid=Api"
   }
 }
