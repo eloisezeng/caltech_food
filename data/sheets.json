@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-24T15:27:19.264Z",
+  "lastUpdated": "2026-07-25T15:07:10.805Z",
   "sources": {
     "house": {
       "sheetId": "2PACX-1vQkl7UZwIzBznKuZA0DgMCtVr7HezxIIocup7F-o3qXz4pK4wNa2BF3nn6-ExQeLkwrK24m4cgrzqwO",
@@ -35,6 +35,7 @@
       "gids": {
         "Pizza Special": 1389289090,
         "Grill Special": 812292265,
+        "101 Friday L": 31078818,
         "Monday": 1584350749,
         "Tuesday": 10318477,
         "Wednesday": 1130846014,
