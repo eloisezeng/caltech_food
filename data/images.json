@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-27T16:25:11.227Z",
+  "lastUpdated": "2026-07-28T16:06:54.237Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -51,20 +51,10 @@
     "Jamaican Coconut Tofu Curry": "https://tse3.mm.bing.net/th/id/OIP.BMnueTahtoJjuz29df5jZgHaLH?r=0&pid=Api",
     "Basmati Rice": "https://tse4.mm.bing.net/th/id/OIP.Fz3ecGF54uMJnfiwThG2dgHaHa?r=0&pid=Api",
     "Vegetarian Special": "https://tse3.mm.bing.net/th/id/OIP.Y69NntyIz-y3OQgybuUASAHaHa?r=0&pid=Api",
-    "Salmon Poke": "https://tse3.mm.bing.net/th/id/OIP.J2UQkmEAiuhqk2I-Mji6fgHaLH?r=0&pid=Api",
-    "Tofu Poke": "https://tse2.mm.bing.net/th/id/OIP.FiPnHs8SU2ZN-dBPn90auwHaLG?r=0&pid=Api",
-    "Mongolian Noodles with Chicken": "https://tse3.mm.bing.net/th/id/OIP.BQYmbCL-jFLxTr2PIniq_gHaLG?r=0&pid=Api",
-    "Mongolian Noodles with Gardein": "https://tse3.mm.bing.net/th/id/OIP.hSJwZqP6y0Puf7xmT47NUgHaHa?r=0&pid=Api",
-    "Chicken Wings w/ Toppings": "https://tse3.mm.bing.net/th/id/OIP.8B3xTVvpczSDO6gnt9hfJQHaFL?r=0&pid=Api",
-    "Tofu Nuggets w/ Toppings": "https://tse4.mm.bing.net/th/id/OIP.-WEw99Neqq22bq41RcBxYwHaJ4?r=0&pid=Api",
-    "Cobb Salad Piadine": "https://tse1.mm.bing.net/th/id/OIP.ge-x5TME2pEZIduoHq610QHaLH?r=0&pid=Api",
-    "Gluten, Dairy, Contains Pork": "https://tse2.mm.bing.net/th/id/OIP.pwwYK2Bdw2Cp1P-TH9241AHaH-?r=0&pid=Api",
     "Beef Fajitas": "https://tse4.mm.bing.net/th/id/OIP.axiHO4HwKXIEYzskmue8qwHaHa?r=0&pid=Api",
     "Dinner Specials": "https://tse3.mm.bing.net/th/id/OIP.UARkbgcuEpbH_0-Tzf6tSQHaKe?r=0&pid=Api",
-    "$11.65": "https://tse2.mm.bing.net/th/id/OIP.gLPJgF8yoziE1RhbgQJqjQAAAA?r=0&pid=Api",
     "$9.35": "https://tse2.mm.bing.net/th/id/OIP.2gRPmLY3UKTD8GE0DQ-uywHaNK?r=0&pid=Api",
     "$10.35": "https://tse2.mm.bing.net/th/id/OIP.Z5kRBAcUd5C9jyy6j8LBuAHaFj?r=0&pid=Api",
-    "Vegan Gardein Fajitas": "https://tse3.mm.bing.net/th/id/OIP.rs9aU_5d8e1OL2heiwjWXAHaHa?r=0&pid=Api",
     "Served with Fries": "https://tse4.mm.bing.net/th/id/OIP.KHqLEnVn3PtOgLwscInFaAHaEO?r=0&pid=Api",
     "Plant Based Dogs": "https://tse3.mm.bing.net/th/id/OIP.WftzH3W-UtrXkKIHm4wJKwHaE8?r=0&pid=Api",
     "Hungarian Beef Goulash": "https://tse4.mm.bing.net/th/id/OIP.OXGVlwZvaknc8Xzk4BvbKwHaJQ?r=0&pid=Api",
@@ -99,6 +89,15 @@
     "Azzaro (Yam & Plantain Curry) and Tofu with Brown Rice": "https://tse2.mm.bing.net/th/id/OIP.T2zeYVSLNq9ctXq2keaJhQHaE8?r=0&pid=Api",
     "Spicy Ginger, Tomato and Peanut Stew with Brown Rice": "https://tse3.mm.bing.net/th/id/OIP.WiP9ax9cKfceVFnwBMeHBQHaLH?r=0&pid=Api",
     "Mediterranean Grain Bowl": "https://tse1.mm.bing.net/th/id/OIP.t79ysigxTzyJgn6KEt3epQHaJ4?r=0&pid=Api",
-    "Menu Coming Soon!": "https://tse1.mm.bing.net/th/id/OIP.SglX9taofxnYyBR7K__Y5QHaKd?r=0&pid=Api"
+    "Menu Coming Soon!": "https://tse1.mm.bing.net/th/id/OIP.SglX9taofxnYyBR7K__Y5QHaKd?r=0&pid=Api",
+    "Stir Fry Noodles with Fried Egg": "https://tse2.mm.bing.net/th/id/OIP.Ku5I5IoZVq5HlIofDW5XkwHaHa?r=0&pid=Api",
+    "Chicken Caesar Salad": "https://tse4.mm.bing.net/th/id/OIP.xz8FlkKHyNwUyhesOs3QhgHaJQ?r=0&pid=Api",
+    "Ranch Salad": "https://tse4.mm.bing.net/th/id/OIP.grpiEU1Nb_h1ac2RWj7uwAHaLH?r=0&pid=Api",
+    "Creamy Pomodoro Pasta with Chicken": "https://tse4.mm.bing.net/th/id/OIP.sofCJrKuTylD57JW1OuxRgHaHa?r=0&pid=Api",
+    "Creamy Pomodoro Pasta with Plant Based Meatballs": "https://tse4.mm.bing.net/th/id/OIP.KTGHM3zPow0NTse6Hf_sbQHaJQ?r=0&pid=Api",
+    "Beef Kofta": "https://tse1.mm.bing.net/th/id/OIP.AZf_8jHMT0PxrXpLKi6bGQHaLH?r=0&pid=Api",
+    "Impossible Meat Kofta": "https://tse4.mm.bing.net/th/id/OIP.s_oeedGy2c1vHIoAMZFNQQHaHa?r=0&pid=Api",
+    "Beef Wet Burritos": "https://tse1.mm.bing.net/th/id/OIP.DJEWduSGdHB25dl7KI7LBAHaJ4?r=0&pid=Api",
+    "Impossible Beef Wet Burritos": "https://tse2.mm.bing.net/th/id/OIP.HhUZK_demmb5Si9ZwYIBzQHaDT?r=0&pid=Api"
   }
 }
