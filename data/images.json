@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-31T16:03:12.736Z",
+  "lastUpdated": "2026-08-01T15:04:29.635Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -55,8 +55,6 @@
     "Dinner Specials": "https://tse3.mm.bing.net/th/id/OIP.UARkbgcuEpbH_0-Tzf6tSQHaKe?r=0&pid=Api",
     "$9.35": "https://tse2.mm.bing.net/th/id/OIP.2gRPmLY3UKTD8GE0DQ-uywHaNK?r=0&pid=Api",
     "$10.35": "https://tse2.mm.bing.net/th/id/OIP.Z5kRBAcUd5C9jyy6j8LBuAHaFj?r=0&pid=Api",
-    "Served with Fries": "https://tse4.mm.bing.net/th/id/OIP.KHqLEnVn3PtOgLwscInFaAHaEO?r=0&pid=Api",
-    "Plant Based Dogs": "https://tse3.mm.bing.net/th/id/OIP.WftzH3W-UtrXkKIHm4wJKwHaE8?r=0&pid=Api",
     "Hungarian Beef Goulash": "https://tse4.mm.bing.net/th/id/OIP.OXGVlwZvaknc8Xzk4BvbKwHaJQ?r=0&pid=Api",
     "Roast Pork with Chimichurri": "https://tse2.mm.bing.net/th/id/OIP.cgcLF2g3QRl9hFmB0qPeKQHaEK?r=0&pid=Api",
     "Roasted Chicken with Caper and Lemon Sauce": "https://tse1.mm.bing.net/th/id/OIP.CL81AapnpjJrcpQwODD47gHaHa?r=0&pid=Api",
@@ -128,6 +126,9 @@
     "Chicken Chow - Mein": "https://tse1.mm.bing.net/th/id/OIP.uhlZyJHVCiyBBYqAP6IcZQHaJ4?r=0&pid=Api",
     "Tofu, Vegetables with General Tso's": "https://tse4.mm.bing.net/th/id/OIP.VkHFH9MxLaAtaOq3h9uzxgHaKm?r=0&pid=Api",
     "Szechuan Pork and Vegetables": "https://tse1.mm.bing.net/th/id/OIP.QptK7TatcIKehTKHiWHTygHaPj?r=0&pid=Api",
-    "Spiced Basmati Rice": "https://tse3.mm.bing.net/th/id/OIP.5ZOYaVewzXaBbgCo8V-AEQHaF7?r=0&pid=Api"
+    "Spiced Basmati Rice": "https://tse3.mm.bing.net/th/id/OIP.5ZOYaVewzXaBbgCo8V-AEQHaF7?r=0&pid=Api",
+    "Shrimp Ice Noodle Bowl": "https://tse1.mm.bing.net/th/id/OIP.DSwCQHSfyGpmASFQy5MNIwHaHa?r=0&pid=Api",
+    "Served with Daikon Radish, Pickles, Kimchi, Mushroom & Gochujang": "https://tse2.mm.bing.net/th/id/OIP.2W5Nlj2ncIZfV3BDVHweHQHaLH?r=0&pid=Api",
+    "Tofu Ice Noodle Bowl": "https://tse1.mm.bing.net/th/id/OIP.01XdCbpppJjKhMa8n_6jxgHaLH?r=0&pid=Api"
   }
 }
