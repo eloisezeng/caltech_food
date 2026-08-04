@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-03T16:30:03.001Z",
+  "lastUpdated": "2026-08-04T16:14:37.070Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -49,15 +49,6 @@
     "Dinner Specials": "https://tse3.mm.bing.net/th/id/OIP.UARkbgcuEpbH_0-Tzf6tSQHaKe?r=0&pid=Api",
     "$9.35": "https://tse2.mm.bing.net/th/id/OIP.2gRPmLY3UKTD8GE0DQ-uywHaNK?r=0&pid=Api",
     "$10.35": "https://tse2.mm.bing.net/th/id/OIP.Z5kRBAcUd5C9jyy6j8LBuAHaFj?r=0&pid=Api",
-    "Stir Fry Noodles with Fried Egg": "https://tse2.mm.bing.net/th/id/OIP.Ku5I5IoZVq5HlIofDW5XkwHaHa?r=0&pid=Api",
-    "Chicken Caesar Salad": "https://tse4.mm.bing.net/th/id/OIP.xz8FlkKHyNwUyhesOs3QhgHaJQ?r=0&pid=Api",
-    "Ranch Salad": "https://tse4.mm.bing.net/th/id/OIP.grpiEU1Nb_h1ac2RWj7uwAHaLH?r=0&pid=Api",
-    "Creamy Pomodoro Pasta with Chicken": "https://tse4.mm.bing.net/th/id/OIP.sofCJrKuTylD57JW1OuxRgHaHa?r=0&pid=Api",
-    "Creamy Pomodoro Pasta with Plant Based Meatballs": "https://tse4.mm.bing.net/th/id/OIP.KTGHM3zPow0NTse6Hf_sbQHaJQ?r=0&pid=Api",
-    "Beef Kofta": "https://tse1.mm.bing.net/th/id/OIP.AZf_8jHMT0PxrXpLKi6bGQHaLH?r=0&pid=Api",
-    "Impossible Meat Kofta": "https://tse4.mm.bing.net/th/id/OIP.s_oeedGy2c1vHIoAMZFNQQHaHa?r=0&pid=Api",
-    "Beef Wet Burritos": "https://tse1.mm.bing.net/th/id/OIP.DJEWduSGdHB25dl7KI7LBAHaJ4?r=0&pid=Api",
-    "Impossible Beef Wet Burritos": "https://tse2.mm.bing.net/th/id/OIP.HhUZK_demmb5Si9ZwYIBzQHaDT?r=0&pid=Api",
     "Italian Chicken": "https://tse3.mm.bing.net/th/id/OIP.njCRf6AsoRLw8jiboVg3ewHaJT?r=0&pid=Api",
     "Indian - spiced Beef Stew": "https://tse3.mm.bing.net/th/id/OIP.EoOT35t35lihiHo3ZSnWAgHaLH?r=0&pid=Api",
     "Roasted Cilantro Lime Chicken": "https://tse3.mm.bing.net/th/id/OIP._8ZmdBMRrZNd2aehC1-g6QHaJQ?r=0&pid=Api",
@@ -98,6 +89,17 @@
     "Doo Boo Jorim with Forbidden Rice": "https://tse1.mm.bing.net/th/id/OIP.h83LFd4AqMLLJZgaEy77vgHaLH?r=0&pid=Api",
     "Soy Bulgogi with Forbidden Rice": "https://tse1.mm.bing.net/th/id/OIP.tYONo-gCKHgqbj1fD9LLbwHaKl?r=0&pid=Api",
     "Build Your Own Mediterranean Grain Bowl": "https://tse1.mm.bing.net/th/id/OIP.Nsbvyem5R-BsKH2e3WuVUwHaLG?r=0&pid=Api",
-    "Menu Coming Soon!": "https://tse1.mm.bing.net/th/id/OIP.SglX9taofxnYyBR7K__Y5QHaKd?r=0&pid=Api"
+    "Menu Coming Soon!": "https://tse1.mm.bing.net/th/id/OIP.SglX9taofxnYyBR7K__Y5QHaKd?r=0&pid=Api",
+    "Nashville Chicken Bowl": "https://tse2.mm.bing.net/th/id/OIP.Xb9CP8qooFl5OlLrGqYQAwHaHa?r=0&pid=Api",
+    "Vegan Nugget Chicken Bowl": "https://tse3.mm.bing.net/th/id/OIP._sGr9uX0yK_wIUjk9PmeCQHaD4?r=0&pid=Api",
+    "Fish Taco": "https://tse3.mm.bing.net/th/id/OIP.j4umVp9Nb8_tLowzYtzHogHaLH?r=0&pid=Api",
+    "Chipotle Tofu Tacos": "https://tse1.mm.bing.net/th/id/OIP.eRvIyLXoeDT9SDwQpqyRmgHaLH?r=0&pid=Api",
+    "General Tso Chicken": "https://tse1.mm.bing.net/th/id/OIP.cafRyB43dEg5PVEqJ3bwrAHaHa?r=0&pid=Api",
+    "Tofu Stir Fry": "https://tse1.mm.bing.net/th/id/OIP.N1BKQwbfODx2svrY0rXjzAHaJQ?r=0&pid=Api",
+    "Meatloaf": "https://tse2.mm.bing.net/th/id/OIP.Q0fmvPHDOpMShScnJac3jQHaKX?r=0&pid=Api",
+    "Vegan Meatloaf": "https://tse4.mm.bing.net/th/id/OIP.jHSV9h2sXWsADT5F2E9egAHaLH?r=0&pid=Api",
+    "Salmon Teriyaki": "https://tse2.mm.bing.net/th/id/OIP.Z4gKmF3MfYtA3TplT_sAxQHaLH?r=0&pid=Api",
+    "Vegan Chicken Teriyaki": "https://tse3.mm.bing.net/th/id/OIP.Uv-wKonLvpwaa82xjo_pagHaPi?r=0&pid=Api",
+    "$11.65": "https://tse4.mm.bing.net/th/id/OIP.2D99wOG9k1l2dZaIJ5Z6zAHaEI?r=0&pid=Api"
   }
 }
