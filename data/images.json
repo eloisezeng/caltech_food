@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-17T14:33:41.740Z",
+  "lastUpdated": "2026-08-18T14:37:54.990Z",
   "cache": {
     "Soup of the day": "https://tse4.mm.bing.net/th/id/OIP.0dtPP5GKcv7yR5n1Z2JtdQHaE8?pid=Api",
     "Vegetarian Soup of the day": "https://tse3.mm.bing.net/th/id/OIP.q3fQljKPMqIWwp6Cfc1yyQHaLH?pid=Api",
@@ -52,8 +52,6 @@
     "Build Your Own Mediterranean Grain Bowl": "https://tse1.mm.bing.net/th/id/OIP.Nsbvyem5R-BsKH2e3WuVUwHaLG?r=0&pid=Api",
     "Roasted Potatoes with Old Bay Spice": "https://tse3.mm.bing.net/th/id/OIP._vuI_HDbZ_ikkJrIW-rhdwHaE6?r=0&pid=Api",
     "Menu Coming Soon!": "https://tse1.mm.bing.net/th/id/OIP.SglX9taofxnYyBR7K__Y5QHaKd?r=0&pid=Api",
-    "Chicken Kabob Bowl\nServed with cucumber tomato salad & yellow rice": "https://tse1.mm.bing.net/th/id/OIP.OfUIRd2Otk9zr7E1wiyszAAAAA?r=0&pid=Api",
-    "Tofu Kabob Bowl\nServed with cucumber tomato salad & yellow rice": "https://tse2.mm.bing.net/th/id/OIP.IcygkZweGwMieuj1j2DlwAHaLH?r=0&pid=Api",
     "Beef Lomo Saltado\nServed with white rice & corn": "https://tse4.mm.bing.net/th/id/OIP.qDed8cNugeaxeKhlVgll7AHaLH?r=0&pid=Api",
     "Vegan Lomo Saltado\nServed with white rice & corn": "https://tse1.mm.bing.net/th/id/OIP.Zw1MJGo-IFoUKbpoKnjX3QHaE8?r=0&pid=Api",
     "Pork Soboro Donburi\nServed with garlic sauteed green beans & calrose rice": "https://tse1.mm.bing.net/th/id/OIP.OVYSUpWVTTnaZLNupmiA-gHaE8?r=0&pid=Api",
@@ -71,16 +69,12 @@
     "Chicken Teriyaki": "https://tse2.mm.bing.net/th/id/OIP.D-V0UBkVw4StEHlQ1910jwHaHa?r=0&pid=Api",
     "Roasted Zucchini with Thyme": "https://tse2.mm.bing.net/th/id/OIP.6SwRlYTxGQ7AvEJh37DrswHaLL?r=0&pid=Api",
     "Turmeric Rice": "https://tse4.mm.bing.net/th/id/OIP.J_gxEl40_MXY16p5HKghWgHaLH?r=0&pid=Api",
-    "Palak Tofu with Brown Basmati": "https://tse3.mm.bing.net/th/id/OIP.Mq_1kdR3f1tgRUqEnMG1-QHaHa?r=0&pid=Api",
-    "Tofu Eggplant Curry with Brown  Basmati": "https://tse1.mm.bing.net/th/id/OIP.KB9M740UiO2omGaPqZPMmQHaLH?r=0&pid=Api",
     "BBQ Pork Ribs": "https://tse4.mm.bing.net/th/id/OIP.V49_N--4mokB3gamxwBWQQHaE8?r=0&pid=Api",
     "Sopa de Fideos con Pollo, (Mexican Chicken Soup)": "https://tse3.mm.bing.net/th/id/OIP.FKXj9waLv9JO8piz7NrkIQHaLH?r=0&pid=Api",
     "Green Chile Mac & Cheese": "https://tse3.mm.bing.net/th/id/OIP.E1wJSVNEU7_eMpgBj9oMTAHaLH?r=0&pid=Api",
     "Beef Stir Fry with Bourbon Sauce": "https://tse3.mm.bing.net/th/id/OIP.ULYdMhjW1P_bs6X-LUKXzAHaLH?r=0&pid=Api",
     "Steamed Broccoli": "https://tse4.mm.bing.net/th/id/OIP.GbG-J6CMzWscmy16GKDaugHaLH?r=0&pid=Api",
     "Parsley Roasted Potatoes": "https://tse3.mm.bing.net/th/id/OIP.D_WB9WlobZBmo7qEehVbOQHaLH?r=0&pid=Api",
-    "Soy Rizo and Potato Tacos with Black Beans": "https://tse2.mm.bing.net/th/id/OIP.QRHBnw5fgod9WdWpSi1zHQHaLH?r=0&pid=Api",
-    "Soy  Chile Colorado": "https://tse4.mm.bing.net/th/id/OIP.7cXMaTWT7dJu6cs8Hw2JUQHaJ4?r=0&pid=Api",
     "Roast Ball Tip with Fresh Herbs": "https://tse2.explicit.bing.net/th/id/OIP.mW0tgkjcvkdTB9HYZl5FZgHaLH?r=0&pid=Api",
     "Seafood Paella": "https://tse4.mm.bing.net/th/id/OIP.Y6zCBQbvkmBgUZbIi6DLeQHaE8?r=0&pid=Api",
     "Creamy Polenta with Mushroom Sauce": "https://tse2.mm.bing.net/th/id/OIP.pcfo7cnUNMChnrS0y0w21AHaJ4?r=0&pid=Api",
@@ -100,6 +94,10 @@
     "Cheese Enchiladas": "https://tse2.mm.bing.net/th/id/OIP.KNcn-kmJBKcr33DTHV_3rgHaLH?r=0&pid=Api",
     "Old Bay Tofu": "https://tse3.mm.bing.net/th/id/OIP.T-HTJB4ZX8VlvI9shDLW1gHaJ4?r=0&pid=Api",
     "Shrimp and Vegetables with General Tso's": "https://tse1.mm.bing.net/th/id/OIP.TghpSvFipannjqkP5fa7uAHaJ4?r=0&pid=Api",
-    "Roasted Chayote with Smoked Paprika": "https://tse2.mm.bing.net/th/id/OIP.0w27ZEg3Oqd1vhzPStMETAHaLH?r=0&pid=Api"
+    "Roasted Chayote with Smoked Paprika": "https://tse2.mm.bing.net/th/id/OIP.0w27ZEg3Oqd1vhzPStMETAHaLH?r=0&pid=Api",
+    "BBQ Chicken\nServed with potatoes & seasonal veggies": "https://tse4.mm.bing.net/th/id/OIP.g9uY-1IMChVp5197W0tuMgHaJQ?r=0&pid=Api",
+    "BBQ Tofu\nServed with potatoes & seasonal veggies": "https://tse1.mm.bing.net/th/id/OIP.zWVOazs0LeCzPdvvE8i21wHaHa?r=0&pid=Api",
+    "Gardein Fajita Bowl with Spanish Rice": "https://tse4.mm.bing.net/th/id/OIP.3m45zr9HJPyGgQgvdj8dcQHaLG?r=0&pid=Api",
+    "Soy Rizo and Potato Tacos with Cilantro Lime Rice": "https://tse1.mm.bing.net/th/id/OIP.Buzxr4rtP9BsUsb711jzPgHaLH?r=0&pid=Api"
   }
 }
